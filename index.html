@@ -216,35 +216,8 @@
       background: #3c3b6e;
     }
 
-    .flag-cn,
-    .flag-tw {
-      background: #de2910;
-    }
-
-    .flag-cn::before {
-      top: 1px;
-      left: 2px;
-      color: #ffde00;
-      content: "★";
-      font-size: 7px;
-      line-height: 1;
-    }
-
-    .flag-tw::before {
-      top: 0;
-      left: 0;
-      width: 9px;
-      height: 7.5px;
-      background: #002b7f;
-    }
-
-    .flag-tw::after {
-      top: 2px;
-      left: 2.5px;
-      width: 4px;
-      height: 4px;
-      border-radius: 999px;
-      background: #ffffff;
+    .flag-cn {
+      background: #de2910 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 20'%3E%3Crect width='30' height='20' fill='%23de2910'/%3E%3Cdefs%3E%3Cpath id='s' d='M0,-1 .224,-.309 .951,-.309 .363,.118 .588,.809 0,.382 -.588,.809 -.363,.118 -.951,-.309 -.224,-.309Z'/%3E%3C/defs%3E%3Cg fill='%23ffde00'%3E%3Cuse href='%23s' transform='translate(5,5) scale(3)'/%3E%3Cuse href='%23s' transform='translate(10,2) rotate(23) scale(1)'/%3E%3Cuse href='%23s' transform='translate(12,4) rotate(45) scale(1)'/%3E%3Cuse href='%23s' transform='translate(12,7) rotate(69) scale(1)'/%3E%3Cuse href='%23s' transform='translate(10,9) rotate(20) scale(1)'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100% no-repeat;
     }
 
     .flag-ru {
@@ -723,6 +696,40 @@
       font-size: 21px;
       line-height: 1.18;
       letter-spacing: 0;
+    }
+
+    html[lang^="zh"] body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "PingFang TC", "Microsoft YaHei", sans-serif;
+      line-height: 1.68;
+    }
+
+    html[lang^="zh"] h1,
+    html[lang^="zh"] h2,
+    html[lang^="zh"] h3,
+    html[lang^="zh"] .lede,
+    html[lang^="zh"] .section-header p,
+    html[lang^="zh"] .feature p,
+    html[lang^="zh"] .showcase p,
+    html[lang^="zh"] .source-card p,
+    html[lang^="zh"] .privacy-item p,
+    html[lang^="zh"] .release-list li {
+      overflow-wrap: normal;
+      line-break: loose;
+      text-wrap: pretty;
+      word-break: normal;
+    }
+
+    html[lang^="zh"] h1 {
+      font-size: clamp(42px, 5.4vw, 70px);
+      line-height: 1.08;
+    }
+
+    html[lang^="zh"] h2 {
+      line-height: 1.13;
+    }
+
+    html[lang^="zh"] .lede {
+      white-space: pre-line;
     }
 
     .showcase {
@@ -1234,7 +1241,7 @@
           <div class="language-menu" role="menu" data-language-menu>
             <button class="language-option" type="button" role="menuitemradio" data-lang="en"><span class="flag flag-us" aria-hidden="true"></span><span>English</span></button>
             <button class="language-option" type="button" role="menuitemradio" data-lang="zh-Hans"><span class="flag flag-cn" aria-hidden="true"></span><span>简体中文</span></button>
-            <button class="language-option" type="button" role="menuitemradio" data-lang="zh-Hant"><span class="flag flag-tw" aria-hidden="true"></span><span>繁體中文</span></button>
+            <button class="language-option" type="button" role="menuitemradio" data-lang="zh-Hant"><span class="flag flag-cn" aria-hidden="true"></span><span>繁體中文</span></button>
             <button class="language-option" type="button" role="menuitemradio" data-lang="ru"><span class="flag flag-ru" aria-hidden="true"></span><span>Русский</span></button>
             <button class="language-option" type="button" role="menuitemradio" data-lang="ja"><span class="flag flag-jp" aria-hidden="true"></span><span>日本語</span></button>
             <button class="language-option" type="button" role="menuitemradio" data-lang="ko"><span class="flag flag-kr" aria-hidden="true"></span><span>한국어</span></button>
@@ -1515,7 +1522,7 @@
     const languages = {
       en: { flagClass: "flag-us", label: "English", htmlLang: "en", languageLabel: "Language" },
       "zh-Hans": { flagClass: "flag-cn", label: "简体中文", htmlLang: "zh-Hans", languageLabel: "语言" },
-      "zh-Hant": { flagClass: "flag-tw", label: "繁體中文", htmlLang: "zh-Hant", languageLabel: "語言" },
+      "zh-Hant": { flagClass: "flag-cn", label: "繁體中文", htmlLang: "zh-Hant", languageLabel: "語言" },
       ru: { flagClass: "flag-ru", label: "Русский", htmlLang: "ru", languageLabel: "Язык" },
       ja: { flagClass: "flag-jp", label: "日本語", htmlLang: "ja", languageLabel: "言語" },
       ko: { flagClass: "flag-kr", label: "한국어", htmlLang: "ko", languageLabel: "언어" },
@@ -1581,8 +1588,8 @@
         "Privacy": "隐私",
         "Download": "下载",
         "Current release v1.6.2": "当前版本 v1.6.2",
-        "Exchange rates that stay where your work happens.": "始终待在工作场景里的汇率工具。",
-        "Currency Tracker turns the macOS menu bar into a focused exchange-rate workspace with live rates, trend charts, conversion, alerts, profiles, and provider controls.": "Currency Tracker 把 macOS 菜单栏变成专注的汇率工作区，支持实时汇率、趋势图、换算、提醒、配置档和数据源管理。",
+        "Exchange rates that stay where your work happens.": "汇率，就在手边。",
+        "Currency Tracker turns the macOS menu bar into a focused exchange-rate workspace with live rates, trend charts, conversion, alerts, profiles, and provider controls.": "Currency Tracker 把 macOS 菜单栏变成汇率工作台，\n行情、趋势图、换算、提醒、配置档和数据源设置都在手边。",
         "Download for macOS": "下载 macOS 版本",
         "View source": "查看源代码",
         "macOS 14 or later": "macOS 14 或更高版本",
@@ -1595,19 +1602,19 @@
         "ISO currencies through provider-backed search": "通过数据源搜索 ISO 货币",
         "0": "0",
         "Project-owned backend services": "项目自有后端服务",
-        "A daily currency desk in a small surface.": "把日常汇率工作台放进一个小窗口。",
-        "The app is designed for repeated checking, not occasional lookup. The default path is fast scanning from the menu bar, with deeper controls only one interaction away.": "这款应用面向高频查看，而不是偶尔查询。默认路径适合从菜单栏快速扫一眼，更深的控制只需要一次交互。",
-        "Scan the rates that matter": "扫一眼重要汇率",
-        "Keep a curated list of exchange pairs in compact cards with source, refresh time, movement badges, and a native scroll surface for longer lists.": "把精选货币对放在紧凑卡片中，同时显示数据源、刷新时间、涨跌标记，并为更长列表保留原生滚动体验。",
-        "Open history in context": "在当前卡片中查看历史",
-        "Expand a card into a trend chart with practical ranges from 7 days to 1 year when historical data is available.": "当历史数据可用时，可以把卡片展开成趋势图，并在 7 天到 1 年之间切换实用区间。",
-        "Convert without switching tools": "不用切换工具也能换算",
-        "Use the inline two-way converter, macOS Services, or a global shortcut to convert selected text from other apps.": "使用卡片内双向换算器、macOS 服务或全局快捷键，直接换算其他应用中选中的文本。",
-        "Control the data layer": "管理数据层",
-        "Add provider credentials, test custom JSON APIs, set alerts, switch profiles, and manage updates from a dedicated Settings window.": "在专门的设置窗口中添加供应商凭据、测试自定义 JSON API、设置提醒、切换配置档并管理更新。",
+        "A daily currency desk in a small surface.": "小小一块，放下每天要看的汇率。",
+        "The app is designed for repeated checking, not occasional lookup. The default path is fast scanning from the menu bar, with deeper controls only one interaction away.": "它不是偶尔查一次的网页替代品，而是为反复查看设计的。打开菜单栏就能快速扫过，深入设置也只隔一次点击。",
+        "Scan the rates that matter": "扫过你真正关心的汇率",
+        "Keep a curated list of exchange pairs in compact cards with source, refresh time, movement badges, and a native scroll surface for longer lists.": "把常看的货币对收进紧凑卡片，同时保留数据源、刷新时间、涨跌标记；列表变长时，也维持 macOS 原生滚动手感。",
+        "Open history in context": "在原处展开历史",
+        "Expand a card into a trend chart with practical ranges from 7 days to 1 year when historical data is available.": "有历史数据时，卡片可以直接展开为趋势图，并在 7 天到 1 年之间切换常用区间。",
+        "Convert without switching tools": "不用离开当前工具就能换算",
+        "Use the inline two-way converter, macOS Services, or a global shortcut to convert selected text from other apps.": "用卡片内双向换算器、macOS 服务或全局快捷键，直接处理其他应用里选中的金额。",
+        "Control the data layer": "把数据来源管清楚",
+        "Add provider credentials, test custom JSON APIs, set alerts, switch profiles, and manage updates from a dedicated Settings window.": "在专门的设置窗口里添加供应商凭据、测试自定义 JSON API、设置提醒、切换配置档并管理更新。",
         "Product surface": "产品界面",
-        "Small enough for the menu bar. Complete enough for real work.": "足够轻巧，可以放进菜单栏；也足够完整，可以认真工作。",
-        "Currency Tracker keeps the primary rate list visually dense and predictable. The pinned panel becomes a resizable always-on-top workspace when you need to monitor rates while working elsewhere.": "Currency Tracker 让主要汇率列表保持紧凑、清晰且可预期。当你需要一边处理其他工作一边监控汇率时，固定面板可以变成可调整大小、始终置顶的工作区。",
+        "Small enough for the menu bar. Complete enough for real work.": "足够轻巧，适合菜单栏；足够完整，撑得起日常工作。",
+        "Currency Tracker keeps the primary rate list visually dense and predictable. The pinned panel becomes a resizable always-on-top workspace when you need to monitor rates while working elsewhere.": "主汇率列表保持紧凑、稳定、容易扫读。需要边工作边盯汇率时，固定面板会变成可调整大小、始终置顶的小工作区。",
         "Native scroll feedback": "原生滚动反馈",
         "Long rate lists use the macOS overlay scroller outside the card content so spacing stays even.": "较长的汇率列表使用位于卡片内容外侧的 macOS 原生覆盖滚动条，因此左右间距保持一致。",
         "Anchored menu behavior": "稳定的菜单栏锚定",
@@ -1615,7 +1622,7 @@
         "Chart and conversion modes": "图表和换算模式",
         "The card itself becomes the chart or converter, keeping the workflow in one place.": "卡片本身可以变成图表或换算器，让工作流留在同一个位置。",
         "Settings": "设置",
-        "A control room instead of a crowded settings page.": "把拥挤的设置页变成清晰的控制中心。",
+        "A control room instead of a crowded settings page.": "不是拥挤的设置页，而是清楚的控制台。",
         "Settings are split into focused sidebar sections for rates, data sources, updates, profiles, alerts, language, permissions, diagnostics, and launch behavior.": "设置被拆分到清晰的边栏目录中，包括汇率、数据源、更新、配置档、提醒、语言、权限、诊断和启动行为。",
         "Provider management": "数据源管理",
         "Add mainstream API providers from a menu, save credentials locally, and test custom JSON templates before enabling them.": "从菜单中添加主流 API 供应商，本地保存凭据，并在启用前测试自定义 JSON 模板。",
@@ -1623,8 +1630,8 @@
         "Check GitHub Releases, download packages, verify SHA256 checksums, and install after confirmation.": "检查 GitHub Releases、下载安装包、验证 SHA256 校验和，并在确认后安装。",
         "Profiles and alerts": "配置档和提醒",
         "Save different rate lists and refresh behavior for different contexts, then add threshold alerts for pairs you watch closely.": "为不同场景保存不同汇率列表和刷新行为，并为重点关注的货币对添加阈值提醒。",
-        "Works out of the box, improves with your own keys.": "开箱即可使用，填入自己的 Key 后更强。",
-        "Public sources keep the app usable immediately. When you need broader coverage or reliability, add provider credentials or define a custom JSON endpoint.": "公共数据源让应用可以立即使用。当你需要更广覆盖或更高可靠性时，可以添加供应商凭据或定义自定义 JSON 端点。",
+        "Works out of the box, improves with your own keys.": "开箱能用，接入自己的 Key 后更稳。",
+        "Public sources keep the app usable immediately. When you need broader coverage or reliability, add provider credentials or define a custom JSON endpoint.": "公共数据源保证一安装就可用；需要更广的覆盖或更稳定的额度时，再添加供应商凭据或自定义 JSON 端点。",
         "Recommended": "推荐",
         "Free tier": "免费额度",
         "Twelve Data offers 800 free API credits per day, which is about 100 full multi-pair refreshes in Currency Tracker.": "Twelve Data 每天提供 800 个免费 API 点数，在 Currency Tracker 中大约相当于 100 次完整的多货币对刷新。",
@@ -1637,14 +1644,14 @@
         "ExchangeRate-API, Fixer, Currencylayer, and custom JSON APIs can be added when your workflow depends on a specific source.": "当你的工作流依赖特定来源时，也可以添加 ExchangeRate-API、Fixer、Currencylayer 或自定义 JSON API。",
         "Review supported sources": "查看支持的数据源",
         "Privacy and operations": "隐私与运行方式",
-        "Transparent behavior for an open-source Mac utility.": "为开源 Mac 工具保持透明行为。",
-        "The app is built to be understandable: local preferences, no project backend, visible provider choices, and a release process through GitHub.": "应用的行为尽量保持可理解：本地偏好设置、没有项目自有后端、可见的数据源选择，以及通过 GitHub 完成发布流程。",
+        "Transparent behavior for an open-source Mac utility.": "开源 Mac 工具，行为应该说得清楚。",
+        "The app is built to be understandable: local preferences, no project backend, visible provider choices, and a release process through GitHub.": "这款应用的边界清楚：偏好设置留在本地，没有项目自有后端，数据源选择可见，发布流程走 GitHub。",
         "Local credential storage": "本地凭据存储",
-        "Provider keys are stored in the app's local Application Support data rather than the macOS Keychain, avoiding confusing trust prompts for an unsigned open-source utility.": "供应商 Key 存储在应用本地 Application Support 数据中，而不是 macOS Keychain，以避免未签名开源工具触发令人困惑的信任提示。",
+        "Provider keys are stored in the app's local Application Support data rather than the macOS Keychain, avoiding confusing trust prompts for an unsigned open-source utility.": "供应商 Key 保存在应用本地的 Application Support 数据中，不写入 macOS Keychain，避免未签名开源工具弹出让人费解的信任提示。",
         "No project backend": "没有项目自有后端",
         "The project does not operate a server for collecting local files, clipboard contents, provider keys, or device data.": "项目不会运行服务器来收集本地文件、剪贴板内容、供应商 Key 或设备数据。",
         "Unsigned distribution": "未签名分发",
-        "Builds are distributed through GitHub Releases. Because the app is not Apple-notarized, macOS may ask for first-launch approval.": "构建版本通过 GitHub Releases 分发。由于应用没有经过 Apple 公证，macOS 可能会在首次启动时要求确认。",
+        "Builds are distributed through GitHub Releases. Because the app is not Apple-notarized, macOS may ask for first-launch approval.": "构建版本通过 GitHub Releases 分发。由于应用没有经过 Apple 公证，macOS 可能会要求你在系统设置中批准首次启动。",
         "Release": "发布",
         "Version 1.6.2": "版本 1.6.2",
         "Shortcut reliability fixes, calculation-aware converter inputs, safer copy fallback, and corrected update repository links.": "优化菜单栏面板、原生滚动反馈、更新截图，并更清晰地说明推荐免费数据源。",
@@ -1664,8 +1671,8 @@
         "Privacy": "隱私",
         "Download": "下載",
         "Current release v1.6.2": "目前版本 v1.6.2",
-        "Exchange rates that stay where your work happens.": "始終留在工作場景裡的匯率工具。",
-        "Currency Tracker turns the macOS menu bar into a focused exchange-rate workspace with live rates, trend charts, conversion, alerts, profiles, and provider controls.": "Currency Tracker 將 macOS 選單列變成專注的匯率工作區，支援即時匯率、趨勢圖、換算、提醒、設定檔與資料源管理。",
+        "Exchange rates that stay where your work happens.": "匯率，就在手邊。",
+        "Currency Tracker turns the macOS menu bar into a focused exchange-rate workspace with live rates, trend charts, conversion, alerts, profiles, and provider controls.": "Currency Tracker 將 macOS 選單列變成匯率工作台，\n行情、趨勢圖、換算、提醒、設定檔和資料源設定都在手邊。",
         "Download for macOS": "下載 macOS 版本",
         "View source": "查看原始碼",
         "macOS 14 or later": "macOS 14 或更新版本",
@@ -1676,19 +1683,19 @@
         "Localized interface languages": "本地化介面語言",
         "ISO currencies through provider-backed search": "透過資料源搜尋 ISO 貨幣",
         "Project-owned backend services": "專案自有後端服務",
-        "A daily currency desk in a small surface.": "把日常匯率工作台放進小巧介面。",
-        "The app is designed for repeated checking, not occasional lookup. The default path is fast scanning from the menu bar, with deeper controls only one interaction away.": "這款應用程式面向高頻查看，而不是偶爾查詢。預設流程適合從選單列快速掃描，更深入的控制只需一次互動。",
-        "Scan the rates that matter": "快速掃描重要匯率",
-        "Keep a curated list of exchange pairs in compact cards with source, refresh time, movement badges, and a native scroll surface for longer lists.": "將精選貨幣對放在緊湊卡片中，同時顯示資料源、刷新時間、漲跌標記，並為較長列表保留原生捲動體驗。",
-        "Open history in context": "在目前卡片中查看歷史",
-        "Expand a card into a trend chart with practical ranges from 7 days to 1 year when historical data is available.": "當歷史資料可用時，可將卡片展開為趨勢圖，並在 7 天到 1 年之間切換實用區間。",
-        "Convert without switching tools": "不切換工具也能換算",
-        "Use the inline two-way converter, macOS Services, or a global shortcut to convert selected text from other apps.": "使用卡片內雙向換算器、macOS 服務或全域快捷鍵，直接換算其他應用程式中選取的文字。",
-        "Control the data layer": "管理資料層",
-        "Add provider credentials, test custom JSON APIs, set alerts, switch profiles, and manage updates from a dedicated Settings window.": "在專門的設定視窗中新增供應商憑證、測試自訂 JSON API、設定提醒、切換設定檔並管理更新。",
+        "A daily currency desk in a small surface.": "小小一塊，放下每天要看的匯率。",
+        "The app is designed for repeated checking, not occasional lookup. The default path is fast scanning from the menu bar, with deeper controls only one interaction away.": "它不是偶爾查一次的網頁替代品，而是為反覆查看設計的。打開選單列就能快速掃過，深入設定也只隔一次點擊。",
+        "Scan the rates that matter": "掃過你真正關心的匯率",
+        "Keep a curated list of exchange pairs in compact cards with source, refresh time, movement badges, and a native scroll surface for longer lists.": "把常看的貨幣對收進緊湊卡片，同時保留資料源、刷新時間、漲跌標記；列表變長時，也維持 macOS 原生捲動手感。",
+        "Open history in context": "在原處展開歷史",
+        "Expand a card into a trend chart with practical ranges from 7 days to 1 year when historical data is available.": "有歷史資料時，卡片可以直接展開為趨勢圖，並在 7 天到 1 年之間切換常用區間。",
+        "Convert without switching tools": "不用離開目前工具就能換算",
+        "Use the inline two-way converter, macOS Services, or a global shortcut to convert selected text from other apps.": "用卡片內雙向換算器、macOS 服務或全域快捷鍵，直接處理其他應用程式中選取的金額。",
+        "Control the data layer": "把資料來源管清楚",
+        "Add provider credentials, test custom JSON APIs, set alerts, switch profiles, and manage updates from a dedicated Settings window.": "在專門的設定視窗裡新增供應商憑證、測試自訂 JSON API、設定提醒、切換設定檔並管理更新。",
         "Product surface": "產品介面",
-        "Small enough for the menu bar. Complete enough for real work.": "足夠輕巧可放進選單列，也足夠完整可應付實際工作。",
-        "Currency Tracker keeps the primary rate list visually dense and predictable. The pinned panel becomes a resizable always-on-top workspace when you need to monitor rates while working elsewhere.": "Currency Tracker 讓主要匯率列表保持緊湊、清晰且可預期。當你需要一邊處理其他工作一邊監控匯率時，固定面板可以變成可調整大小、永遠置頂的工作區。",
+        "Small enough for the menu bar. Complete enough for real work.": "足夠輕巧，適合選單列；足夠完整，撐得起日常工作。",
+        "Currency Tracker keeps the primary rate list visually dense and predictable. The pinned panel becomes a resizable always-on-top workspace when you need to monitor rates while working elsewhere.": "主要匯率列表保持緊湊、穩定、容易掃讀。需要邊工作邊盯匯率時，固定面板會變成可調整大小、永遠置頂的小工作區。",
         "Native scroll feedback": "原生捲動回饋",
         "Long rate lists use the macOS overlay scroller outside the card content so spacing stays even.": "較長的匯率列表使用位於卡片內容外側的 macOS 原生覆蓋捲動條，因此左右間距保持一致。",
         "Anchored menu behavior": "穩定的選單列錨定",
@@ -1696,7 +1703,7 @@
         "Chart and conversion modes": "圖表與換算模式",
         "The card itself becomes the chart or converter, keeping the workflow in one place.": "卡片本身可以變成圖表或換算器，讓工作流程留在同一處。",
         "Settings": "設定",
-        "A control room instead of a crowded settings page.": "把擁擠的設定頁變成清楚的控制中心。",
+        "A control room instead of a crowded settings page.": "不是擁擠的設定頁，而是清楚的控制台。",
         "Settings are split into focused sidebar sections for rates, data sources, updates, profiles, alerts, language, permissions, diagnostics, and launch behavior.": "設定被拆分到清楚的側邊欄目錄中，包括匯率、資料源、更新、設定檔、提醒、語言、權限、診斷與啟動行為。",
         "Provider management": "資料源管理",
         "Add mainstream API providers from a menu, save credentials locally, and test custom JSON templates before enabling them.": "從選單新增主流 API 供應商，本機儲存憑證，並在啟用前測試自訂 JSON 範本。",
@@ -1704,8 +1711,8 @@
         "Check GitHub Releases, download packages, verify SHA256 checksums, and install after confirmation.": "檢查 GitHub Releases、下載安裝包、驗證 SHA256 校驗和，並在確認後安裝。",
         "Profiles and alerts": "設定檔與提醒",
         "Save different rate lists and refresh behavior for different contexts, then add threshold alerts for pairs you watch closely.": "為不同場景儲存不同匯率列表與刷新行為，並為重點關注的貨幣對加入閾值提醒。",
-        "Works out of the box, improves with your own keys.": "開箱即可使用，填入自己的 Key 後更強。",
-        "Public sources keep the app usable immediately. When you need broader coverage or reliability, add provider credentials or define a custom JSON endpoint.": "公共資料源讓應用程式可立即使用。當你需要更廣覆蓋或更高可靠性時，可以新增供應商憑證或定義自訂 JSON 端點。",
+        "Works out of the box, improves with your own keys.": "開箱能用，接入自己的 Key 後更穩。",
+        "Public sources keep the app usable immediately. When you need broader coverage or reliability, add provider credentials or define a custom JSON endpoint.": "公共資料源保證一安裝就可用；需要更廣的覆蓋或更穩定的額度時，再新增供應商憑證或自訂 JSON 端點。",
         "Recommended": "推薦",
         "Free tier": "免費額度",
         "Twelve Data offers 800 free API credits per day, which is about 100 full multi-pair refreshes in Currency Tracker.": "Twelve Data 每天提供 800 個免費 API 點數，在 Currency Tracker 中約等於 100 次完整的多貨幣對刷新。",
@@ -1718,14 +1725,14 @@
         "ExchangeRate-API, Fixer, Currencylayer, and custom JSON APIs can be added when your workflow depends on a specific source.": "當你的工作流程依賴特定來源時，也可以新增 ExchangeRate-API、Fixer、Currencylayer 或自訂 JSON API。",
         "Review supported sources": "查看支援的資料源",
         "Privacy and operations": "隱私與運作方式",
-        "Transparent behavior for an open-source Mac utility.": "為開源 Mac 工具保持透明行為。",
-        "The app is built to be understandable: local preferences, no project backend, visible provider choices, and a release process through GitHub.": "應用程式行為盡量保持可理解：本機偏好設定、沒有專案自有後端、可見的資料源選擇，以及透過 GitHub 完成發布流程。",
+        "Transparent behavior for an open-source Mac utility.": "開源 Mac 工具，行為應該說得清楚。",
+        "The app is built to be understandable: local preferences, no project backend, visible provider choices, and a release process through GitHub.": "這款應用程式的邊界清楚：偏好設定留在本機，沒有專案自有後端，資料源選擇可見，發布流程走 GitHub。",
         "Local credential storage": "本機憑證儲存",
-        "Provider keys are stored in the app's local Application Support data rather than the macOS Keychain, avoiding confusing trust prompts for an unsigned open-source utility.": "供應商 Key 儲存在應用程式本機 Application Support 資料中，而不是 macOS Keychain，以避免未簽名開源工具觸發令人困惑的信任提示。",
+        "Provider keys are stored in the app's local Application Support data rather than the macOS Keychain, avoiding confusing trust prompts for an unsigned open-source utility.": "供應商 Key 保存在應用程式本機的 Application Support 資料中，不寫入 macOS Keychain，避免未簽名開源工具跳出讓人費解的信任提示。",
         "No project backend": "沒有專案自有後端",
         "The project does not operate a server for collecting local files, clipboard contents, provider keys, or device data.": "專案不會運行伺服器來收集本機檔案、剪貼簿內容、供應商 Key 或裝置資料。",
         "Unsigned distribution": "未簽名發佈",
-        "Builds are distributed through GitHub Releases. Because the app is not Apple-notarized, macOS may ask for first-launch approval.": "建置版本透過 GitHub Releases 發佈。由於應用程式未經 Apple 公證，macOS 可能會在首次啟動時要求確認。",
+        "Builds are distributed through GitHub Releases. Because the app is not Apple-notarized, macOS may ask for first-launch approval.": "建置版本透過 GitHub Releases 發佈。由於應用程式未經 Apple 公證，macOS 可能會要求你在系統設定中核准首次啟動。",
         "Release": "發佈",
         "Version 1.6.2": "版本 1.6.2",
         "Shortcut reliability fixes, calculation-aware converter inputs, safer copy fallback, and corrected update repository links.": "優化選單列面板、原生捲動回饋、更新截圖，並更清楚說明推薦免費資料源。",
@@ -2439,7 +2446,7 @@
     const release156Translations = {
       "zh-Hans": {
         "Non-notarized distribution": "未公证分发",
-        "Builds are distributed through GitHub Releases. They are not signed with an Apple Developer ID or Apple-notarized, so macOS may ask for first-launch approval in System Settings.": "构建版本通过 GitHub Releases 分发。它们没有使用 Apple Developer ID 签名，也没有经过 Apple 公证，因此 macOS 可能会要求在系统设置中批准首次启动。",
+        "Builds are distributed through GitHub Releases. They are not signed with an Apple Developer ID or Apple-notarized, so macOS may ask for first-launch approval in System Settings.": "构建版本通过 GitHub Releases 分发。它们没有使用 Apple Developer ID 签名，也没有经过 Apple 公证，因此 macOS 可能会要求你在系统设置中批准首次启动。",
         "Launch fix for GitHub builds, a clean non-notarized package, and clearer first-launch approval instructions.": "修复 GitHub 构建启动问题，提供干净的未公证安装包，并明确首次启动批准说明。",
         "GitHub release builds no longer quit immediately after launch.": "GitHub 发布构建不再启动后立即退出。",
         "The menu bar app stays resident when macOS sends status item visibility changes.": "当 macOS 发送状态栏项目可见性变化时，菜单栏应用会继续驻留。",
@@ -2449,7 +2456,7 @@
       },
       "zh-Hant": {
         "Non-notarized distribution": "未公證發佈",
-        "Builds are distributed through GitHub Releases. They are not signed with an Apple Developer ID or Apple-notarized, so macOS may ask for first-launch approval in System Settings.": "建置版本透過 GitHub Releases 發佈。它們沒有使用 Apple Developer ID 簽名，也未經 Apple 公證，因此 macOS 可能會要求在系統設定中核准首次啟動。",
+        "Builds are distributed through GitHub Releases. They are not signed with an Apple Developer ID or Apple-notarized, so macOS may ask for first-launch approval in System Settings.": "建置版本透過 GitHub Releases 發佈。它們沒有使用 Apple Developer ID 簽名，也未經 Apple 公證，因此 macOS 可能會要求你在系統設定中核准首次啟動。",
         "Launch fix for GitHub builds, a clean non-notarized package, and clearer first-launch approval instructions.": "修復 GitHub 建置啟動問題，提供乾淨的未公證安裝包，並明確首次啟動核准說明。",
         "GitHub release builds no longer quit immediately after launch.": "GitHub 發佈建置不再啟動後立即退出。",
         "The menu bar app stays resident when macOS sends status item visibility changes.": "當 macOS 傳送狀態列項目可見性變化時，選單列應用程式會繼續常駐。",
@@ -2545,32 +2552,32 @@
 
     const release16Translations = {
       "zh-Hans": {
-        "Settings are split into focused sidebar sections for rates, data sources, updates, profiles, alerts, language, permissions, diagnostics, menu bar visibility, background activity, and launch behavior.": "设置被拆分到清晰的边栏目录中，包括汇率、数据源、更新、配置档、提醒、语言、权限、诊断、菜单栏显示、后台活动和启动行为。",
-        "Check GitHub Releases, download packages, verify SHA256 checksums, install after confirmation, and review macOS permissions after relaunch when needed.": "检查 GitHub Releases、下载安装包、验证 SHA256 校验和、确认后安装，并在需要时重启后复查 macOS 权限。",
+        "Settings are split into focused sidebar sections for rates, data sources, updates, profiles, alerts, language, permissions, diagnostics, menu bar visibility, background activity, and launch behavior.": "设置按用途分进侧边栏：汇率、数据源、更新、配置档、提醒、语言、权限、诊断、菜单栏显示、后台活动和启动行为都各归其位。",
+        "Check GitHub Releases, download packages, verify SHA256 checksums, install after confirmation, and review macOS permissions after relaunch when needed.": "检查 GitHub Releases、下载安装包、验证 SHA256 校验和，确认后安装；需要时，重启后再复查 macOS 权限。",
         "Menu bar visibility, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "菜单栏显示、后台活动控制、更新后权限复查，以及完整 ad-hoc 签名的发布包。",
         "Menu bar visibility, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "菜单栏显示、AppKit 状态栏项稳定性、后台活动控制、更新后权限复查，以及完整 ad-hoc 签名的发布包。",
-        "Menu bar panel placement fix, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "菜单栏面板定位修复、AppKit 状态栏项稳定性、后台活动控制、更新后权限复查，以及完整 ad-hoc 签名的发布包。",
+        "Menu bar panel placement fix, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "修复菜单栏面板位置，提升 AppKit 状态栏项稳定性，加入后台活动控制、更新后权限复查，并提供完整 ad-hoc 签名的发布包。",
         "SHA256 checksum is published as Currency-Tracker-1.6.2.zip.sha256 in the release assets.": "SHA256 校验和已作为 Currency-Tracker-1.6.2.zip.sha256 发布在 release 资产中。",
-        "Menu bar panel now stays below the macOS menu bar instead of being clipped at the top of the screen.": "菜单栏面板现在会停在 macOS 菜单栏下方，不再被屏幕顶部裁掉。",
-        "Show or hide the menu bar icon from Settings while keeping Dock access available.": "可在设置中显示或隐藏菜单栏图标，同时保留 Dock 入口。",
-        "Menu bar visibility now uses an AppKit status item to avoid launch hangs from dynamic SwiftUI menu bar scene changes.": "菜单栏显示现在使用 AppKit 状态栏项，避免动态 SwiftUI 菜单栏 scene 变化导致启动卡死。",
-        "Background activity can now pause scheduled refreshes, automatic update checks, and global shortcut monitoring.": "后台活动开关现在可以暂停定时刷新、自动检查更新和全局快捷键监听。",
-        "After in-app updates, Currency Tracker opens the Permissions page if previously granted system permissions need review.": "应用内更新后，如果之前授予的系统权限需要复查，Currency Tracker 会打开权限页面。",
-        "Release bundles are now sealed with a full ad-hoc app signature before zipping.": "发布包现在会在压缩前使用完整的 app 级 ad-hoc 签名封装。"
+        "Menu bar panel now stays below the macOS menu bar instead of being clipped at the top of the screen.": "菜单栏面板会停在 macOS 菜单栏下方，不再被屏幕顶部裁掉。",
+        "Show or hide the menu bar icon from Settings while keeping Dock access available.": "可以在设置中显示或隐藏菜单栏图标，同时保留 Dock 入口。",
+        "Menu bar visibility now uses an AppKit status item to avoid launch hangs from dynamic SwiftUI menu bar scene changes.": "菜单栏显示改用 AppKit 状态栏项，避免动态 SwiftUI 菜单栏场景变化导致启动卡住。",
+        "Background activity can now pause scheduled refreshes, automatic update checks, and global shortcut monitoring.": "后台活动开关可以暂停定时刷新、自动更新检查和全局快捷键监听。",
+        "After in-app updates, Currency Tracker opens the Permissions page if previously granted system permissions need review.": "应用内更新后，如果已授予的系统权限需要复查，Currency Tracker 会打开权限页面。",
+        "Release bundles are now sealed with a full ad-hoc app signature before zipping.": "发布包会在压缩前完成 app 级 ad-hoc 签名封装。"
       },
       "zh-Hant": {
-        "Settings are split into focused sidebar sections for rates, data sources, updates, profiles, alerts, language, permissions, diagnostics, menu bar visibility, background activity, and launch behavior.": "設定被拆分到清楚的側邊欄目錄中，包括匯率、資料源、更新、設定檔、提醒、語言、權限、診斷、選單列顯示、背景活動與啟動行為。",
-        "Check GitHub Releases, download packages, verify SHA256 checksums, install after confirmation, and review macOS permissions after relaunch when needed.": "檢查 GitHub Releases、下載安裝包、驗證 SHA256 校驗和、確認後安裝，並在需要時於重新啟動後複查 macOS 權限。",
+        "Settings are split into focused sidebar sections for rates, data sources, updates, profiles, alerts, language, permissions, diagnostics, menu bar visibility, background activity, and launch behavior.": "設定按用途分進側邊欄：匯率、資料源、更新、設定檔、提醒、語言、權限、診斷、選單列顯示、背景活動與啟動行為都各歸其位。",
+        "Check GitHub Releases, download packages, verify SHA256 checksums, install after confirmation, and review macOS permissions after relaunch when needed.": "檢查 GitHub Releases、下載安裝包、驗證 SHA256 校驗和，確認後安裝；需要時，重新啟動後再複查 macOS 權限。",
         "Menu bar visibility, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "選單列顯示、背景活動控制、更新後權限複查，以及完整 ad-hoc 簽名的發佈包。",
         "Menu bar visibility, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "選單列顯示、AppKit 狀態列項目穩定性、背景活動控制、更新後權限複查，以及完整 ad-hoc 簽名的發佈包。",
-        "Menu bar panel placement fix, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "選單列面板定位修正、AppKit 狀態列項目穩定性、背景活動控制、更新後權限複查，以及完整 ad-hoc 簽名的發佈包。",
+        "Menu bar panel placement fix, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "修正選單列面板位置，提升 AppKit 狀態列項目穩定性，加入背景活動控制、更新後權限複查，並提供完整 ad-hoc 簽名的發佈包。",
         "SHA256 checksum is published as Currency-Tracker-1.6.2.zip.sha256 in the release assets.": "SHA256 校驗和已作為 Currency-Tracker-1.6.2.zip.sha256 發佈在 release 資產中。",
-        "Menu bar panel now stays below the macOS menu bar instead of being clipped at the top of the screen.": "選單列面板現在會停在 macOS 選單列下方，不再被螢幕頂部裁切。",
-        "Show or hide the menu bar icon from Settings while keeping Dock access available.": "可在設定中顯示或隱藏選單列圖示，同時保留 Dock 入口。",
-        "Menu bar visibility now uses an AppKit status item to avoid launch hangs from dynamic SwiftUI menu bar scene changes.": "選單列顯示現在使用 AppKit 狀態列項目，避免動態 SwiftUI 選單列 scene 變化導致啟動卡死。",
-        "Background activity can now pause scheduled refreshes, automatic update checks, and global shortcut monitoring.": "背景活動開關現在可以暫停定時刷新、自動檢查更新和全域快捷鍵監聽。",
-        "After in-app updates, Currency Tracker opens the Permissions page if previously granted system permissions need review.": "應用程式內更新後，如果先前授予的系統權限需要複查，Currency Tracker 會打開權限頁面。",
-        "Release bundles are now sealed with a full ad-hoc app signature before zipping.": "發佈包現在會在壓縮前使用完整的 app 級 ad-hoc 簽名封裝。"
+        "Menu bar panel now stays below the macOS menu bar instead of being clipped at the top of the screen.": "選單列面板會停在 macOS 選單列下方，不再被螢幕頂部裁切。",
+        "Show or hide the menu bar icon from Settings while keeping Dock access available.": "可以在設定中顯示或隱藏選單列圖示，同時保留 Dock 入口。",
+        "Menu bar visibility now uses an AppKit status item to avoid launch hangs from dynamic SwiftUI menu bar scene changes.": "選單列顯示改用 AppKit 狀態列項目，避免動態 SwiftUI 選單列場景變化導致啟動卡住。",
+        "Background activity can now pause scheduled refreshes, automatic update checks, and global shortcut monitoring.": "背景活動開關可以暫停定時刷新、自動更新檢查和全域快捷鍵監聽。",
+        "After in-app updates, Currency Tracker opens the Permissions page if previously granted system permissions need review.": "應用程式內更新後，如果已授予的系統權限需要複查，Currency Tracker 會打開權限頁面。",
+        "Release bundles are now sealed with a full ad-hoc app signature before zipping.": "發佈包會在壓縮前完成 app 級 ad-hoc 簽名封裝。"
       },
       ru: {
         "Settings are split into focused sidebar sections for rates, data sources, updates, profiles, alerts, language, permissions, diagnostics, menu bar visibility, background activity, and launch behavior.": "Настройки разделены на разделы для курсов, источников данных, обновлений, профилей, уведомлений, языка, разрешений, диагностики, видимости строки меню, фоновой активности и запуска.",
