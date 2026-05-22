@@ -189,7 +189,7 @@ struct Currency_TrackerTests {
         let pairID = store.selectedPairIDs.first!
         store.setBaseCurrencyCode("EUR")
         store.setAutoRefreshMinutes(30)
-        store.setMenuBarDisplayMode(.compactPair)
+        store.setMenuBarDisplayMode(.pairOnly)
         store.setRateDisplayBaseAmount(100)
         store.setConversionFractionDigits(6)
         store.setConverterCurrenciesFollowSelectedPairs(false)
@@ -213,7 +213,7 @@ struct Currency_TrackerTests {
 
         let reloaded = PreferencesStore(userDefaults: defaults, secretStore: secretStore)
 
-        #expect(reloaded.menuBarDisplayMode == .compactPair)
+        #expect(reloaded.menuBarDisplayMode == .pairOnly)
         #expect(reloaded.rateDisplayBaseAmount == 100)
         #expect(reloaded.conversionFractionDigits == 6)
         #expect(reloaded.converterCurrenciesFollowSelectedPairs == false)

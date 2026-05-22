@@ -264,23 +264,34 @@ final class StatusItemController: NSObject {
         }
 
         let featuredCard = viewModel.cards.first { $0.id == viewModel.featuredPairID } ?? viewModel.cards.first
-        let symbolImage = NSImage(systemSymbolName: "banknote.fill", accessibilityDescription: "Currency Tracker")
-        symbolImage?.isTemplate = true
+        let symbolImage = Self.menuBarIcon
+        button.image = nil
+        button.title = ""
+        button.imagePosition = .imageOnly
+        button.imageScaling = .scaleProportionallyDown
         button.toolTip = viewModel.menuBarHelpText
 
         switch preferences.menuBarDisplayMode {
         case .iconOnly:
             statusItem?.length = NSStatusItem.squareLength
             button.image = symbolImage
-            button.title = ""
+        case .pairOnly:
+            statusItem?.length = NSStatusItem.variableLength
+            if let featuredCard {
+                button.imagePosition = .noImage
+                button.title = featuredCard.compactPairLabel
+            } else {
+                button.imagePosition = .imageOnly
+                button.image = symbolImage
+            }
         case .featuredRate:
             statusItem?.length = NSStatusItem.variableLength
             if let featuredCard, featuredCard.snapshot != nil {
-                button.image = nil
+                button.imagePosition = .noImage
                 button.title = featuredCard.valueText
             } else {
+                button.imagePosition = .imageOnly
                 button.image = symbolImage
-                button.title = ""
             }
         case .compactPair:
             statusItem?.length = NSStatusItem.variableLength
@@ -289,8 +300,8 @@ final class StatusItemController: NSObject {
                 button.imagePosition = .imageLeading
                 button.title = " \(featuredCard.compactPairLabel) \(featuredCard.valueText)"
             } else {
+                button.imagePosition = .imageOnly
                 button.image = symbolImage
-                button.title = ""
             }
         }
     }
@@ -399,6 +410,39 @@ final class StatusItemController: NSObject {
     private static let menuBarPopoverMinimumHeight: CGFloat = 320
     private static let menuBarPopoverScreenInset: CGFloat = 8
     private static let menuBarPopoverTopInset: CGFloat = 4
+
+    private static let menuBarIcon: NSImage = {
+        let size = NSSize(width: 18, height: 18)
+        let image = NSImage(size: size, flipped: false) { _ in
+            NSColor.black.setStroke()
+            NSColor.black.setFill()
+
+            let lensRect = NSRect(x: 2.4, y: 6.0, width: 9.8, height: 9.8)
+            let lensPath = NSBezierPath(ovalIn: lensRect)
+            lensPath.lineWidth = 2.0
+            lensPath.stroke()
+
+            let handlePath = NSBezierPath()
+            handlePath.move(to: NSPoint(x: 11.3, y: 5.8))
+            handlePath.line(to: NSPoint(x: 15.9, y: 1.2))
+            handlePath.lineWidth = 2.6
+            handlePath.lineCapStyle = .round
+            handlePath.stroke()
+
+            let symbol = NSAttributedString(
+                string: "$",
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 8.2, weight: .heavy),
+                    .foregroundColor: NSColor.black
+                ]
+            )
+            symbol.draw(at: NSPoint(x: 5.3, y: 7.0))
+            return true
+        }
+        image.isTemplate = true
+        image.accessibilityDescription = "Currency Tracker"
+        return image
+    }()
 }
 
 @MainActor

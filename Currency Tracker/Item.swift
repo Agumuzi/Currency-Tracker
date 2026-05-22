@@ -242,6 +242,7 @@ nonisolated enum ExchangeSource: String, Codable, Sendable, CaseIterable {
 
 nonisolated enum MenuBarDisplayMode: String, Codable, CaseIterable, Identifiable, Sendable {
     case iconOnly
+    case pairOnly
     case featuredRate
     case compactPair
 
@@ -253,6 +254,8 @@ nonisolated enum MenuBarDisplayMode: String, Codable, CaseIterable, Identifiable
         switch self {
         case .iconOnly:
             String(localized: "只显示图标")
+        case .pairOnly:
+            String(localized: "只显示货币对")
         case .featuredRate:
             String(localized: "显示重点汇率")
         case .compactPair:

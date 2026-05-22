@@ -85,9 +85,9 @@ final class LightweightPromptPanel: LightweightPromptPaneling {
     }
 
     func showResult(_ presentation: ConversionPresentation) async -> Bool {
-        let result = await present(size: NSSize(width: 360, height: 194)) { resolve in
+        let result = await present(size: NSSize(width: 420, height: 150)) { resolve in
             ResultPromptView(
-                expressionText: presentation.expressionText,
+                presentation: presentation,
                 onDismiss: { resolve(true) }
             )
         }
@@ -252,9 +252,11 @@ private final class PromptSession<Result>: NSObject, NSWindowDelegate, PromptSes
 
 private struct PromptCard<Content: View>: View {
     let content: Content
+    let contentPadding: CGFloat
 
-    init(@ViewBuilder content: () -> Content) {
+    init(contentPadding: CGFloat = 20, @ViewBuilder content: () -> Content) {
         self.content = content()
+        self.contentPadding = contentPadding
     }
 
     var body: some View {
@@ -276,7 +278,7 @@ private struct PromptCard<Content: View>: View {
                 )
 
             content
-                .padding(20)
+                .padding(contentPadding)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -482,36 +484,98 @@ private struct AmountInterpretationPromptView: View {
 }
 
 private struct ResultPromptView: View {
-    let expressionText: String
+    let presentation: ConversionPresentation
     let onDismiss: () -> Void
 
     @State private var didAutoDismiss = false
+    @State private var dismissTask: Task<Void, Never>?
+    @State private var hasHovered = false
 
     var body: some View {
-        PromptCard {
-            VStack(alignment: .leading, spacing: 14) {
-                Text("换算结果")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-
-                Text(expressionText)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                HStack {
-                    Spacer()
-
-                    Button("关闭") {
-                        dismissIfNeeded()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+        PromptCard(contentPadding: 16) {
+            HStack(alignment: .center, spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.16))
+                    Image(systemName: "arrow.left.arrow.right")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(Color.accentColor)
                 }
+                .frame(width: 42, height: 42)
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("换算结果")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(.secondary)
+
+                    Text(targetText)
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
+
+                    Text(sourceText)
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Button {
+                    dismissIfNeeded()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 28, height: 28)
+                        .background(
+                            Circle()
+                                .fill(Color(nsColor: .controlBackgroundColor).opacity(0.82))
+                        )
+                }
+                .buttonStyle(.plain)
+                .help("关闭")
             }
         }
-        .task {
-            try? await Task.sleep(nanoseconds: 2_400_000_000)
+        .onAppear {
+            scheduleAutoDismiss(after: 3.2)
+        }
+        .onHover { isHovering in
+            if isHovering {
+                hasHovered = true
+                cancelAutoDismiss()
+            } else {
+                scheduleAutoDismiss(after: hasHovered ? 1.1 : 3.2)
+            }
+        }
+        .onDisappear {
+            cancelAutoDismiss()
+        }
+    }
+
+    private var sourceText: String {
+        "\(ServiceConversionFormatting.sourceAmount(presentation.sourceAmount)) \(presentation.sourceCurrencyCode)"
+    }
+
+    private var targetText: String {
+        "\(ServiceConversionFormatting.resultAmount(presentation.targetAmount, fractionDigits: presentation.fractionDigits)) \(presentation.targetCurrencyCode)"
+    }
+
+    private func scheduleAutoDismiss(after seconds: Double) {
+        cancelAutoDismiss()
+        dismissTask = Task { @MainActor in
+            let nanoseconds = UInt64(seconds * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: nanoseconds)
+            guard Task.isCancelled == false else {
+                return
+            }
             dismissIfNeeded()
         }
+    }
+
+    private func cancelAutoDismiss() {
+        dismissTask?.cancel()
+        dismissTask = nil
     }
 
     private func dismissIfNeeded() {
@@ -520,6 +584,7 @@ private struct ResultPromptView: View {
         }
 
         didAutoDismiss = true
+        cancelAutoDismiss()
         onDismiss()
     }
 }

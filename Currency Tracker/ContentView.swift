@@ -30,13 +30,15 @@ struct ContentView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: panelSectionSpacing) {
             panelHeader
             compactStatusBanner
             panelContent
             footer
         }
-        .padding(16)
+        .padding(.horizontal, panelHorizontalPadding)
+        .padding(.top, panelTopPadding)
+        .padding(.bottom, panelBottomPadding)
         .frame(
             minWidth: 408,
             idealWidth: 408,
@@ -589,15 +591,20 @@ struct ContentView: View {
     }
 
     private var chromeHeight: CGFloat {
-        let toolbarHeight: CGFloat = 38
+        let toolbarHeight: CGFloat = 36
         let bannerHeight: CGFloat = shouldShowStatusBanner ? 44 : 0
         let footerHeight: CGFloat = 34
         let spacingCount: CGFloat = shouldShowStatusBanner ? 3 : 2
-        return 32 + toolbarHeight + bannerHeight + footerHeight + (spacingCount * 12)
+        return panelTopPadding
+            + panelBottomPadding
+            + toolbarHeight
+            + bannerHeight
+            + footerHeight
+            + (spacingCount * panelSectionSpacing)
     }
 
     private var cardStackBottomPadding: CGFloat {
-        14
+        10
     }
 
     private var cardListMinimumHeight: CGFloat {
@@ -618,6 +625,22 @@ struct ContentView: View {
         panelContentMode == .converter && preferences.converterCurrenciesFollowSelectedPairs == false
     }
 
+    private var panelHorizontalPadding: CGFloat {
+        16
+    }
+
+    private var panelTopPadding: CGFloat {
+        14
+    }
+
+    private var panelBottomPadding: CGFloat {
+        12
+    }
+
+    private var panelSectionSpacing: CGFloat {
+        10
+    }
+
     private var quickAddHelpText: String {
         usesConverterQuickAdd ? String(localized: "快速添加换算币种") : String(localized: "快速添加货币对")
     }
@@ -627,7 +650,7 @@ struct ContentView: View {
     }
 
     private func estimatedHeight(for card: CurrencyCardModel) -> CGFloat {
-        expandedCardID == card.id ? 262 : 110
+        expandedCardID == card.id ? 268 : 112
     }
 
     private func toolbarButtonLabel(systemName: String, isActive: Bool = false) -> some View {
@@ -1141,7 +1164,7 @@ private struct CurrencyCardView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 10) {
             header
 
             if isExpanded {
@@ -1152,7 +1175,8 @@ private struct CurrencyCardView: View {
                 metaRow(text: collapsedMetaText)
             }
         }
-        .padding(16)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(cardBackground)
         .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -1213,13 +1237,13 @@ private struct CurrencyCardView: View {
                     )
             }
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 7) {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                     HStack(spacing: 6) {
                         Text(card.compactPairLabel)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
                             .lineLimit(1)
-                            .minimumScaleFactor(0.78)
+                            .minimumScaleFactor(0.72)
 
                         if canExpand {
                             Button {
@@ -1240,20 +1264,20 @@ private struct CurrencyCardView: View {
                     Spacer(minLength: 12)
 
                     Text(card.valueText)
-                        .font(.system(size: card.snapshot == nil ? 18 : 26, weight: .semibold, design: .rounded))
+                        .font(.system(size: card.snapshot == nil ? 19 : 29, weight: .semibold, design: .rounded))
                         .contentTransition(.numericText())
                         .foregroundStyle(card.valueColor)
                         .multilineTextAlignment(.trailing)
                         .lineLimit(1)
                         .minimumScaleFactor(0.68)
                         .allowsTightening(true)
-                        .frame(minWidth: 150, idealWidth: 170, maxWidth: 190, alignment: .trailing)
+                        .frame(minWidth: 142, idealWidth: 164, maxWidth: 188, alignment: .trailing)
                         .layoutPriority(2)
                 }
 
                 HStack(alignment: .center, spacing: 8) {
                     Text(pairSecondaryText)
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.86)
@@ -1365,7 +1389,7 @@ private struct CurrencyCardView: View {
     private func metaRow(text: String) -> some View {
         HStack(spacing: 8) {
             Text(text)
-                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .font(.system(size: 11, weight: .medium, design: .rounded))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
             Spacer(minLength: 0)
@@ -1531,7 +1555,7 @@ private struct CurrencyCardView: View {
 
     private func valueChip(text: String, color: Color) -> some View {
         Text(text)
-            .font(.system(size: 10, weight: .semibold, design: .rounded))
+            .font(.system(size: 11, weight: .semibold, design: .rounded))
             .foregroundStyle(color)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)

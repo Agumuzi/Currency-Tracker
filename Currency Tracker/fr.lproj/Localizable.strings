@@ -209,6 +209,7 @@
 "选择菜单栏中显示的信息密度" = "Choisissez la quantité d'informations qui apparaissent dans la barre de menu";
 "重点汇率来自面板中的第一张卡片。空间紧张时建议保持只显示图标。" = "Le tarif présenté provient de la première carte du panneau. Utilisez le mode icône uniquement lorsque l’espace est restreint.";
 "只显示图标" = "Icône uniquement";
+"只显示货币对" = "Paire uniquement";
 "显示重点汇率" = "Tarif vedette";
 "显示货币对和汇率" = "Paire et tarif";
 "配置 Profile" = "Paramètres Profiles";
