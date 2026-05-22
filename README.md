@@ -1,5 +1,13 @@
 # Currency Tracker
 
+<p>
+  <strong>English</strong>
+  ·
+  <a href="README.zh-CN.md">简体中文</a>
+  ·
+  <a href="README.ru.md">Русский</a>
+</p>
+
 Currency Tracker is a macOS menu bar app for exchange rates, quick conversion, and system-wide selected-text currency conversion. It is built for people who check a small set of rates repeatedly and want the workflow to stay close to the menu bar.
 
 <p>
@@ -115,6 +123,10 @@ Approve `Currency Tracker`, then confirm `Open`. After you approve it once, futu
 Currency Tracker is local-first. Preferences, selected pairs, refresh behavior, profiles, alerts, and API credentials are stored on your Mac. Provider keys are kept in the app's local Application Support data, not in the macOS Keychain. The app does not upload local files, clipboard contents, or device data to any backend service owned by this project.
 
 External exchange-rate providers only receive the exchange-rate requests needed for the data sources you enable.
+
+## License
+
+Currency Tracker is released under the [MIT License](LICENSE).
 
 ## Links
 
