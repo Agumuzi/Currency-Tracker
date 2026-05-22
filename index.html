@@ -943,6 +943,50 @@
       margin-top: 9px;
     }
 
+    .install-options {
+      display: grid;
+      gap: 14px;
+      margin: 20px 0 0;
+    }
+
+    .install-option {
+      min-width: 0;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel-soft);
+    }
+
+    .install-option h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    .install-option p,
+    .release-note {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .install-command {
+      margin: 0;
+      padding: 12px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--ink) 6%, var(--panel));
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre;
+    }
+
+    .release-command {
+      margin-top: 10px;
+    }
+
     .release-checksum {
       margin: 16px 0 0;
       color: var(--muted);
@@ -1500,7 +1544,21 @@
             <a class="button primary" href="https://github.com/Agumuzi/Currency-Tracker/releases/download/v1.6.2/Currency-Tracker-1.6.2.zip">Download v1.6.2</a>
             <a class="button" href="https://github.com/Agumuzi/Currency-Tracker/releases/tag/v1.6.2">Release notes</a>
           </div>
+          <div class="install-options">
+            <div class="install-option">
+              <h3>Install with Homebrew</h3>
+              <pre class="install-command"><code>brew tap agumuzi/currency-tracker
+brew install --cask currency-tracker</code></pre>
+              <p>Homebrew installs the same GitHub Release ZIP and verifies it with the cask SHA256 checksum.</p>
+            </div>
+            <div class="install-option">
+              <h3>Direct download</h3>
+              <p>Download the ZIP, unzip it, and move Currency Tracker.app to Applications.</p>
+            </div>
+          </div>
           <p class="release-checksum">SHA256 checksum is published as Currency-Tracker-1.6.2.zip.sha256 in the release assets.</p>
+          <p class="release-note">If macOS does not show Open Anyway and you have verified that the app came from this GitHub release, you can remove the quarantine attribute manually. Only use this for software from a source you trust.</p>
+          <pre class="install-command release-command"><code>xattr -dr com.apple.quarantine "/Applications/Currency Tracker.app"</code></pre>
         </div>
         <ul class="release-list">
           <li>Menu bar panel now stays below the macOS menu bar instead of being clipped at the top of the screen.</li>
@@ -2557,7 +2615,12 @@
         "Menu bar visibility, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "菜单栏显示、后台活动控制、更新后权限复查，以及完整 ad-hoc 签名的发布包。",
         "Menu bar visibility, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "菜单栏显示、AppKit 状态栏项稳定性、后台活动控制、更新后权限复查，以及完整 ad-hoc 签名的发布包。",
         "Menu bar panel placement fix, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "修复菜单栏面板位置，提升 AppKit 状态栏项稳定性，加入后台活动控制、更新后权限复查，并提供完整 ad-hoc 签名的发布包。",
+        "Install with Homebrew": "通过 Homebrew 安装",
+        "Homebrew installs the same GitHub Release ZIP and verifies it with the cask SHA256 checksum.": "Homebrew 会安装同一个 GitHub Release ZIP，并使用 cask 里的 SHA256 校验值进行验证。",
+        "Direct download": "直接下载",
+        "Download the ZIP, unzip it, and move Currency Tracker.app to Applications.": "下载 ZIP、解压，然后把 Currency Tracker.app 移到“应用程序”文件夹。",
         "SHA256 checksum is published as Currency-Tracker-1.6.2.zip.sha256 in the release assets.": "SHA256 校验和已作为 Currency-Tracker-1.6.2.zip.sha256 发布在 release 资产中。",
+        "If macOS does not show Open Anyway and you have verified that the app came from this GitHub release, you can remove the quarantine attribute manually. Only use this for software from a source you trust.": "如果 macOS 没有显示“仍要打开”，并且你已经确认应用来自本项目的 GitHub Release，可以手动移除 quarantine 标记。这个命令只应用于你信任来源的软件。",
         "Menu bar panel now stays below the macOS menu bar instead of being clipped at the top of the screen.": "菜单栏面板会停在 macOS 菜单栏下方，不再被屏幕顶部裁掉。",
         "Show or hide the menu bar icon from Settings while keeping Dock access available.": "可以在设置中显示或隐藏菜单栏图标，同时保留 Dock 入口。",
         "Menu bar visibility now uses an AppKit status item to avoid launch hangs from dynamic SwiftUI menu bar scene changes.": "菜单栏显示改用 AppKit 状态栏项，避免动态 SwiftUI 菜单栏场景变化导致启动卡住。",
@@ -2571,7 +2634,12 @@
         "Menu bar visibility, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "選單列顯示、背景活動控制、更新後權限複查，以及完整 ad-hoc 簽名的發佈包。",
         "Menu bar visibility, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "選單列顯示、AppKit 狀態列項目穩定性、背景活動控制、更新後權限複查，以及完整 ad-hoc 簽名的發佈包。",
         "Menu bar panel placement fix, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "修正選單列面板位置，提升 AppKit 狀態列項目穩定性，加入背景活動控制、更新後權限複查，並提供完整 ad-hoc 簽名的發佈包。",
+        "Install with Homebrew": "透過 Homebrew 安裝",
+        "Homebrew installs the same GitHub Release ZIP and verifies it with the cask SHA256 checksum.": "Homebrew 會安裝同一個 GitHub Release ZIP，並使用 cask 裡的 SHA256 校驗值驗證。",
+        "Direct download": "直接下載",
+        "Download the ZIP, unzip it, and move Currency Tracker.app to Applications.": "下載 ZIP、解壓縮，然後把 Currency Tracker.app 移到「應用程式」資料夾。",
         "SHA256 checksum is published as Currency-Tracker-1.6.2.zip.sha256 in the release assets.": "SHA256 校驗和已作為 Currency-Tracker-1.6.2.zip.sha256 發佈在 release 資產中。",
+        "If macOS does not show Open Anyway and you have verified that the app came from this GitHub release, you can remove the quarantine attribute manually. Only use this for software from a source you trust.": "如果 macOS 沒有顯示「仍要打開」，且你已確認應用程式來自本專案的 GitHub Release，可以手動移除 quarantine 標記。這個命令只應用於你信任來源的軟體。",
         "Menu bar panel now stays below the macOS menu bar instead of being clipped at the top of the screen.": "選單列面板會停在 macOS 選單列下方，不再被螢幕頂部裁切。",
         "Show or hide the menu bar icon from Settings while keeping Dock access available.": "可以在設定中顯示或隱藏選單列圖示，同時保留 Dock 入口。",
         "Menu bar visibility now uses an AppKit status item to avoid launch hangs from dynamic SwiftUI menu bar scene changes.": "選單列顯示改用 AppKit 狀態列項目，避免動態 SwiftUI 選單列場景變化導致啟動卡住。",
@@ -2585,7 +2653,12 @@
         "Menu bar visibility, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "Видимость строки меню, управление фоновой активностью, проверка разрешений после обновления и полностью ad-hoc подписанные релизные пакеты.",
         "Menu bar visibility, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "Видимость строки меню, стабильный AppKit status item, управление фоновой активностью, проверка разрешений после обновления и полностью ad-hoc подписанные релизные пакеты.",
         "Menu bar panel placement fix, AppKit status item stability, background activity controls, update permission review, and fully ad-hoc-signed release bundles.": "Исправлено положение панели строки меню, стабильный AppKit status item, управление фоновой активностью, проверка разрешений после обновления и полностью ad-hoc подписанные релизные пакеты.",
+        "Install with Homebrew": "Установка через Homebrew",
+        "Homebrew installs the same GitHub Release ZIP and verifies it with the cask SHA256 checksum.": "Homebrew устанавливает тот же ZIP из GitHub Release и проверяет его по SHA256 из cask.",
+        "Direct download": "Прямая загрузка",
+        "Download the ZIP, unzip it, and move Currency Tracker.app to Applications.": "Скачайте ZIP, распакуйте его и переместите Currency Tracker.app в Applications.",
         "SHA256 checksum is published as Currency-Tracker-1.6.2.zip.sha256 in the release assets.": "Контрольная сумма SHA256 опубликована в assets релиза как Currency-Tracker-1.6.2.zip.sha256.",
+        "If macOS does not show Open Anyway and you have verified that the app came from this GitHub release, you can remove the quarantine attribute manually. Only use this for software from a source you trust.": "Если macOS не показывает Open Anyway и вы убедились, что приложение загружено из GitHub Release этого проекта, можно вручную убрать quarantine-атрибут. Используйте эту команду только для программ из источника, которому доверяете.",
         "Menu bar panel now stays below the macOS menu bar instead of being clipped at the top of the screen.": "Панель строки меню теперь остается ниже строки меню macOS и не обрезается верхним краем экрана.",
         "Show or hide the menu bar icon from Settings while keeping Dock access available.": "Показывайте или скрывайте значок строки меню в настройках, сохраняя доступ через Dock.",
         "Menu bar visibility now uses an AppKit status item to avoid launch hangs from dynamic SwiftUI menu bar scene changes.": "Видимость строки меню теперь использует AppKit status item, чтобы избежать зависаний запуска из-за динамических изменений SwiftUI menu bar scene.",
@@ -2722,6 +2795,10 @@
       ".source-card a",
       ".privacy-item h3",
       ".privacy-item p",
+      ".install-option h3",
+      ".install-option p",
+      ".release-note",
+      ".release-checksum",
       ".release-list li",
       ".footer"
     ].join(",");

@@ -105,13 +105,39 @@ Version `1.6.2` includes:
 
 ## Installation
 
+### Homebrew
+
+```bash
+brew tap agumuzi/currency-tracker
+brew install --cask currency-tracker
+```
+
+Homebrew installs the same GitHub Release ZIP and verifies it with the cask SHA256 checksum. To update later:
+
+```bash
+brew update
+brew upgrade --cask currency-tracker
+```
+
+### Direct Download
+
 Download `Currency-Tracker-1.6.2.zip` from the latest GitHub release, unzip it, and move `Currency Tracker.app` to your Applications folder.
+
+### First Launch Approval
 
 The app is distributed through GitHub Releases. It is ad-hoc signed for bundle integrity, but it is not signed with an Apple Developer ID and is not notarized by Apple. On first launch, macOS may block it. Open:
 
 `System Settings` -> `Privacy & Security` -> `Open Anyway`
 
 Approve `Currency Tracker`, then confirm `Open`. After you approve it once, future launches should work normally. Replacing the app during a manual or in-app update preserves your existing Application Support data, but macOS may ask for approval again because the new app bundle is still not Developer ID signed or notarized. System privacy permissions are controlled by macOS and cannot be silently restored by the app; review Settings -> Permissions if Accessibility, notifications, or launch-at-login approval changes after an update.
+
+If macOS does not show `Open Anyway` and you have verified that the app came from this GitHub release, you can remove the quarantine attribute manually:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/Currency Tracker.app"
+```
+
+Only use that command for software from a source you trust.
 
 ## Requirements
 

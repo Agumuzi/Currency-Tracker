@@ -105,13 +105,39 @@ Currency Tracker 默认可使用公开备用数据源。对个人使用来说，
 
 ## 安装
 
+### Homebrew
+
+```bash
+brew tap agumuzi/currency-tracker
+brew install --cask currency-tracker
+```
+
+Homebrew 会安装同一个 GitHub Release ZIP，并使用 cask 里的 SHA256 校验值进行验证。之后更新可以运行：
+
+```bash
+brew update
+brew upgrade --cask currency-tracker
+```
+
+### 直接下载
+
 从最新 GitHub Release 下载 `Currency-Tracker-1.6.2.zip`，解压后将 `Currency Tracker.app` 移动到“应用程序”文件夹。
+
+### 首次启动批准
 
 应用通过 GitHub Releases 分发。它使用 ad-hoc 签名来保证 bundle 完整性，但没有使用 Apple Developer ID 签名，也没有经过 Apple 公证。首次启动时，macOS 可能会拦截。请打开：
 
 `系统设置` -> `隐私与安全性` -> `仍要打开`
 
 批准 `Currency Tracker`，然后确认“打开”。首次批准后，之后通常可以正常启动。手动更新或应用内更新替换 app 时，会保留现有的 Application Support 数据，但由于新的 app bundle 仍然不是 Developer ID 签名和公证版本，macOS 可能再次要求批准。系统隐私权限由 macOS 控制，应用无法静默恢复；如果更新后辅助功能、通知或登录项权限发生变化，请检查“设置”中的“权限”页面。
+
+如果 macOS 没有显示 `仍要打开`，并且你已经确认应用来自本项目的 GitHub Release，可以手动移除 quarantine 标记：
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/Currency Tracker.app"
+```
+
+这个命令不是安全验证；只对你信任来源的软件使用。
 
 ## 系统要求
 
