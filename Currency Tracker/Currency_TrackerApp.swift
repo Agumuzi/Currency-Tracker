@@ -411,32 +411,83 @@ final class StatusItemController: NSObject {
     private static let menuBarPopoverScreenInset: CGFloat = 8
     private static let menuBarPopoverTopInset: CGFloat = 4
 
+    @inline(never)
+    private static func drawMenuBarFlowMark() {
+        NSColor.black.setStroke()
+        NSColor.black.setFill()
+
+        let flowPath = NSBezierPath()
+        flowPath.move(to: NSPoint(x: 14.75, y: 12.55))
+        flowPath.curve(
+            to: NSPoint(x: 7.30, y: 15.50),
+            controlPoint1: NSPoint(x: 13.42, y: 15.34),
+            controlPoint2: NSPoint(x: 10.40, y: 16.35)
+        )
+        flowPath.curve(
+            to: NSPoint(x: 2.02, y: 8.15),
+            controlPoint1: NSPoint(x: 3.82, y: 14.55),
+            controlPoint2: NSPoint(x: 1.70, y: 11.48)
+        )
+        flowPath.curve(
+            to: NSPoint(x: 9.05, y: 2.05),
+            controlPoint1: NSPoint(x: 2.38, y: 4.45),
+            controlPoint2: NSPoint(x: 5.38, y: 1.86)
+        )
+        flowPath.curve(
+            to: NSPoint(x: 14.42, y: 4.80),
+            controlPoint1: NSPoint(x: 11.38, y: 2.18),
+            controlPoint2: NSPoint(x: 13.20, y: 3.18)
+        )
+        flowPath.curve(
+            to: NSPoint(x: 13.55, y: 6.22),
+            controlPoint1: NSPoint(x: 15.00, y: 5.58),
+            controlPoint2: NSPoint(x: 14.45, y: 6.44)
+        )
+        flowPath.curve(
+            to: NSPoint(x: 9.18, y: 4.62),
+            controlPoint1: NSPoint(x: 12.45, y: 5.95),
+            controlPoint2: NSPoint(x: 11.50, y: 4.72)
+        )
+        flowPath.curve(
+            to: NSPoint(x: 4.34, y: 8.72),
+            controlPoint1: NSPoint(x: 6.35, y: 4.50),
+            controlPoint2: NSPoint(x: 4.24, y: 6.35)
+        )
+        flowPath.curve(
+            to: NSPoint(x: 8.78, y: 13.45),
+            controlPoint1: NSPoint(x: 4.45, y: 11.20),
+            controlPoint2: NSPoint(x: 6.28, y: 13.14)
+        )
+        flowPath.curve(
+            to: NSPoint(x: 12.72, y: 11.82),
+            controlPoint1: NSPoint(x: 10.62, y: 13.68),
+            controlPoint2: NSPoint(x: 11.95, y: 12.82)
+        )
+        flowPath.curve(
+            to: NSPoint(x: 14.75, y: 12.55),
+            controlPoint1: NSPoint(x: 13.24, y: 11.14),
+            controlPoint2: NSPoint(x: 15.22, y: 11.66)
+        )
+        flowPath.close()
+        flowPath.fill()
+
+        if let context = NSGraphicsContext.current {
+            context.compositingOperation = .clear
+            NSColor.clear.setFill()
+            let counterPath = NSBezierPath(ovalIn: NSRect(x: 6.05, y: 6.00, width: 5.90, height: 5.90))
+            counterPath.fill()
+            context.compositingOperation = .sourceOver
+            NSColor.black.setFill()
+        }
+
+        let trackedPointPath = NSBezierPath(ovalIn: NSRect(x: 11.55, y: 10.85, width: 3.35, height: 3.35))
+        trackedPointPath.fill()
+    }
+
     private static let menuBarIcon: NSImage = {
         let size = NSSize(width: 18, height: 18)
         let image = NSImage(size: size, flipped: false) { _ in
-            NSColor.black.setStroke()
-            NSColor.black.setFill()
-
-            let lensRect = NSRect(x: 2.4, y: 6.0, width: 9.8, height: 9.8)
-            let lensPath = NSBezierPath(ovalIn: lensRect)
-            lensPath.lineWidth = 2.0
-            lensPath.stroke()
-
-            let handlePath = NSBezierPath()
-            handlePath.move(to: NSPoint(x: 11.3, y: 5.8))
-            handlePath.line(to: NSPoint(x: 15.9, y: 1.2))
-            handlePath.lineWidth = 2.6
-            handlePath.lineCapStyle = .round
-            handlePath.stroke()
-
-            let symbol = NSAttributedString(
-                string: "$",
-                attributes: [
-                    .font: NSFont.systemFont(ofSize: 8.2, weight: .heavy),
-                    .foregroundColor: NSColor.black
-                ]
-            )
-            symbol.draw(at: NSPoint(x: 5.3, y: 7.0))
+            drawMenuBarFlowMark()
             return true
         }
         image.isTemplate = true

@@ -94,12 +94,10 @@ The app can check GitHub Releases from Settings. Update packages are downloaded,
 
 ## Current Release
 
-Version `1.6.3` includes:
+Version `1.6.4` includes:
 
-- Polishes the menu bar panel with larger currency-pair titles, stronger rate typography, and tighter vertical spacing.
-- Replaces the menu bar icon with a branded magnifier-style template icon that better matches the app icon.
-- Adds a menu bar display mode that shows only the featured currency pair.
-- Redesigns the global shortcut conversion result popup with a compact layout, clearer typography, and hover-aware auto-dismiss behavior.
+- Finalizes a new abstract flow-mark menu bar icon for a cleaner brand identity at small macOS status-item sizes.
+- Keeps the menu bar icon as a macOS template image so it adapts to light, dark, and highlighted menu bar states.
 - Signs the full app bundle ad-hoc before zipping so release assets have sealed resources and bound bundle metadata.
 
 ## Installation
@@ -120,7 +118,7 @@ brew upgrade --cask currency-tracker
 
 ### Direct Download
 
-Download `Currency-Tracker-1.6.3.zip` from the latest GitHub release, unzip it, and move `Currency Tracker.app` to your Applications folder.
+Download `Currency-Tracker-1.6.4.zip` from the latest GitHub release, unzip it, and move `Currency Tracker.app` to your Applications folder.
 
 ### First Launch Approval
 

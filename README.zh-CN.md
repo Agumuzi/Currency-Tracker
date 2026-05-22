@@ -94,12 +94,10 @@ Currency Tracker 默认可使用公开备用数据源。对个人使用来说，
 
 ## 当前版本
 
-版本 `1.6.3` 包含：
+版本 `1.6.4` 包含：
 
-- 优化菜单栏面板视觉层级，放大货币对标题和汇率数字，并收紧垂直留白。
-- 将菜单栏图标替换为更贴近应用 logo 的放大镜风格模板图标。
-- 新增只显示重点货币对的菜单栏显示模式。
-- 重做全局快捷键换算结果弹窗，使布局更紧凑、字体层级更清晰，并在鼠标悬停时暂停自动隐藏。
+- 定稿新的抽象流线菜单栏图标，使 macOS 状态栏小尺寸下的品牌识别更干净。
+- 菜单栏图标继续使用 macOS 模板图标，适配浅色、深色和高亮状态。
 - 在压缩前对完整 app bundle 进行 ad-hoc 签名，使发布资源包含密封资源和绑定的 bundle 元数据。
 
 ## 安装
@@ -120,7 +118,7 @@ brew upgrade --cask currency-tracker
 
 ### 直接下载
 
-从最新 GitHub Release 下载 `Currency-Tracker-1.6.3.zip`，解压后将 `Currency Tracker.app` 移动到“应用程序”文件夹。
+从最新 GitHub Release 下载 `Currency-Tracker-1.6.4.zip`，解压后将 `Currency Tracker.app` 移动到“应用程序”文件夹。
 
 ### 首次启动批准
 

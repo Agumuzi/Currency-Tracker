@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.4 - 2026-05-22
+
+- Finalizes the abstract flow-mark menu bar icon selected for this release.
+- Keeps the menu bar icon as a macOS template image so it adapts to light, dark, and highlighted states.
+
 ## 1.6.3 - 2026-05-22
 
 - Polishes the menu bar panel with larger currency-pair titles, stronger rate typography, and tighter vertical spacing.
