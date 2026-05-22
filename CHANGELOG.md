@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.3 - 2026-05-22
+
+- Polishes the menu bar panel with larger currency-pair titles, stronger rate typography, and tighter vertical spacing.
+- Replaces the menu bar icon with a branded magnifier-style template icon that better matches the app icon.
+- Adds a menu bar display mode that shows only the featured currency pair.
+- Redesigns the global shortcut conversion result popup with a compact layout, clearer typography, and hover-aware auto-dismiss behavior.
+
 ## 1.6.2 - 2026-05-13
 
 - Fixes the menu bar panel placement so it stays fully below the macOS menu bar instead of being clipped at the top of the screen.
