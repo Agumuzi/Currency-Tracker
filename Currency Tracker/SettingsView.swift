@@ -12,7 +12,6 @@ import UniformTypeIdentifiers
 import UserNotifications
 
 enum SettingsSection: String, CaseIterable, Hashable, Sendable {
-    case welcome
     case general
     case language
     case rates
@@ -27,8 +26,6 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
 
     var title: LocalizedStringKey {
         switch self {
-        case .welcome:
-            "欢迎"
         case .general:
             "通用"
         case .language:
@@ -56,8 +53,6 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
 
     var subtitle: LocalizedStringKey {
         switch self {
-        case .welcome:
-            "首次设置与使用建议"
         case .general:
             "基准货币与文本换算"
         case .language:
@@ -85,8 +80,6 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
 
     var symbolName: String {
         switch self {
-        case .welcome:
-            "sparkles"
         case .general:
             "gearshape"
         case .language:
@@ -113,6 +106,66 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
     }
 }
 
+enum WelcomeFlowPersistence {
+    static let completedKey = "hasCompletedWelcomeWindow"
+    static let legacyInitialSettingsKey = "hasShownInitialSettingsWindow"
+    static let currentStepKey = "welcomeCurrentStep"
+}
+
+enum WelcomeStep: Int, CaseIterable, Identifiable, Hashable {
+    case introduction
+    case accessibility
+    case notifications
+    case loginItems
+
+    var id: Int {
+        rawValue
+    }
+
+    static func normalized(rawValue: Int?) -> WelcomeStep {
+        guard let rawValue,
+              let step = WelcomeStep(rawValue: rawValue) else {
+            return .introduction
+        }
+
+        return step
+    }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .introduction:
+            "欢迎使用 Currency Tracker"
+        case .accessibility:
+            "辅助功能权限"
+        case .notifications:
+            "通知权限"
+        case .loginItems:
+            "登录项权限"
+        }
+    }
+
+    var symbolName: String {
+        switch self {
+        case .introduction:
+            "sparkles"
+        case .accessibility:
+            "checkmark.shield"
+        case .notifications:
+            "bell"
+        case .loginItems:
+            "power"
+        }
+    }
+
+    var previous: WelcomeStep? {
+        WelcomeStep(rawValue: rawValue - 1)
+    }
+
+    var next: WelcomeStep? {
+        WelcomeStep(rawValue: rawValue + 1)
+    }
+}
+
 private enum SoftwareUpdateCheckState: Equatable {
     case idle
     case checking
@@ -127,6 +180,48 @@ private struct SupportedAppLanguage: Identifiable {
 
     var id: String {
         code
+    }
+}
+
+private struct SettingsInsetGlassBackground: View {
+    let cornerRadius: CGFloat
+    var material: Material = .thinMaterial
+    var isInteractive = false
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        CurrencyGlassSurface(
+            cornerRadius: cornerRadius,
+            fillColor: colorScheme == .dark ? Color.white.opacity(0.035) : Color.white.opacity(0.52),
+            material: material,
+            strokeColor: colorScheme == .dark ? Color.white.opacity(0.075) : Color.white.opacity(0.46),
+            shadowColor: .clear,
+            shadowRadius: 0,
+            shadowY: 0,
+            usesLiquidGlass: true,
+            isInteractive: isInteractive
+        )
+    }
+}
+
+private struct SettingsAccentGlassBackground: View {
+    let cornerRadius: CGFloat
+    var tint: Color = .accentColor
+    var isInteractive = false
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        CurrencyGlassSurface(
+            cornerRadius: cornerRadius,
+            fillColor: tint.opacity(colorScheme == .dark ? 0.14 : 0.09),
+            material: .thinMaterial,
+            strokeColor: tint.opacity(colorScheme == .dark ? 0.26 : 0.20),
+            shadowColor: .clear,
+            shadowRadius: 0,
+            shadowY: 0,
+            usesLiquidGlass: true,
+            isInteractive: isInteractive
+        )
     }
 }
 
@@ -147,7 +242,7 @@ struct SettingsView: View {
     @State private var converterCurrencySearch = ""
     @State private var draftConverterCurrencyCode = "USD"
     @State private var draggedPairID: String?
-    @State private var selectedSection: SettingsSection = .welcome
+    @State private var selectedSection: SettingsSection = .general
     @State private var isShowingAPIPrivacyDetails = false
     @State private var updateCheckState: SoftwareUpdateCheckState = .idle
     @State private var lastUpdateCheckDate: Date?
@@ -184,8 +279,9 @@ struct SettingsView: View {
 
             detailPane
         }
-        .frame(minWidth: 780, minHeight: 540, alignment: .topLeading)
+        .frame(minWidth: 820, minHeight: 560, alignment: .topLeading)
         .background(windowBackground)
+        .ignoresSafeArea(.container, edges: .top)
         .onAppear {
             syncDraftSelectionToSearchResults()
             syncConverterCurrencySelectionToSearchResults()
@@ -205,18 +301,14 @@ struct SettingsView: View {
 
     private var detailPane: some View {
         VStack(spacing: 0) {
-            Color.clear
-                .frame(height: detailTitlebarClearance)
-                .frame(maxWidth: .infinity)
-
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 16) {
                     pageHeader
                     selectedPageContent
                 }
                 .frame(maxWidth: detailContentMaxWidth, alignment: .leading)
                 .padding(.horizontal, detailContentPadding)
-                .padding(.top, detailContentPadding)
+                .padding(.top, 22)
                 .padding(.bottom, detailContentPadding)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -231,7 +323,7 @@ struct SettingsView: View {
             appHeader
 
             ScrollView(.vertical, showsIndicators: true) {
-                VStack(spacing: 4) {
+                VStack(spacing: 6) {
                     ForEach(SettingsSection.allCases, id: \.self) { section in
                         sidebarButton(for: section)
                     }
@@ -254,8 +346,16 @@ struct SettingsView: View {
                 .foregroundStyle(Color.accentColor)
                 .frame(width: 38, height: 38)
                 .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(Color.accentColor.opacity(colorScheme == .dark ? 0.18 : 0.12))
+                    CurrencyGlassSurface(
+                        cornerRadius: 12,
+                        fillColor: Color.accentColor.opacity(colorScheme == .dark ? 0.16 : 0.10),
+                        material: .thinMaterial,
+                        strokeColor: Color.accentColor.opacity(colorScheme == .dark ? 0.28 : 0.20),
+                        shadowColor: .black.opacity(colorScheme == .dark ? 0.12 : 0.04),
+                        shadowRadius: 6,
+                        shadowY: 2,
+                        usesLiquidGlass: true
+                    )
                 )
 
             VStack(alignment: .leading, spacing: 5) {
@@ -280,8 +380,16 @@ struct SettingsView: View {
                 .foregroundStyle(Color.accentColor)
                 .frame(width: 42, height: 42)
                 .background(
-                    RoundedRectangle(cornerRadius: 11, style: .continuous)
-                        .fill(Color.accentColor.opacity(colorScheme == .dark ? 0.18 : 0.12))
+                    CurrencyGlassSurface(
+                        cornerRadius: 13,
+                        fillColor: Color.accentColor.opacity(colorScheme == .dark ? 0.17 : 0.11),
+                        material: .thinMaterial,
+                        strokeColor: Color.accentColor.opacity(colorScheme == .dark ? 0.30 : 0.22),
+                        shadowColor: .black.opacity(colorScheme == .dark ? 0.12 : 0.04),
+                        shadowRadius: 7,
+                        shadowY: 2,
+                        usesLiquidGlass: true
+                    )
                 )
 
             VStack(alignment: .leading, spacing: 5) {
@@ -295,15 +403,13 @@ struct SettingsView: View {
 
             Spacer(minLength: 0)
         }
-        .padding(16)
-        .background(pageHeaderBackground)
+        .padding(.horizontal, 2)
+        .padding(.bottom, 2)
     }
 
     @ViewBuilder
     private var selectedPageContent: some View {
         switch selectedSection {
-        case .welcome:
-            welcomeSection
         case .general:
             baseCurrencySection
             currencyDisplaySection
@@ -334,83 +440,6 @@ struct SettingsView: View {
         }
     }
 
-    private var welcomeSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("用三步完成初始化")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-
-            VStack(spacing: 10) {
-                onboardingStep(
-                    symbolName: "list.bullet.rectangle",
-                    title: "添加常用货币对",
-                    detail: preferences.selectedPairs.isEmpty
-                        ? String(localized: "还没有添加汇率，先选择你每天要看的货币对。")
-                        : String(format: String(localized: "已经添加 %d 个货币对。"), preferences.selectedPairs.count),
-                    actionTitle: "管理汇率",
-                    target: .rates
-                )
-                onboardingStep(
-                    symbolName: "checkmark.shield",
-                    title: "确认系统权限",
-                    detail: String(localized: "全局快捷键和文本换算在部分应用中需要辅助功能权限。"),
-                    actionTitle: "查看权限",
-                    target: .permissions
-                )
-                onboardingStep(
-                    symbolName: "key",
-                    title: "按需启用增强数据源",
-                    detail: String(localized: "没有 API key 也能使用公共来源；需要更高覆盖率时再添加自己的 key。"),
-                    actionTitle: "数据源",
-                    target: .dataSources
-                )
-            }
-        }
-        .padding(18)
-        .background(sectionCardBackground)
-    }
-
-    private func onboardingStep(
-        symbolName: String,
-        title: LocalizedStringKey,
-        detail: String,
-        actionTitle: LocalizedStringKey,
-        target: SettingsSection
-    ) -> some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: symbolName)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(Color.accentColor)
-                .frame(width: 34, height: 34)
-                .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .fill(Color.accentColor.opacity(0.12))
-                )
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                Text(detail)
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            Spacer()
-
-            Button(actionTitle) {
-                selectedSection = target
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-        }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
-        )
-    }
-
     private func sidebarButton(for section: SettingsSection) -> some View {
         Button {
             selectedSection = section
@@ -422,14 +451,23 @@ struct SettingsView: View {
                     .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                     .frame(width: 28, height: 28)
                     .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(isSelected ? Color.accentColor.opacity(0.16) : Color.primary.opacity(colorScheme == .dark ? 0.045 : 0.035))
+                        CurrencyGlassSurface(
+                            cornerRadius: 10,
+                            fillColor: isSelected ? Color.accentColor.opacity(colorScheme == .dark ? 0.12 : 0.08) : Color.primary.opacity(colorScheme == .dark ? 0.025 : 0.018),
+                            material: .ultraThinMaterial,
+                            strokeColor: isSelected ? Color.white.opacity(colorScheme == .dark ? 0.18 : 0.62) : Color.primary.opacity(colorScheme == .dark ? 0.050 : 0.035),
+                            shadowColor: .clear,
+                            shadowRadius: 0,
+                            shadowY: 0,
+                            usesLiquidGlass: true,
+                            isInteractive: isSelected
+                        )
                     )
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(section.title)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Color.primary)
+                        .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
                     Text(section.subtitle)
                         .font(.system(size: 10, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
@@ -439,11 +477,11 @@ struct SettingsView: View {
 
                 Spacer(minLength: 0)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 9)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(sidebarRowBackground(isSelected: isSelected))
-            .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("settings.sidebar.\(section.rawValue)")
@@ -485,8 +523,7 @@ struct SettingsView: View {
             }
             .padding(12)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color(nsColor: .windowBackgroundColor))
+                SettingsInsetGlassBackground(cornerRadius: 10)
             )
 
             VStack(alignment: .leading, spacing: 10) {
@@ -507,8 +544,7 @@ struct SettingsView: View {
                         .padding(.horizontal, 10)
                         .padding(.vertical, 7)
                         .background(
-                            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                .fill(Color(nsColor: .windowBackgroundColor))
+                            SettingsInsetGlassBackground(cornerRadius: 8)
                         )
                     }
                 }
@@ -690,8 +726,7 @@ struct SettingsView: View {
                         .padding(12)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color(nsColor: .windowBackgroundColor))
+                            SettingsInsetGlassBackground(cornerRadius: 10)
                         )
                 } else {
                     VStack(spacing: 10) {
@@ -730,8 +765,7 @@ struct SettingsView: View {
                             }
                             .padding(12)
                             .background(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(Color(nsColor: .windowBackgroundColor))
+                                SettingsInsetGlassBackground(cornerRadius: 10, isInteractive: true)
                             )
                         }
                     }
@@ -997,8 +1031,7 @@ struct SettingsView: View {
                             }
                             .buttonStyle(.plain)
                             .background(
-                                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                    .fill(Color(nsColor: .windowBackgroundColor))
+                                SettingsInsetGlassBackground(cornerRadius: 8, isInteractive: true)
                             )
                             .disabled(canSwapDraftCurrencies == false)
                             .help("调换货币")
@@ -1090,8 +1123,7 @@ struct SettingsView: View {
         }
         .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
+            SettingsInsetGlassBackground(cornerRadius: 10)
         )
     }
 
@@ -1108,8 +1140,7 @@ struct SettingsView: View {
                     .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color(nsColor: .windowBackgroundColor))
+                        SettingsInsetGlassBackground(cornerRadius: 10)
                     )
             } else {
                 VStack(spacing: 8) {
@@ -1252,8 +1283,7 @@ struct SettingsView: View {
                             .padding(12)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(Color(nsColor: .windowBackgroundColor))
+                                SettingsInsetGlassBackground(cornerRadius: 10)
                             )
                     } else {
                         VStack(spacing: 10) {
@@ -1353,8 +1383,7 @@ struct SettingsView: View {
         }
         .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
+            SettingsInsetGlassBackground(cornerRadius: 10, isInteractive: true)
         )
     }
 
@@ -1744,6 +1773,11 @@ struct SettingsView: View {
             .background(
                 Capsule(style: .continuous)
                     .fill(Color.accentColor.opacity(colorScheme == .dark ? 0.16 : 0.10))
+                    .overlay(
+                        Capsule(style: .continuous)
+                            .strokeBorder(Color.accentColor.opacity(colorScheme == .dark ? 0.22 : 0.18), lineWidth: 1)
+                    )
+                    .currencyLiquidGlass(in: Capsule(style: .continuous), isEnabled: true)
             )
     }
 
@@ -1775,8 +1809,7 @@ struct SettingsView: View {
             .foregroundStyle(.secondary)
             .frame(width: 28, height: 28)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color(nsColor: .windowBackgroundColor))
+                SettingsInsetGlassBackground(cornerRadius: 10)
             )
             .help("拖动调整展示顺序")
     }
@@ -1809,8 +1842,7 @@ struct SettingsView: View {
         }
         .padding(3)
         .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
+            SettingsInsetGlassBackground(cornerRadius: 8)
         )
     }
 
@@ -1820,8 +1852,7 @@ struct SettingsView: View {
                 .font(.system(size: 18))
                 .frame(width: 28, height: 28)
                 .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color(nsColor: .controlBackgroundColor))
+                    SettingsInsetGlassBackground(cornerRadius: 8)
                 )
 
             VStack(alignment: .leading, spacing: 3) {
@@ -1847,8 +1878,7 @@ struct SettingsView: View {
         }
         .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
+            SettingsInsetGlassBackground(cornerRadius: 10, isInteractive: true)
         )
     }
 
@@ -1880,8 +1910,7 @@ struct SettingsView: View {
         }
         .padding(3)
         .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color(nsColor: .controlBackgroundColor))
+            SettingsInsetGlassBackground(cornerRadius: 8)
         )
     }
 
@@ -1897,8 +1926,7 @@ struct SettingsView: View {
                 .padding(.horizontal, 9)
                 .padding(.vertical, 7)
                 .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color(nsColor: .controlBackgroundColor))
+                    SettingsInsetGlassBackground(cornerRadius: 8)
                 )
             }
         }
@@ -1938,8 +1966,16 @@ struct SettingsView: View {
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
+            CurrencyGlassSurface(
+                cornerRadius: 14,
+                fillColor: sectionSurfaceColor.opacity(0.72),
+                material: .thinMaterial,
+                strokeColor: Color.secondary.opacity(0.12),
+                shadowColor: .clear,
+                shadowRadius: 0,
+                shadowY: 0,
+                usesLiquidGlass: true
+            )
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -1953,79 +1989,91 @@ struct SettingsView: View {
     }
 
     private var sectionCardBackground: some View {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
-            .fill(sectionSurfaceColor)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(sectionStrokeColor, lineWidth: 1)
-            )
-            .shadow(color: sectionShadowColor, radius: 10, x: 0, y: 4)
+        CurrencyGlassSurface(
+            cornerRadius: 16,
+            fillColor: sectionSurfaceColor,
+            material: .regularMaterial,
+            strokeColor: sectionStrokeColor,
+            shadowColor: sectionShadowColor,
+            shadowRadius: 8,
+            shadowY: 3,
+            usesLiquidGlass: true
+        )
     }
 
-    private var pageHeaderBackground: some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
-            .fill(headerSurfaceColor)
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(sectionStrokeColor, lineWidth: 1)
-            )
-            .shadow(color: sectionShadowColor.opacity(0.7), radius: 8, x: 0, y: 3)
-    }
-
+    @ViewBuilder
     private func sidebarRowBackground(isSelected: Bool) -> some View {
-        RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .fill(isSelected ? Color.accentColor.opacity(colorScheme == .dark ? 0.18 : 0.12) : Color.clear)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(isSelected ? Color.accentColor.opacity(colorScheme == .dark ? 0.26 : 0.18) : Color.clear, lineWidth: 1)
+        if isSelected {
+            CurrencyGlassSurface(
+                cornerRadius: 14,
+                fillColor: Color.accentColor.opacity(colorScheme == .dark ? 0.11 : 0.075),
+                material: .thinMaterial,
+                strokeColor: Color.accentColor.opacity(colorScheme == .dark ? 0.30 : 0.24),
+                shadowColor: .clear,
+                shadowRadius: 0,
+                shadowY: 0,
+                usesLiquidGlass: true,
+                isInteractive: true
             )
+        } else {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color.clear)
+        }
     }
 
     private var settingsDivider: some View {
         Rectangle()
-            .fill(Color.primary.opacity(colorScheme == .dark ? 0.10 : 0.08))
+            .fill(Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.055))
             .frame(width: 1)
     }
 
     private var sidebarBackground: some View {
-        Color(nsColor: .underPageBackgroundColor)
-            .opacity(colorScheme == .dark ? 0.74 : 0.58)
-    }
-
-    private var detailPaneBackground: some View {
-        Color(nsColor: .windowBackgroundColor)
-            .overlay(alignment: .top) {
+        Rectangle()
+            .fill(.thinMaterial)
+            .overlay(
                 LinearGradient(
                     colors: [
-                        Color.primary.opacity(colorScheme == .dark ? 0.035 : 0.025),
-                        Color.clear
+                        sidebarTintColor.opacity(colorScheme == .dark ? 0.74 : 0.64),
+                        sidebarTintColor.opacity(colorScheme == .dark ? 0.58 : 0.48)
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(height: 120)
-                .allowsHitTesting(false)
-            }
+            )
+    }
+
+    private var detailPaneBackground: some View {
+        Rectangle()
+            .fill(detailPaneSurfaceColor)
     }
 
     private var windowBackground: some View {
-        Color(nsColor: .windowBackgroundColor)
+        Rectangle()
+            .fill(detailPaneSurfaceColor)
+    }
+
+    private var sidebarTintColor: Color {
+        colorScheme == .dark
+            ? Color(red: 0.265, green: 0.265, blue: 0.265)
+            : Color(red: 0.890, green: 0.900, blue: 0.915)
+    }
+
+    private var detailPaneSurfaceColor: Color {
+        colorScheme == .dark
+            ? Color(red: 0.085, green: 0.088, blue: 0.092)
+            : Color(red: 0.955, green: 0.960, blue: 0.970)
     }
 
     private var sectionSurfaceColor: Color {
-        Color(nsColor: .controlBackgroundColor).opacity(colorScheme == .dark ? 0.72 : 0.92)
-    }
-
-    private var headerSurfaceColor: Color {
-        Color(nsColor: .controlBackgroundColor).opacity(colorScheme == .dark ? 0.62 : 0.86)
+        colorScheme == .dark ? Color.white.opacity(0.060) : Color.white.opacity(0.54)
     }
 
     private var sectionStrokeColor: Color {
-        Color.primary.opacity(colorScheme == .dark ? 0.07 : 0.06)
+        Color.primary.opacity(colorScheme == .dark ? 0.10 : 0.065)
     }
 
     private var sectionShadowColor: Color {
-        Color.black.opacity(colorScheme == .dark ? 0.18 : 0.06)
+        Color.black.opacity(colorScheme == .dark ? 0.14 : 0.045)
     }
 
     private var currentAppLanguageName: String {
@@ -2191,8 +2239,7 @@ struct SettingsView: View {
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
+            SettingsInsetGlassBackground(cornerRadius: 14)
         )
     }
 
@@ -2246,6 +2293,366 @@ struct SettingsView: View {
         formatter.dateFormat = "yyyyMMdd-HHmmss"
         return formatter
     }()
+}
+
+struct FirstRunWelcomeView: View {
+    let initialStep: WelcomeStep
+    let launchController: LaunchAtLoginController
+    let persistStep: (WelcomeStep) -> Void
+    let complete: () -> Void
+
+    @State private var selectedStep: WelcomeStep
+    @State private var accessibilityTrusted = AXIsProcessTrusted()
+    @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
+
+    init(
+        initialStep: WelcomeStep,
+        launchController: LaunchAtLoginController,
+        persistStep: @escaping (WelcomeStep) -> Void,
+        complete: @escaping () -> Void
+    ) {
+        self.initialStep = initialStep
+        self.launchController = launchController
+        self.persistStep = persistStep
+        self.complete = complete
+        _selectedStep = State(initialValue: initialStep)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            topBar
+
+            Divider()
+                .padding(.vertical, 14)
+
+            stepContent
+                .frame(maxWidth: .infinity, minHeight: 250, alignment: .topLeading)
+
+            Spacer(minLength: 18)
+
+            bottomBar
+        }
+        .padding(24)
+        .frame(width: 620, height: 480, alignment: .leading)
+        .background(
+            SettingsInsetGlassBackground(cornerRadius: 0, material: .regularMaterial)
+        )
+        .onAppear {
+            persistStep(selectedStep)
+            refreshPermissionStatuses()
+        }
+        .onChange(of: selectedStep) { _, newStep in
+            persistStep(newStep)
+            refreshPermissionStatuses()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            refreshPermissionStatuses()
+        }
+    }
+
+    private var topBar: some View {
+        HStack(alignment: .center, spacing: 14) {
+            Image(systemName: selectedStep.symbolName)
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 52, height: 52)
+                .background(SettingsAccentGlassBackground(cornerRadius: 16))
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text(selectedStep.title)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                Text(stepSubtitle)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+
+            Button("跳过") {
+                complete()
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .accessibilityIdentifier("welcome.skip")
+        }
+    }
+
+    @ViewBuilder
+    private var stepContent: some View {
+        switch selectedStep {
+        case .introduction:
+            introductionPage
+        case .accessibility:
+            permissionPage(
+                title: "辅助功能",
+                detail: "Currency Tracker 用辅助功能权限在你按下全局快捷键时读取当前选中的文本，并在部分应用中使用复制动作作为回退。",
+                unavailableDetail: "不开启时，系统级选中文本换算会不可用，或者只能先手动复制文字再回到应用内换算。",
+                statusText: accessibilityTrusted ? "已开启" : "未开启",
+                isReady: accessibilityTrusted,
+                actionTitle: "打开辅助功能设置",
+                action: openAccessibilitySettings
+            )
+        case .notifications:
+            permissionPage(
+                title: "通知",
+                detail: "通知权限用于在汇率提醒达到阈值时弹出系统通知，让你不必一直打开应用查看。",
+                unavailableDetail: "不开启时，提醒仍可保存在应用内，但触发后不会弹出系统通知。",
+                statusText: notificationStatusText,
+                isReady: notificationsAuthorized,
+                actionTitle: "开启通知权限",
+                action: requestNotificationPermission
+            )
+        case .loginItems:
+            permissionPage(
+                title: "开机启动",
+                detail: "登录项权限用于开机后自动启动 Currency Tracker，让菜单栏汇率、后台刷新和全局快捷键监听持续可用。",
+                unavailableDetail: "不开启时，每次重启电脑后需要手动打开应用，后台刷新和快捷键监听也会等应用启动后才工作。",
+                statusText: launchStatusText,
+                isReady: launchController.isEnabled && !launchController.requiresApproval,
+                actionTitle: "打开登录项设置",
+                action: openLoginItemsSettings
+            )
+        }
+    }
+
+    private var introductionPage: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("接下来只会引导你处理系统权限。")
+                .font(.system(size: 17, weight: .bold, design: .rounded))
+
+            Text("这些权限不是查看汇率所必需的，但会影响全局快捷键、汇率提醒通知、开机后自动运行等系统级功能。你可以逐项开启，也可以跳过；完成或跳过后，欢迎窗口之后启动和应用内更新后都不会自动弹出。")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(alignment: .leading, spacing: 10) {
+                welcomePermissionPreview(symbolName: "checkmark.shield", title: "辅助功能", detail: "用于全局快捷键读取选中文本。")
+                welcomePermissionPreview(symbolName: "bell", title: "通知", detail: "用于汇率提醒触发时弹出系统通知。")
+                welcomePermissionPreview(symbolName: "power", title: "开机启动", detail: "用于重启电脑后自动恢复菜单栏和后台能力。")
+            }
+            .padding(.top, 4)
+        }
+    }
+
+    private func permissionPage(
+        title: LocalizedStringKey,
+        detail: LocalizedStringKey,
+        unavailableDetail: LocalizedStringKey,
+        statusText: String,
+        isReady: Bool,
+        actionTitle: LocalizedStringKey,
+        action: @escaping () -> Void
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                Circle()
+                    .fill((isReady ? Color.green : Color.orange).opacity(0.16))
+                    .frame(width: 10, height: 10)
+                Text(statusText)
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundStyle(isReady ? Color(red: 0.09, green: 0.53, blue: 0.32) : Color(red: 0.78, green: 0.50, blue: 0.11))
+            }
+
+            Text(title)
+                .font(.system(size: 17, weight: .bold, design: .rounded))
+
+            Text(detail)
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundStyle(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(unavailableDetail)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Button(actionTitle) {
+                persistStep(selectedStep)
+                action()
+            }
+            .buttonStyle(.borderedProminent)
+            .accessibilityIdentifier("welcome.permission.action")
+
+            Text("如果系统要求重新打开软件，重启后会自动回到这一页。")
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .foregroundStyle(.tertiary)
+        }
+    }
+
+    private var bottomBar: some View {
+        HStack {
+            Button("上一步") {
+                moveToPreviousStep()
+            }
+            .buttonStyle(.bordered)
+            .disabled(selectedStep.previous == nil)
+            .accessibilityIdentifier("welcome.previous")
+
+            Spacer()
+
+            progressDots
+
+            Spacer()
+
+            Button(nextButtonTitle) {
+                moveToNextStepOrComplete()
+            }
+            .buttonStyle(.borderedProminent)
+            .keyboardShortcut(.defaultAction)
+            .accessibilityIdentifier("welcome.next")
+        }
+    }
+
+    private var progressDots: some View {
+        HStack(spacing: 7) {
+            ForEach(WelcomeStep.allCases) { step in
+                Circle()
+                    .fill(step == selectedStep ? Color.accentColor : Color.secondary.opacity(0.28))
+                    .frame(width: step == selectedStep ? 9 : 7, height: step == selectedStep ? 9 : 7)
+                    .animation(.easeInOut(duration: 0.16), value: selectedStep)
+            }
+        }
+        .accessibilityLabel(progressAccessibilityText)
+    }
+
+    private func welcomePermissionPreview(
+        symbolName: String,
+        title: LocalizedStringKey,
+        detail: LocalizedStringKey
+    ) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: symbolName)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 30, height: 30)
+                .background(SettingsAccentGlassBackground(cornerRadius: 9))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                Text(detail)
+                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var stepSubtitle: LocalizedStringKey {
+        switch selectedStep {
+        case .introduction:
+            "先了解接下来要开启哪些能力"
+        case .accessibility:
+            "让全局快捷键可以读取选中文本"
+        case .notifications:
+            "让汇率提醒可以通过系统通知出现"
+        case .loginItems:
+            "让应用在重启电脑后自动恢复"
+        }
+    }
+
+    private var nextButtonTitle: LocalizedStringKey {
+        selectedStep.next == nil ? "完成" : "下一步"
+    }
+
+    private var progressAccessibilityText: Text {
+        Text(String(format: String(localized: "第 %d 步，共 %d 步"), selectedStep.rawValue + 1, WelcomeStep.allCases.count))
+    }
+
+    private var notificationsAuthorized: Bool {
+        switch notificationStatus {
+        case .authorized, .provisional, .ephemeral:
+            true
+        case .denied, .notDetermined:
+            false
+        @unknown default:
+            false
+        }
+    }
+
+    private var notificationStatusText: String {
+        switch notificationStatus {
+        case .authorized, .provisional, .ephemeral:
+            String(localized: "已开启")
+        case .denied:
+            String(localized: "已拒绝")
+        case .notDetermined:
+            String(localized: "未开启")
+        @unknown default:
+            String(localized: "状态未知")
+        }
+    }
+
+    private var launchStatusText: String {
+        if launchController.requiresApproval {
+            return String(localized: "需要在系统设置中批准")
+        }
+
+        return launchController.isEnabled ? String(localized: "已开启") : String(localized: "未开启")
+    }
+
+    private func moveToPreviousStep() {
+        guard let previous = selectedStep.previous else {
+            return
+        }
+
+        selectedStep = previous
+    }
+
+    private func moveToNextStepOrComplete() {
+        guard let next = selectedStep.next else {
+            complete()
+            return
+        }
+
+        selectedStep = next
+    }
+
+    private func refreshPermissionStatuses() {
+        accessibilityTrusted = AXIsProcessTrusted()
+        launchController.refreshStatus()
+        Task { @MainActor in
+            notificationStatus = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+        }
+    }
+
+    private func openAccessibilitySettings() {
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+        _ = AXIsProcessTrustedWithOptions(options)
+        openSystemSettings(urlStrings: [
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
+            "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Accessibility"
+        ])
+    }
+
+    private func requestNotificationPermission() {
+        Task { @MainActor in
+            _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
+            notificationStatus = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+            openSystemSettings(urlStrings: [
+                "x-apple.systempreferences:com.apple.Notifications-Settings.extension",
+                "x-apple.systempreferences:com.apple.preference.notifications"
+            ])
+        }
+    }
+
+    private func openLoginItemsSettings() {
+        launchController.setEnabled(true)
+        launchController.openSystemSettings()
+        refreshPermissionStatuses()
+    }
+
+    private func openSystemSettings(urlStrings: [String]) {
+        for urlString in urlStrings {
+            guard let url = URL(string: urlString) else {
+                continue
+            }
+
+            if NSWorkspace.shared.open(url) {
+                return
+            }
+        }
+    }
 }
 
 private struct APIConfigurationRow: View {
@@ -2327,8 +2734,7 @@ private struct APIConfigurationRow: View {
         }
         .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
+            SettingsInsetGlassBackground(cornerRadius: 14, isInteractive: true)
         )
     }
 
@@ -2395,8 +2801,7 @@ private struct RateAlertRow: View {
         }
         .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
+            SettingsInsetGlassBackground(cornerRadius: 10, isInteractive: true)
         )
     }
 }
@@ -2578,8 +2983,7 @@ private struct CustomAPIProviderRow: View {
         }
         .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
+            SettingsInsetGlassBackground(cornerRadius: 10, isInteractive: true)
         )
         .onChange(of: provider) { _, newProvider in
             refreshFromProviderIfNeeded(newProvider)

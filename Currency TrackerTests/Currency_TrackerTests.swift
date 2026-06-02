@@ -477,6 +477,68 @@ struct Currency_TrackerTests {
     }
 
     @Test
+    func initialLaunchShowsWelcomeOnlyBeforeCompletion() {
+        let firstLaunchAction = InitialLaunchCoordinator.resolvedInitialPresentationAction(
+            isRunningUITests: false,
+            forceShowSettings: false,
+            isDefaultLaunch: true,
+            needsPermissionReview: false,
+            hasCompletedWelcome: false,
+            isDebugLaunch: false,
+            menuBarItemEnabled: true
+        )
+        let laterLaunchAction = InitialLaunchCoordinator.resolvedInitialPresentationAction(
+            isRunningUITests: false,
+            forceShowSettings: false,
+            isDefaultLaunch: true,
+            needsPermissionReview: false,
+            hasCompletedWelcome: true,
+            isDebugLaunch: false,
+            menuBarItemEnabled: true
+        )
+
+        #expect(firstLaunchAction == .showWelcome)
+        #expect(laterLaunchAction == .automaticUpdateCheck)
+    }
+
+    @Test
+    func initialLaunchPrioritizesUpdatePermissionReviewOverWelcome() {
+        let action = InitialLaunchCoordinator.resolvedInitialPresentationAction(
+            isRunningUITests: false,
+            forceShowSettings: false,
+            isDefaultLaunch: true,
+            needsPermissionReview: true,
+            hasCompletedWelcome: false,
+            isDebugLaunch: false,
+            menuBarItemEnabled: true
+        )
+
+        #expect(action == .showSettings(.permissions))
+    }
+
+    @Test
+    func initialLaunchForceShowSettingsDoesNotOpenWelcome() {
+        let action = InitialLaunchCoordinator.resolvedInitialPresentationAction(
+            isRunningUITests: true,
+            forceShowSettings: true,
+            isDefaultLaunch: true,
+            needsPermissionReview: false,
+            hasCompletedWelcome: false,
+            isDebugLaunch: false,
+            menuBarItemEnabled: true
+        )
+
+        #expect(action == .showSettings(nil))
+    }
+
+    @Test
+    func welcomeStepRestoresStoredProgressSafely() {
+        #expect(WelcomeStep.normalized(rawValue: WelcomeStep.notifications.rawValue) == .notifications)
+        #expect(WelcomeStep.normalized(rawValue: nil) == .introduction)
+        #expect(WelcomeStep.normalized(rawValue: 99) == .introduction)
+    }
+
+    @Test
     func softwareUpdateInstallerFindsAndValidatesExtractedApp() throws {
         let fileManager = FileManager.default
         let rootURL = fileManager.temporaryDirectory

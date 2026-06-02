@@ -18,6 +18,7 @@ struct Currency_TrackerApp: App {
     private let credentialStore: EnhancedSourceCredentialStore
     private let launchController: LaunchAtLoginController
     private let settingsWindowController: SettingsWindowController
+    private let welcomeWindowController: WelcomeWindowController
     private let panelWindowController: PanelWindowController
     private let softwareUpdateWindowController: SoftwareUpdateWindowController
     private let automaticUpdateCoordinator: AutomaticSoftwareUpdateCoordinator
@@ -84,6 +85,10 @@ struct Currency_TrackerApp: App {
             globalShortcutHandler: globalShortcutHandler,
             softwareUpdateWindowController: softwareUpdateWindowController
         )
+        let welcomeWindowController = WelcomeWindowController(
+            userDefaults: userDefaults,
+            launchController: launchController
+        )
         panelWindowController.configurePinnedContent { controller in
             AnyView(
                 ContentView(
@@ -106,6 +111,7 @@ struct Currency_TrackerApp: App {
             userDefaults: userDefaults,
             preferences: preferences,
             settingsWindowController: settingsWindowController,
+            welcomeWindowController: welcomeWindowController,
             automaticUpdateCoordinator: automaticUpdateCoordinator,
             isRunningUITests: isRunningUITests
         )
@@ -122,6 +128,7 @@ struct Currency_TrackerApp: App {
         self.credentialStore = credentialStore
         self.launchController = launchController
         self.settingsWindowController = settingsWindowController
+        self.welcomeWindowController = welcomeWindowController
         self.panelWindowController = panelWindowController
         self.softwareUpdateWindowController = softwareUpdateWindowController
         self.automaticUpdateCoordinator = automaticUpdateCoordinator
@@ -187,14 +194,16 @@ struct Currency_TrackerApp: App {
 }
 
 @MainActor
-final class StatusItemController: NSObject {
+final class StatusItemController: NSObject, NSWindowDelegate {
     private let preferences: PreferencesStore
     private let viewModel: ExchangePanelViewModel
     private let settingsWindowController: SettingsWindowController
     private let panelWindowController: PanelWindowController
     private let isRunningUITests: Bool
     private var statusItem: NSStatusItem?
-    private var popover: NSPopover?
+    private var menuPanel: NSPanel?
+    private var localEventMonitor: Any?
+    private var globalEventMonitor: Any?
 
     init(
         preferences: PreferencesStore,
@@ -238,8 +247,7 @@ final class StatusItemController: NSObject {
     }
 
     private func removeStatusItem() {
-        popover?.performClose(nil)
-        popover = nil
+        closeMenuPanel()
         if let statusItem {
             NSStatusBar.system.removeStatusItem(statusItem)
             self.statusItem = nil
@@ -278,8 +286,9 @@ final class StatusItemController: NSObject {
         case .pairOnly:
             statusItem?.length = NSStatusItem.variableLength
             if let featuredCard {
-                button.imagePosition = .noImage
-                button.title = featuredCard.compactPairLabel
+                button.image = symbolImage
+                button.imagePosition = .imageLeading
+                button.title = " \(featuredCard.compactPairLabel)"
             } else {
                 button.imagePosition = .imageOnly
                 button.image = symbolImage
@@ -287,8 +296,9 @@ final class StatusItemController: NSObject {
         case .featuredRate:
             statusItem?.length = NSStatusItem.variableLength
             if let featuredCard, featuredCard.snapshot != nil {
-                button.imagePosition = .noImage
-                button.title = featuredCard.valueText
+                button.image = symbolImage
+                button.imagePosition = .imageLeading
+                button.title = " \(featuredCard.valueText)"
             } else {
                 button.imagePosition = .imageOnly
                 button.image = symbolImage
@@ -311,17 +321,33 @@ final class StatusItemController: NSObject {
             return
         }
 
-        if let popover, popover.isShown {
-            popover.performClose(sender)
+        if let menuPanel, menuPanel.isVisible {
+            closeMenuPanel()
             return
         }
 
         let contentSize = resolvedMenuBarPopoverContentSize(for: sender)
-        let popover = NSPopover()
-        popover.behavior = .transient
-        popover.animates = false
-        popover.contentSize = contentSize
-        popover.contentViewController = NSHostingController(
+        let frame = resolvedMenuBarPanelFrame(contentSize: contentSize, from: sender)
+        let panel = MenuBarExchangeRatePanel(
+            contentRect: frame,
+            styleMask: [.borderless],
+            backing: .buffered,
+            defer: false
+        )
+        panel.identifier = NSUserInterfaceItemIdentifier("currency-tracker-menu-panel")
+        panel.delegate = self
+        panel.backgroundColor = .clear
+        panel.isOpaque = false
+        panel.hasShadow = false
+        panel.isMovable = false
+        panel.isMovableByWindowBackground = false
+        panel.isFloatingPanel = true
+        panel.hidesOnDeactivate = false
+        panel.level = .statusBar
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
+        panel.minSize = NSSize(width: 408, height: 320)
+        panel.maxSize = NSSize(width: 560, height: max(760, contentSize.height))
+        panel.contentViewController = NSHostingController(
             rootView: ContentView(
                 viewModel: viewModel,
                 preferences: preferences,
@@ -332,52 +358,141 @@ final class StatusItemController: NSObject {
                 menuBarMaximumPanelHeight: contentSize.height
             )
         )
-        self.popover = popover
-        popover.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
-        popover.contentViewController?.view.window?.makeKey()
-        repositionMenuBarPopover(popover, from: sender)
-        Task { @MainActor [weak self, weak popover, weak sender] in
-            guard let popover, let sender else {
-                return
-            }
-
-            self?.repositionMenuBarPopover(popover, from: sender)
-        }
+        panel.setContentSize(contentSize)
+        panel.setFrame(frame, display: false)
+        menuPanel = panel
+        panel.makeKeyAndOrderFront(nil)
+        panel.orderFrontRegardless()
+        installMenuPanelDismissHandlers()
     }
 
     private func resolvedMenuBarPopoverContentSize(for button: NSStatusBarButton) -> NSSize {
         let visibleFrame = screen(for: button).visibleFrame
         let maximumHeight = max(Self.menuBarPopoverMinimumHeight, visibleFrame.height - (Self.menuBarPopoverScreenInset * 2))
+        let contentHeight = estimatedMenuBarPopoverContentHeight()
         return NSSize(
             width: Self.menuBarPopoverWidth,
-            height: min(Self.menuBarPopoverPreferredHeight, maximumHeight)
+            height: min(max(contentHeight, Self.menuBarPopoverMinimumHeight), maximumHeight)
         )
     }
 
-    private func repositionMenuBarPopover(_ popover: NSPopover, from button: NSStatusBarButton) {
-        guard let window = popover.contentViewController?.view.window else {
+    private func estimatedMenuBarPopoverContentHeight() -> CGFloat {
+        let pairCount = preferences.selectedPairs.count
+        let cardAreaHeight: CGFloat
+        if pairCount == 0 {
+            cardAreaHeight = Self.collapsedCardHeight
+        } else {
+            cardAreaHeight = (CGFloat(pairCount) * Self.collapsedCardHeight)
+                + (CGFloat(max(0, pairCount - 1)) * Self.cardSpacing)
+                + Self.cardStackBottomPadding
+        }
+
+        let showsStatusBanner = shouldReserveMenuBarStatusBanner
+        let bannerHeight = showsStatusBanner ? Self.statusBannerHeight : 0
+        let spacingCount: CGFloat = showsStatusBanner ? 3 : 2
+
+        return Self.panelTopPadding
+            + Self.panelBottomPadding
+            + Self.toolbarHeight
+            + bannerHeight
+            + Self.footerHeight
+            + (spacingCount * Self.panelSectionSpacing)
+            + cardAreaHeight
+    }
+
+    private var shouldReserveMenuBarStatusBanner: Bool {
+        guard viewModel.statusMessage != nil else {
+            return false
+        }
+
+        if preferences.selectedPairs.isEmpty {
+            return true
+        }
+
+        return viewModel.statusSymbolName.contains("exclamationmark")
+            || viewModel.cards.contains { $0.state != .ready }
+    }
+
+    private func resolvedMenuBarPanelFrame(contentSize: NSSize, from button: NSStatusBarButton) -> NSRect {
+        let screen = screen(for: button)
+        let visibleFrame = screen.visibleFrame
+        let rawAnchorFrame = screenFrame(for: button)
+        let anchorFrame = rawAnchorFrame.flatMap { frame in
+            let hasUsableSize = frame.width >= 4 && frame.height >= 4
+            let isNotPinnedToScreenEdge = frame.midX > visibleFrame.minX + 24
+            return hasUsableSize && isNotPinnedToScreenEdge ? frame : nil
+        }
+        let topEdge = min(anchorFrame?.minY ?? visibleFrame.maxY, visibleFrame.maxY) - Self.menuBarPopoverTopInset
+        let height = min(contentSize.height, max(Self.menuBarPopoverMinimumHeight, topEdge - visibleFrame.minY - Self.menuBarPopoverScreenInset))
+        let fallbackX = visibleFrame.maxX - contentSize.width - Self.menuBarPopoverScreenInset
+        let x = clamped(
+            anchorFrame.map { $0.midX - (contentSize.width / 2) } ?? fallbackX,
+            lower: visibleFrame.minX + Self.menuBarPopoverScreenInset,
+            upper: max(visibleFrame.minX + Self.menuBarPopoverScreenInset, visibleFrame.maxX - contentSize.width - Self.menuBarPopoverScreenInset)
+        )
+        let y = clamped(
+            topEdge - height,
+            lower: visibleFrame.minY + Self.menuBarPopoverScreenInset,
+            upper: max(visibleFrame.minY + Self.menuBarPopoverScreenInset, visibleFrame.maxY - height - Self.menuBarPopoverTopInset)
+        )
+
+        return NSRect(x: x, y: y, width: contentSize.width, height: height)
+    }
+
+    private func closeMenuPanel() {
+        removeMenuPanelDismissHandlers()
+        menuPanel?.contentViewController = nil
+        menuPanel?.orderOut(nil)
+        menuPanel = nil
+    }
+
+    private func installMenuPanelDismissHandlers() {
+        removeMenuPanelDismissHandlers()
+
+        localEventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown]) { [weak self] event in
+            guard let self, let menuPanel = self.menuPanel else {
+                return event
+            }
+
+            if event.type == .keyDown, event.keyCode == 53 {
+                self.closeMenuPanel()
+                return nil
+            }
+
+            if let eventWindow = event.window, eventWindow === menuPanel {
+                return event
+            }
+
+            self.closeMenuPanel()
+            return event
+        }
+
+        globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.closeMenuPanel()
+            }
+        }
+    }
+
+    private func removeMenuPanelDismissHandlers() {
+        if let localEventMonitor {
+            NSEvent.removeMonitor(localEventMonitor)
+            self.localEventMonitor = nil
+        }
+
+        if let globalEventMonitor {
+            NSEvent.removeMonitor(globalEventMonitor)
+            self.globalEventMonitor = nil
+        }
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow,
+              window === menuPanel else {
             return
         }
 
-        let screen = screen(for: button)
-        let visibleFrame = screen.visibleFrame
-        let anchorFrame = screenFrame(for: button)
-        let topEdge = min(anchorFrame?.minY ?? visibleFrame.maxY, visibleFrame.maxY) - Self.menuBarPopoverTopInset
-        let maximumHeight = max(Self.menuBarPopoverMinimumHeight, topEdge - visibleFrame.minY - Self.menuBarPopoverScreenInset)
-        var frame = window.frame
-        frame.size.height = min(frame.height, maximumHeight)
-        frame.origin.x = clamped(
-            (anchorFrame?.midX ?? visibleFrame.midX) - (frame.width / 2),
-            lower: visibleFrame.minX + Self.menuBarPopoverScreenInset,
-            upper: max(visibleFrame.minX + Self.menuBarPopoverScreenInset, visibleFrame.maxX - frame.width - Self.menuBarPopoverScreenInset)
-        )
-        frame.origin.y = clamped(
-            topEdge - frame.height,
-            lower: visibleFrame.minY + Self.menuBarPopoverScreenInset,
-            upper: max(visibleFrame.minY + Self.menuBarPopoverScreenInset, visibleFrame.maxY - frame.height - Self.menuBarPopoverTopInset)
-        )
-
-        window.setFrame(frame, display: true)
+        closeMenuPanel()
     }
 
     private func screenFrame(for button: NSStatusBarButton) -> NSRect? {
@@ -406,94 +521,86 @@ final class StatusItemController: NSObject {
     }
 
     private static let menuBarPopoverWidth: CGFloat = 408
-    private static let menuBarPopoverPreferredHeight: CGFloat = 620
     private static let menuBarPopoverMinimumHeight: CGFloat = 320
     private static let menuBarPopoverScreenInset: CGFloat = 8
     private static let menuBarPopoverTopInset: CGFloat = 4
-
-    @inline(never)
-    private static func drawMenuBarFlowMark() {
-        NSColor.black.setStroke()
-        NSColor.black.setFill()
-
-        let flowPath = NSBezierPath()
-        flowPath.move(to: NSPoint(x: 14.75, y: 12.55))
-        flowPath.curve(
-            to: NSPoint(x: 7.30, y: 15.50),
-            controlPoint1: NSPoint(x: 13.42, y: 15.34),
-            controlPoint2: NSPoint(x: 10.40, y: 16.35)
-        )
-        flowPath.curve(
-            to: NSPoint(x: 2.02, y: 8.15),
-            controlPoint1: NSPoint(x: 3.82, y: 14.55),
-            controlPoint2: NSPoint(x: 1.70, y: 11.48)
-        )
-        flowPath.curve(
-            to: NSPoint(x: 9.05, y: 2.05),
-            controlPoint1: NSPoint(x: 2.38, y: 4.45),
-            controlPoint2: NSPoint(x: 5.38, y: 1.86)
-        )
-        flowPath.curve(
-            to: NSPoint(x: 14.42, y: 4.80),
-            controlPoint1: NSPoint(x: 11.38, y: 2.18),
-            controlPoint2: NSPoint(x: 13.20, y: 3.18)
-        )
-        flowPath.curve(
-            to: NSPoint(x: 13.55, y: 6.22),
-            controlPoint1: NSPoint(x: 15.00, y: 5.58),
-            controlPoint2: NSPoint(x: 14.45, y: 6.44)
-        )
-        flowPath.curve(
-            to: NSPoint(x: 9.18, y: 4.62),
-            controlPoint1: NSPoint(x: 12.45, y: 5.95),
-            controlPoint2: NSPoint(x: 11.50, y: 4.72)
-        )
-        flowPath.curve(
-            to: NSPoint(x: 4.34, y: 8.72),
-            controlPoint1: NSPoint(x: 6.35, y: 4.50),
-            controlPoint2: NSPoint(x: 4.24, y: 6.35)
-        )
-        flowPath.curve(
-            to: NSPoint(x: 8.78, y: 13.45),
-            controlPoint1: NSPoint(x: 4.45, y: 11.20),
-            controlPoint2: NSPoint(x: 6.28, y: 13.14)
-        )
-        flowPath.curve(
-            to: NSPoint(x: 12.72, y: 11.82),
-            controlPoint1: NSPoint(x: 10.62, y: 13.68),
-            controlPoint2: NSPoint(x: 11.95, y: 12.82)
-        )
-        flowPath.curve(
-            to: NSPoint(x: 14.75, y: 12.55),
-            controlPoint1: NSPoint(x: 13.24, y: 11.14),
-            controlPoint2: NSPoint(x: 15.22, y: 11.66)
-        )
-        flowPath.close()
-        flowPath.fill()
-
-        if let context = NSGraphicsContext.current {
-            context.compositingOperation = .clear
-            NSColor.clear.setFill()
-            let counterPath = NSBezierPath(ovalIn: NSRect(x: 6.05, y: 6.00, width: 5.90, height: 5.90))
-            counterPath.fill()
-            context.compositingOperation = .sourceOver
-            NSColor.black.setFill()
-        }
-
-        let trackedPointPath = NSBezierPath(ovalIn: NSRect(x: 11.55, y: 10.85, width: 3.35, height: 3.35))
-        trackedPointPath.fill()
-    }
+    private static let panelTopPadding: CGFloat = 14
+    private static let panelBottomPadding: CGFloat = 12
+    private static let panelSectionSpacing: CGFloat = 10
+    private static let toolbarHeight: CGFloat = 36
+    private static let statusBannerHeight: CGFloat = 44
+    private static let footerHeight: CGFloat = 34
+    private static let collapsedCardHeight: CGFloat = 112
+    private static let cardSpacing: CGFloat = 12
+    private static let cardStackBottomPadding: CGFloat = 10
 
     private static let menuBarIcon: NSImage = {
-        let size = NSSize(width: 18, height: 18)
-        let image = NSImage(size: size, flipped: false) { _ in
-            drawMenuBarFlowMark()
+        let pointSize = NSSize(width: 18, height: 18)
+        let image = NSImage(size: pointSize, flipped: false) { _ in
+            guard let context = NSGraphicsContext.current?.cgContext else {
+                return false
+            }
+
+            context.setShouldAntialias(true)
+            context.setAllowsAntialiasing(true)
+
+            NSColor.black.setStroke()
+            NSColor.black.setFill()
+
+            let lensRect = NSRect(x: 1.9, y: 5.05, width: 11.7, height: 11.7)
+
+            let handlePath = NSBezierPath()
+            handlePath.lineWidth = 3.05
+            handlePath.lineCapStyle = .round
+            handlePath.move(to: NSPoint(x: 12.55, y: 6.05))
+            handlePath.line(to: NSPoint(x: 16.15, y: 1.95))
+            handlePath.stroke()
+
+            let lensPath = NSBezierPath(ovalIn: lensRect)
+            lensPath.lineWidth = 1.55
+            lensPath.stroke()
+
+            let yenPath = NSBezierPath()
+            yenPath.lineWidth = 1.85
+            yenPath.lineCapStyle = .butt
+            yenPath.lineJoinStyle = .miter
+            yenPath.move(to: NSPoint(x: 5.45, y: 13.55))
+            yenPath.line(to: NSPoint(x: 7.78, y: 9.70))
+            yenPath.line(to: NSPoint(x: 10.1, y: 13.55))
+            yenPath.move(to: NSPoint(x: 7.78, y: 9.70))
+            yenPath.line(to: NSPoint(x: 7.78, y: 6.70))
+            yenPath.stroke()
+
+            let upperBar = NSBezierPath()
+            upperBar.lineWidth = 1.05
+            upperBar.lineCapStyle = .butt
+            upperBar.move(to: NSPoint(x: 5.55, y: 9.15))
+            upperBar.line(to: NSPoint(x: 10.0, y: 9.15))
+            upperBar.stroke()
+
+            let lowerBar = NSBezierPath()
+            lowerBar.lineWidth = 1.05
+            lowerBar.lineCapStyle = .butt
+            lowerBar.move(to: NSPoint(x: 5.55, y: 7.85))
+            lowerBar.line(to: NSPoint(x: 10.0, y: 7.85))
+            lowerBar.stroke()
+
             return true
         }
         image.isTemplate = true
         image.accessibilityDescription = "Currency Tracker"
         return image
     }()
+}
+
+private final class MenuBarExchangeRatePanel: NSPanel {
+    override var canBecomeKey: Bool {
+        true
+    }
+
+    override var canBecomeMain: Bool {
+        false
+    }
 }
 
 @MainActor
@@ -594,9 +701,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             window.titleVisibility = .hidden
             window.titlebarAppearsTransparent = true
             window.toolbarStyle = .unifiedCompact
+            window.titlebarSeparatorStyle = .none
+            window.isOpaque = true
+            window.backgroundColor = Self.settingsWindowBackgroundColor
             window.isReleasedWhenClosed = false
-            window.setContentSize(NSSize(width: 880, height: 600))
-            window.minSize = NSSize(width: 780, height: 540)
+            window.setContentSize(NSSize(width: 940, height: 660))
+            window.minSize = NSSize(width: 820, height: 560)
             window.setFrameAutosaveName("currency-tracker-settings-window")
             window.center()
 
@@ -623,6 +733,17 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         }
     }
 
+    private static var settingsWindowBackgroundColor: NSColor {
+        NSColor(name: NSColor.Name("CurrencySettingsDetailBackground")) { appearance in
+            let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+            if isDark {
+                return NSColor(calibratedRed: 0.085, green: 0.088, blue: 0.092, alpha: 1)
+            }
+
+            return NSColor(calibratedRed: 0.955, green: 0.960, blue: 0.970, alpha: 1)
+        }
+    }
+
     private func makeRootView() -> SettingsView {
         SettingsView(
             preferences: preferences,
@@ -633,5 +754,97 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             softwareUpdateWindowController: softwareUpdateWindowController,
             focusSection: focusSection
         )
+    }
+}
+
+@MainActor
+final class WelcomeWindowController: NSObject, NSWindowDelegate {
+    private let userDefaults: UserDefaults
+    private let launchController: LaunchAtLoginController
+    private var windowController: NSWindowController?
+    private var onComplete: (() -> Void)?
+    private var didCompleteWelcome = false
+
+    init(
+        userDefaults: UserDefaults,
+        launchController: LaunchAtLoginController
+    ) {
+        self.userDefaults = userDefaults
+        self.launchController = launchController
+        super.init()
+    }
+
+    func configure(onComplete: @escaping () -> Void) {
+        self.onComplete = onComplete
+    }
+
+    func show() {
+        if windowController == nil {
+            let window = NSWindow(contentViewController: NSHostingController(rootView: makeRootView()))
+            window.identifier = NSUserInterfaceItemIdentifier("currency-tracker-welcome-window")
+            window.delegate = self
+            window.title = "Currency Tracker"
+            window.styleMask = [.titled, .closable]
+            window.titleVisibility = .hidden
+            window.titlebarAppearsTransparent = false
+            window.isReleasedWhenClosed = false
+            window.isOpaque = true
+            window.backgroundColor = .windowBackgroundColor
+            window.setContentSize(NSSize(width: 620, height: 480))
+            window.center()
+            windowController = NSWindowController(window: window)
+        } else if let window = windowController?.window {
+            window.contentViewController = NSHostingController(rootView: makeRootView())
+        }
+
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        windowController?.showWindow(nil)
+        windowController?.window?.makeKeyAndOrderFront(nil)
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow,
+              window == windowController?.window else {
+            return
+        }
+
+        completeWelcomeIfNeeded()
+        windowController = nil
+    }
+
+    private func makeRootView() -> FirstRunWelcomeView {
+        FirstRunWelcomeView(
+            initialStep: currentStep,
+            launchController: launchController,
+            persistStep: { [weak self] step in
+                self?.persistStep(step)
+            },
+            complete: { [weak self] in
+                self?.completeAndClose()
+            }
+        )
+    }
+
+    private var currentStep: WelcomeStep {
+        WelcomeStep.normalized(rawValue: userDefaults.object(forKey: WelcomeFlowPersistence.currentStepKey) as? Int)
+    }
+
+    private func persistStep(_ step: WelcomeStep) {
+        userDefaults.set(step.rawValue, forKey: WelcomeFlowPersistence.currentStepKey)
+    }
+
+    private func completeAndClose() {
+        completeWelcomeIfNeeded()
+        windowController?.close()
+    }
+
+    private func completeWelcomeIfNeeded() {
+        guard !didCompleteWelcome else {
+            return
+        }
+
+        didCompleteWelcome = true
+        userDefaults.removeObject(forKey: WelcomeFlowPersistence.currentStepKey)
+        onComplete?()
     }
 }

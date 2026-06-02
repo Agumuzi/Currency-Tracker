@@ -19,3 +19,7 @@ DerivedData/
 *.app
 *.dmg
 *.zip
+
+# GitHub Pages artifacts live on the gh-pages branch, not main
+/index.html
+/assets/

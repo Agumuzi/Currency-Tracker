@@ -19,7 +19,7 @@ Currency Tracker is a macOS menu bar app for exchange rates, quick conversion, a
 </p>
 
 <p>
-  <img src="assets/screenshots/menu-panel-history.png" width="420" alt="Currency Tracker menu bar panel with a selected currency pair, trend chart, and compact rate cards.">
+  <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="420" alt="Currency Tracker menu bar panel with a selected currency pair, trend chart, and compact rate cards.">
 </p>
 
 ## What It Does
@@ -41,17 +41,17 @@ Currency Tracker is a macOS menu bar app for exchange rates, quick conversion, a
 
 | Rate list | History chart | Inline conversion |
 | --- | --- | --- |
-| <img src="assets/screenshots/menu-panel.png" alt="Currency Tracker menu bar panel showing multiple exchange-rate cards."> | <img src="assets/screenshots/menu-panel-history.png" alt="Expanded rate card with a one-month history chart."> | <img src="assets/screenshots/menu-panel-conversion.png" alt="Expanded rate card with two-way currency conversion."> |
+| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png" alt="Currency Tracker menu bar panel showing multiple exchange-rate cards."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" alt="Expanded rate card with a one-month history chart."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png" alt="Expanded rate card with two-way currency conversion."> |
 
-### Settings And Configuration
+### Welcome And Settings
 
-| Welcome | Rates | Data sources |
+| First-run permissions | General settings | Rates |
 | --- | --- | --- |
-| <img src="assets/screenshots/settings-window.png" alt="Currency Tracker settings welcome screen with setup steps."> | <img src="assets/screenshots/settings-rates.png" alt="Settings screen for managing shown exchange-rate pairs."> | <img src="assets/screenshots/data-sources-window.png" alt="Settings screen for API provider credentials and custom API templates."> |
+| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png" alt="Standalone first-run welcome window explaining permission setup."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png" alt="General settings screen with the refreshed sidebar and menu bar controls."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png" alt="Settings screen for managing shown exchange-rate pairs."> |
 
-| Profiles | Alerts | Updates |
+| Data sources | Permissions | Updates |
 | --- | --- | --- |
-| <img src="assets/screenshots/settings-profiles.png" alt="Settings screen for saving and switching profiles."> | <img src="assets/screenshots/settings-alerts.png" alt="Settings screen for exchange-rate threshold alerts."> | <img src="assets/screenshots/settings-updates.png" alt="Settings screen for checking updates and enabling automatic checks."> |
+| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png" alt="Settings screen for API provider credentials and custom API templates."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png" alt="Settings screen showing system permission status."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png" alt="Settings screen for checking updates and enabling automatic checks."> |
 
 ## Main Features
 
@@ -94,11 +94,11 @@ The app can check GitHub Releases from Settings. Update packages are downloaded,
 
 ## Current Release
 
-Version `1.6.4` includes:
+Version `1.7` includes:
 
-- Finalizes a new abstract flow-mark menu bar icon for a cleaner brand identity at small macOS status-item sizes.
-- Keeps the menu bar icon as a macOS template image so it adapts to light, dark, and highlighted menu bar states.
-- Signs the full app bundle ad-hoc before zipping so release assets have sealed resources and bound bundle metadata.
+- Adds a standalone first-run welcome window focused on macOS permission setup.
+- Refreshes the settings and menu bar UI with a cleaner glass-style layout.
+- Refines the menu bar magnifier icon for small macOS status-item rendering.
 
 ## Installation
 
@@ -118,7 +118,7 @@ brew upgrade --cask currency-tracker
 
 ### Direct Download
 
-Download `Currency-Tracker-1.6.4.zip` from the latest GitHub release, unzip it, and move `Currency Tracker.app` to your Applications folder.
+Download `Currency-Tracker-1.7.zip` from the latest GitHub release, unzip it, and move `Currency Tracker.app` to your Applications folder.
 
 ### First Launch Approval
 

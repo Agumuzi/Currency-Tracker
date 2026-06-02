@@ -334,8 +334,16 @@ struct ContentView: View {
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(viewModel.statusBackgroundColor)
+                CurrencyGlassSurface(
+                    cornerRadius: 12,
+                    fillColor: viewModel.statusBackgroundColor,
+                    material: .thinMaterial,
+                    strokeColor: viewModel.statusColor.opacity(colorScheme == .dark ? 0.18 : 0.14),
+                    shadowColor: .clear,
+                    shadowRadius: 0,
+                    shadowY: 0,
+                    usesLiquidGlass: true
+                )
             )
         }
     }
@@ -371,12 +379,16 @@ struct ContentView: View {
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(cardSurfaceColor)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .strokeBorder(subtleBorderColor, lineWidth: 1)
-                    )
+                CurrencyGlassSurface(
+                    cornerRadius: 16,
+                    fillColor: cardSurfaceColor,
+                    material: .regularMaterial,
+                    strokeColor: subtleBorderColor,
+                    shadowColor: .black.opacity(colorScheme == .dark ? 0.16 : 0.05),
+                    shadowRadius: 9,
+                    shadowY: 4,
+                    usesLiquidGlass: true
+                )
             )
             .frame(maxWidth: .infinity, minHeight: cardListMinimumHeight, maxHeight: cardAreaHeight, alignment: .topLeading)
         } else if shouldScrollCards {
@@ -471,26 +483,37 @@ struct ContentView: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(footerSurfaceColor)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .strokeBorder(subtleBorderColor.opacity(0.8), lineWidth: 1)
-                )
+            CurrencyGlassSurface(
+                cornerRadius: 14,
+                fillColor: footerSurfaceColor,
+                material: .thinMaterial,
+                strokeColor: subtleBorderColor.opacity(0.8),
+                shadowColor: .black.opacity(colorScheme == .dark ? 0.12 : 0.04),
+                shadowRadius: 7,
+                shadowY: 3,
+                usesLiquidGlass: true
+            )
         )
     }
 
     private var panelBackground: some View {
-        RoundedRectangle(cornerRadius: 18, style: .continuous)
-            .fill(panelSurfaceColor)
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .strokeBorder(panelBorderColor, lineWidth: 1)
-            )
-            .shadow(color: .black.opacity(colorScheme == .dark ? 0.34 : 0.12), radius: 18, y: 8)
+        CurrencyGlassSurface(
+            cornerRadius: 22,
+            fillColor: panelSurfaceColor,
+            material: .regularMaterial,
+            strokeColor: panelBorderColor,
+            shadowColor: .black.opacity(colorScheme == .dark ? 0.32 : 0.11),
+            shadowRadius: 20,
+            shadowY: 8,
+            usesLiquidGlass: true
+        )
     }
 
     private var shouldShowStatusBanner: Bool {
+        guard viewModel.statusMessage != nil else {
+            return false
+        }
+
         if preferences.selectedPairs.isEmpty {
             return true
         }
@@ -661,43 +684,44 @@ struct ContentView: View {
             .background(
                 Circle()
                     .fill(isActive ? Color.accentColor.opacity(0.15) : toolbarButtonSurfaceColor)
-            )
-            .overlay(
-                Circle()
-                    .strokeBorder(isActive ? Color.accentColor.opacity(0.32) : subtleBorderColor, lineWidth: 1)
+                    .overlay(
+                        Circle()
+                            .strokeBorder(isActive ? Color.accentColor.opacity(0.32) : subtleBorderColor, lineWidth: 1)
+                    )
+                    .currencyLiquidGlass(in: Circle(), isEnabled: true, isInteractive: true)
             )
     }
 
     private var panelSurfaceColor: Color {
         colorScheme == .dark
-            ? Color(red: 0.095, green: 0.105, blue: 0.125)
-            : Color(red: 0.948, green: 0.956, blue: 0.968)
+            ? Color.white.opacity(0.055)
+            : Color.white.opacity(0.58)
     }
 
     private var cardSurfaceColor: Color {
         colorScheme == .dark
-            ? Color(red: 0.145, green: 0.155, blue: 0.180)
-            : Color.white
+            ? Color.white.opacity(0.070)
+            : Color.white.opacity(0.62)
     }
 
     private var footerSurfaceColor: Color {
         colorScheme == .dark
-            ? Color(red: 0.130, green: 0.140, blue: 0.162)
-            : Color(red: 0.985, green: 0.988, blue: 0.992)
+            ? Color.white.opacity(0.055)
+            : Color.white.opacity(0.48)
     }
 
     private var toolbarButtonSurfaceColor: Color {
         colorScheme == .dark
-            ? Color(red: 0.155, green: 0.165, blue: 0.190)
-            : Color.white
+            ? Color.white.opacity(0.060)
+            : Color.white.opacity(0.55)
     }
 
     private var panelBorderColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.10) : Color.black.opacity(0.09)
+        colorScheme == .dark ? Color.white.opacity(0.18) : Color.black.opacity(0.08)
     }
 
     private var subtleBorderColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.10) : Color.black.opacity(0.075)
+        colorScheme == .dark ? Color.white.opacity(0.14) : Color.black.opacity(0.070)
     }
 
     private func refreshIntervalTitle(for value: Int) -> String {
@@ -905,8 +929,16 @@ private struct PanelCurrencyConverterView: View {
                     .font(.system(size: 22))
                     .frame(width: 32, height: 32)
                     .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color(nsColor: .underPageBackgroundColor).opacity(0.70))
+                        CurrencyGlassSurface(
+                            cornerRadius: 9,
+                            fillColor: Color(nsColor: .underPageBackgroundColor).opacity(colorScheme == .dark ? 0.36 : 0.42),
+                            material: .ultraThinMaterial,
+                            strokeColor: rowBorderColor,
+                            shadowColor: .clear,
+                            shadowRadius: 0,
+                            shadowY: 0,
+                            usesLiquidGlass: true
+                        )
                     )
             }
 
@@ -944,24 +976,29 @@ private struct PanelCurrencyConverterView: View {
     }
 
     private func rowBackground(isActive: Bool) -> some View {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
-            .fill(rowFillColor(isActive: isActive))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(isActive ? Color.accentColor.opacity(0.34) : rowBorderColor, lineWidth: 1)
-            )
+        CurrencyGlassSurface(
+            cornerRadius: 13,
+            fillColor: rowFillColor(isActive: isActive),
+            material: .thinMaterial,
+            strokeColor: isActive ? Color.accentColor.opacity(0.34) : rowBorderColor,
+            shadowColor: .black.opacity(colorScheme == .dark ? 0.10 : 0.035),
+            shadowRadius: isActive ? 7 : 4,
+            shadowY: isActive ? 3 : 2,
+            usesLiquidGlass: true,
+            isInteractive: isActive
+        )
     }
 
     private func rowFillColor(isActive: Bool) -> Color {
         if colorScheme == .dark {
-            return isActive ? Color(red: 0.175, green: 0.190, blue: 0.230) : Color(red: 0.138, green: 0.148, blue: 0.172)
+            return isActive ? Color.accentColor.opacity(0.18) : Color.white.opacity(0.055)
         }
 
-        return isActive ? Color(red: 0.972, green: 0.982, blue: 1.0) : Color.white
+        return isActive ? Color.accentColor.opacity(0.11) : Color.white.opacity(0.52)
     }
 
     private var rowBorderColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.10) : Color.black.opacity(0.075)
+        colorScheme == .dark ? Color.white.opacity(0.13) : Color.black.opacity(0.070)
     }
 
     private func binding(for code: String) -> Binding<String> {
@@ -1232,16 +1269,24 @@ private struct CurrencyCardView: View {
                     .multilineTextAlignment(.center)
                     .frame(width: 28, height: 38)
                     .background(
-                        RoundedRectangle(cornerRadius: 9, style: .continuous)
-                            .fill(Color(nsColor: .underPageBackgroundColor).opacity(0.82))
+                        CurrencyGlassSurface(
+                            cornerRadius: 10,
+                            fillColor: Color(nsColor: .underPageBackgroundColor).opacity(colorScheme == .dark ? 0.38 : 0.42),
+                            material: .ultraThinMaterial,
+                            strokeColor: Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.06),
+                            shadowColor: .clear,
+                            shadowRadius: 0,
+                            shadowY: 0,
+                            usesLiquidGlass: true
+                        )
                     )
             }
 
             VStack(alignment: .leading, spacing: 7) {
-                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                HStack(alignment: .center, spacing: 12) {
                     HStack(spacing: 6) {
                         Text(card.compactPairLabel)
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .font(.system(size: 26, weight: .bold, design: .rounded))
                             .lineLimit(1)
                             .minimumScaleFactor(0.72)
 
@@ -1495,45 +1540,36 @@ private struct CurrencyCardView: View {
     }
 
     private var cardBackground: some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
-            .fill(cardFillColor)
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(cardSheenColor)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(borderColor, lineWidth: 1)
-            )
-            .shadow(color: .black.opacity(cardShadowOpacity), radius: isFeatured ? 13 : 8, y: isFeatured ? 7 : 4)
+        CurrencyGlassSurface(
+            cornerRadius: 16,
+            fillColor: cardFillColor,
+            material: .regularMaterial,
+            strokeColor: borderColor,
+            shadowColor: .black.opacity(cardShadowOpacity),
+            shadowRadius: isFeatured ? 13 : 8,
+            shadowY: isFeatured ? 7 : 4,
+            usesLiquidGlass: true
+        )
     }
 
     private var cardFillColor: Color {
         if colorScheme == .dark {
             return isFeatured
-                ? Color(red: 0.165, green: 0.178, blue: 0.210)
-                : Color(red: 0.138, green: 0.148, blue: 0.172)
+                ? Color.white.opacity(0.100)
+                : Color.white.opacity(0.060)
         }
 
         return isFeatured
-            ? Color(red: 0.988, green: 0.992, blue: 1.0)
-            : Color.white
-    }
-
-    private var cardSheenColor: Color {
-        if colorScheme == .dark {
-            return Color.white.opacity(isFeatured ? 0.055 : 0.025)
-        }
-
-        return Color.white.opacity(isFeatured ? 0.30 : 0.12)
+            ? Color.white.opacity(0.70)
+            : Color.white.opacity(0.54)
     }
 
     private var cardShadowOpacity: Double {
         if colorScheme == .dark {
-            return isFeatured ? 0.38 : 0.24
+            return isFeatured ? 0.32 : 0.18
         }
 
-        return isFeatured ? 0.14 : 0.09
+        return isFeatured ? 0.11 : 0.06
     }
 
     private var borderColor: Color {
@@ -1835,21 +1871,28 @@ private struct CurrencyCardView: View {
 
 private struct TrendRangePicker: View {
     @Binding var selectedRange: CardTrendRange
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         HStack(spacing: 6) {
             ForEach(CardTrendRange.allCases) { range in
+                let isSelected = selectedRange == range
                 Button {
                     selectedRange = range
                 } label: {
                     Text(range.title)
                         .font(.system(size: 10, weight: .semibold, design: .rounded))
-                        .foregroundStyle(selectedRange == range ? Color.white : Color.secondary)
+                        .foregroundStyle(isSelected ? Color.white : Color.secondary)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 5)
                         .background(
                             Capsule(style: .continuous)
-                                .fill(selectedRange == range ? Color.accentColor : Color(nsColor: .controlBackgroundColor))
+                                .fill(isSelected ? Color.accentColor : Color.white.opacity(colorScheme == .dark ? 0.060 : 0.48))
+                                .overlay(
+                                    Capsule(style: .continuous)
+                                        .strokeBorder(Color.primary.opacity(colorScheme == .dark ? 0.10 : 0.06), lineWidth: 1)
+                                )
+                                .currencyLiquidGlass(in: Capsule(style: .continuous), isEnabled: isSelected, isInteractive: true)
                         )
                 }
                 .buttonStyle(.plain)
@@ -1867,11 +1910,16 @@ private struct TrendChartView: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(chartBackground)
-
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder(chartBorderColor, lineWidth: 1)
+            CurrencyGlassSurface(
+                cornerRadius: 13,
+                fillColor: chartSurfaceColor,
+                material: .thinMaterial,
+                strokeColor: chartBorderColor,
+                shadowColor: .clear,
+                shadowRadius: 0,
+                shadowY: 0,
+                usesLiquidGlass: true
+            )
 
             if points.count >= 2 {
                 chartContent
@@ -1978,30 +2026,12 @@ private struct TrendChartView: View {
         }
     }
 
-    private var chartBackground: LinearGradient {
-        if colorScheme == .dark {
-            return LinearGradient(
-                colors: [
-                    Color(red: 0.145, green: 0.158, blue: 0.192),
-                    Color(red: 0.110, green: 0.122, blue: 0.150)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
-
-        return LinearGradient(
-            colors: [
-                Color(red: 0.965, green: 0.973, blue: 0.988),
-                Color(red: 0.938, green: 0.950, blue: 0.972)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+    private var chartSurfaceColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.045) : Color.white.opacity(0.46)
     }
 
     private var chartBorderColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.10) : Color.black.opacity(0.07)
+        colorScheme == .dark ? Color.white.opacity(0.11) : Color.black.opacity(0.065)
     }
 
     private var axisTextColor: Color {
@@ -2086,6 +2116,35 @@ private struct TrendAreaShape: Shape {
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
         path.closeSubpath()
         return path
+    }
+}
+
+struct CurrencyGlassSurface: View {
+    let cornerRadius: CGFloat
+    let fillColor: Color
+    let material: Material
+    let strokeColor: Color
+    let shadowColor: Color
+    let shadowRadius: CGFloat
+    let shadowY: CGFloat
+    var usesLiquidGlass = true
+    var isInteractive = false
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+
+        shape
+            .fill(material)
+            .overlay(shape.fill(fillColor))
+            .overlay(shape.strokeBorder(strokeColor, lineWidth: 1))
+            .currencyLiquidGlass(in: shape, isEnabled: usesLiquidGlass, isInteractive: isInteractive)
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func currencyLiquidGlass<S: Shape>(in shape: S, isEnabled: Bool = true, isInteractive: Bool = false) -> some View {
+        self
     }
 }
 

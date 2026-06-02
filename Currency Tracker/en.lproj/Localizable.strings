@@ -199,6 +199,10 @@
 
 "欢迎" = "Welcome";
 "首次设置与使用建议" = "First setup and usage tips";
+"欢迎使用 Currency Tracker" = "Welcome to Currency Tracker";
+"第一次使用时完成几个基础设置，之后启动或应用内更新不会再次弹出这个窗口。" = "Complete a few basic settings the first time you use the app. This window will not appear again on launch or after in-app updates.";
+"稍后设置" = "Set Up Later";
+"开始设置" = "Start Setup";
 "配置" = "Profiles";
 "提醒" = "Alerts";
 "权限" = "Permissions";

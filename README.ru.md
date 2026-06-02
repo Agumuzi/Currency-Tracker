@@ -19,7 +19,7 @@ Currency Tracker — приложение для macOS в строке меню,
 </p>
 
 <p>
-  <img src="assets/screenshots/menu-panel-history.png" width="420" alt="Панель Currency Tracker в строке меню с выбранной валютной парой, графиком и компактными карточками курсов.">
+  <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="420" alt="Панель Currency Tracker в строке меню с выбранной валютной парой, графиком и компактными карточками курсов.">
 </p>
 
 ## Что умеет приложение
@@ -41,17 +41,17 @@ Currency Tracker — приложение для macOS в строке меню,
 
 | Список курсов | График истории | Конвертация в карточке |
 | --- | --- | --- |
-| <img src="assets/screenshots/menu-panel.png" alt="Панель Currency Tracker в строке меню с несколькими карточками курсов."> | <img src="assets/screenshots/menu-panel-history.png" alt="Раскрытая карточка курса с графиком за один месяц."> | <img src="assets/screenshots/menu-panel-conversion.png" alt="Раскрытая карточка курса с двусторонней конвертацией валют."> |
+| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png" alt="Панель Currency Tracker в строке меню с несколькими карточками курсов."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" alt="Раскрытая карточка курса с графиком за один месяц."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png" alt="Раскрытая карточка курса с двусторонней конвертацией валют."> |
 
-### Настройки и конфигурация
+### Приветствие и настройки
 
-| Добро пожаловать | Курсы | Источники данных |
+| Первичные разрешения | Общие настройки | Курсы |
 | --- | --- | --- |
-| <img src="assets/screenshots/settings-window.png" alt="Приветственный экран настроек Currency Tracker с шагами настройки."> | <img src="assets/screenshots/settings-rates.png" alt="Экран настроек для управления отображаемыми валютными парами."> | <img src="assets/screenshots/data-sources-window.png" alt="Экран настроек для API-ключей поставщиков и пользовательских API-шаблонов."> |
+| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png" alt="Отдельное окно первого запуска с объяснением системных разрешений."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png" alt="Общие настройки с обновленной боковой панелью и управлением строкой меню."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png" alt="Экран настроек для управления отображаемыми валютными парами."> |
 
-| Профили | Оповещения | Обновления |
+| Источники данных | Разрешения | Обновления |
 | --- | --- | --- |
-| <img src="assets/screenshots/settings-profiles.png" alt="Экран настроек для сохранения и переключения профилей."> | <img src="assets/screenshots/settings-alerts.png" alt="Экран настроек для пороговых оповещений по курсам."> | <img src="assets/screenshots/settings-updates.png" alt="Экран настроек для проверки обновлений и включения автоматической проверки."> |
+| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png" alt="Экран настроек для API-ключей поставщиков и пользовательских API-шаблонов."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png" alt="Экран настроек со статусом системных разрешений."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png" alt="Экран настроек для проверки обновлений и включения автоматической проверки."> |
 
 ## Основные возможности
 
@@ -94,11 +94,11 @@ Currency Tracker — приложение для macOS в строке меню,
 
 ## Текущий выпуск
 
-Версия `1.6.4` включает:
+Версия `1.7` включает:
 
-- Финальный абстрактный flow-mark значок строки меню для более чистой фирменной формы в малом размере macOS status item.
-- Значок строки меню остается шаблонным значком macOS и адаптируется к светлому, темному и выделенному состояниям строки меню.
-- Ad-hoc подпись всего app bundle перед упаковкой в zip, чтобы релизные файлы имели sealed resources и привязанные метаданные bundle.
+- Отдельное окно первого запуска, сосредоточенное на настройке разрешений macOS.
+- Обновленные интерфейсы настроек и строки меню с более чистой glass-style компоновкой.
+- Уточненный значок лупы в строке меню для лучшего отображения в малом размере status item macOS.
 
 ## Установка
 
@@ -118,7 +118,7 @@ brew upgrade --cask currency-tracker
 
 ### Прямая загрузка
 
-Скачайте `Currency-Tracker-1.6.4.zip` из последнего GitHub Release, распакуйте архив и переместите `Currency Tracker.app` в папку Applications.
+Скачайте `Currency-Tracker-1.7.zip` из последнего GitHub Release, распакуйте архив и переместите `Currency Tracker.app` в папку Applications.
 
 ### Разрешение первого запуска
 

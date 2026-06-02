@@ -19,7 +19,7 @@ Currency Tracker 是一款 macOS 菜单栏汇率工具，支持实时汇率查�
 </p>
 
 <p>
-  <img src="assets/screenshots/menu-panel-history.png" width="420" alt="Currency Tracker 菜单栏面板，显示选中的货币对、趋势图和紧凑汇率卡片。">
+  <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="420" alt="Currency Tracker 菜单栏面板，显示选中的货币对、趋势图和紧凑汇率卡片。">
 </p>
 
 ## 功能概览
@@ -41,17 +41,17 @@ Currency Tracker 是一款 macOS 菜单栏汇率工具，支持实时汇率查�
 
 | 汇率列表 | 历史图表 | 内联换算 |
 | --- | --- | --- |
-| <img src="assets/screenshots/menu-panel.png" alt="Currency Tracker 菜单栏面板，显示多个汇率卡片。"> | <img src="assets/screenshots/menu-panel-history.png" alt="展开后的汇率卡片，显示一个月历史走势图。"> | <img src="assets/screenshots/menu-panel-conversion.png" alt="展开后的汇率卡片，显示双向货币换算。"> |
+| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png" alt="Currency Tracker 菜单栏面板，显示多个汇率卡片。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" alt="展开后的汇率卡片，显示一个月历史走势图。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png" alt="展开后的汇率卡片，显示双向货币换算。"> |
 
-### 设置与配置
+### 欢迎与设置
 
-| 欢迎页 | 汇率 | 数据源 |
+| 首次权限引导 | 通用设置 | 汇率 |
 | --- | --- | --- |
-| <img src="assets/screenshots/settings-window.png" alt="Currency Tracker 设置欢迎页，显示配置步骤。"> | <img src="assets/screenshots/settings-rates.png" alt="用于管理显示货币对的设置页面。"> | <img src="assets/screenshots/data-sources-window.png" alt="用于配置 API 服务商凭据和自定义 API 模板的设置页面。"> |
+| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png" alt="独立首次欢迎窗口，说明系统权限设置流程。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png" alt="新版通用设置界面，包含侧边栏和菜单栏显示控制。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png" alt="用于管理显示货币对的设置页面。"> |
 
-| 配置档案 | 提醒 | 更新 |
+| 数据源 | 权限 | 更新 |
 | --- | --- | --- |
-| <img src="assets/screenshots/settings-profiles.png" alt="用于保存和切换配置档案的设置页面。"> | <img src="assets/screenshots/settings-alerts.png" alt="用于设置汇率阈值提醒的设置页面。"> | <img src="assets/screenshots/settings-updates.png" alt="用于检查更新和启用自动检查的设置页面。"> |
+| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png" alt="用于配置 API 服务商凭据和自定义 API 模板的设置页面。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png" alt="显示系统权限状态的设置页面。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png" alt="用于检查更新和启用自动检查的设置页面。"> |
 
 ## 主要功能
 
@@ -94,11 +94,11 @@ Currency Tracker 默认可使用公开备用数据源。对个人使用来说，
 
 ## 当前版本
 
-版本 `1.6.4` 包含：
+版本 `1.7` 包含：
 
-- 定稿新的抽象流线菜单栏图标，使 macOS 状态栏小尺寸下的品牌识别更干净。
-- 菜单栏图标继续使用 macOS 模板图标，适配浅色、深色和高亮状态。
-- 在压缩前对完整 app bundle 进行 ad-hoc 签名，使发布资源包含密封资源和绑定的 bundle 元数据。
+- 新增独立首次欢迎窗口，重点引导用户处理 macOS 系统权限。
+- 刷新设置界面和菜单栏界面，使用更干净的玻璃风格布局。
+- 微调菜单栏放大镜图标，使小尺寸状态栏显示更精细。
 
 ## 安装
 
@@ -118,7 +118,7 @@ brew upgrade --cask currency-tracker
 
 ### 直接下载
 
-从最新 GitHub Release 下载 `Currency-Tracker-1.6.4.zip`，解压后将 `Currency Tracker.app` 移动到“应用程序”文件夹。
+从最新 GitHub Release 下载 `Currency-Tracker-1.7.zip`，解压后将 `Currency Tracker.app` 移动到“应用程序”文件夹。
 
 ### 首次启动批准
 

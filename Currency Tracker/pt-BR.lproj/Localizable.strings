@@ -187,6 +187,10 @@
 "阿联酋迪拉姆" = "Dirham dos Emirados Árabes Unidos";
 "欢迎" = "Bem-vindo";
 "首次设置与使用建议" = "Primeira configuração e dicas de uso";
+"欢迎使用 Currency Tracker" = "Bem-vindo ao Currency Tracker";
+"第一次使用时完成几个基础设置，之后启动或应用内更新不会再次弹出这个窗口。" = "Conclua algumas configurações básicas no primeiro uso. Esta janela não aparecerá novamente ao iniciar nem após atualizações dentro do app.";
+"稍后设置" = "Configurar depois";
+"开始设置" = "Iniciar configuração";
 "配置" = "Profiles";
 "提醒" = "Alertas";
 "权限" = "Permissões";

@@ -47,9 +47,17 @@ final class ServiceActionHandler: NSObject {
 
 @MainActor
 final class InitialLaunchCoordinator {
+    enum InitialPresentationAction: Equatable {
+        case none
+        case automaticUpdateCheck
+        case showWelcome
+        case showSettings(SettingsSection?)
+    }
+
     private let userDefaults: UserDefaults
     private let preferences: PreferencesStore
     private let settingsWindowController: SettingsWindowController
+    private let welcomeWindowController: WelcomeWindowController
     private let automaticUpdateCoordinator: AutomaticSoftwareUpdateCoordinator
     private let isRunningUITests: Bool
     private var observer: NSObjectProtocol?
@@ -59,14 +67,17 @@ final class InitialLaunchCoordinator {
         userDefaults: UserDefaults,
         preferences: PreferencesStore,
         settingsWindowController: SettingsWindowController,
+        welcomeWindowController: WelcomeWindowController,
         automaticUpdateCoordinator: AutomaticSoftwareUpdateCoordinator,
         isRunningUITests: Bool
     ) {
         self.userDefaults = userDefaults
         self.preferences = preferences
         self.settingsWindowController = settingsWindowController
+        self.welcomeWindowController = welcomeWindowController
         self.automaticUpdateCoordinator = automaticUpdateCoordinator
         self.isRunningUITests = isRunningUITests
+        migrateLegacyWelcomeCompletionIfNeeded()
         self.observer = NotificationCenter.default.addObserver(
             forName: NSApplication.didFinishLaunchingNotification,
             object: nil,
@@ -75,6 +86,9 @@ final class InitialLaunchCoordinator {
             Task { @MainActor [weak self] in
                 await self?.handleApplicationDidFinishLaunching(notification)
             }
+        }
+        welcomeWindowController.configure { [weak self] in
+            self?.markWelcomeCompleted()
         }
 
         if Self.shouldShowSettingsForUITest {
@@ -117,24 +131,89 @@ final class InitialLaunchCoordinator {
             return
         }
 
-        if await SoftwareUpdatePermissionRecovery.shouldPresentReviewAfterLaunch(userDefaults: userDefaults) {
-            didHandleInitialPresentation = true
-            settingsWindowController.show(section: .permissions)
-            return
-        }
-
-        let hasShownInitialSettingsWindow = userDefaults.bool(forKey: "hasShownInitialSettingsWindow")
+        let needsPermissionReview = await SoftwareUpdatePermissionRecovery.shouldPresentReviewAfterLaunch(userDefaults: userDefaults)
         let isDebugLaunch = ProcessInfo.processInfo.arguments.contains("-NSDocumentRevisionsDebugMode")
-        let shouldPresent = forceShowSettings || !hasShownInitialSettingsWindow || isDebugLaunch || !preferences.menuBarItemEnabled
-        guard shouldPresent else {
-            didHandleInitialPresentation = true
-            automaticUpdateCoordinator.checkIfNeeded()
-            return
-        }
+        let action = Self.resolvedInitialPresentationAction(
+            isRunningUITests: isRunningUITests,
+            forceShowSettings: forceShowSettings,
+            isDefaultLaunch: isDefaultLaunch,
+            needsPermissionReview: needsPermissionReview,
+            hasCompletedWelcome: hasCompletedWelcome,
+            isDebugLaunch: isDebugLaunch,
+            menuBarItemEnabled: preferences.menuBarItemEnabled
+        )
 
         didHandleInitialPresentation = true
-        userDefaults.set(true, forKey: "hasShownInitialSettingsWindow")
-        settingsWindowController.show()
+
+        switch action {
+        case .none:
+            return
+        case .automaticUpdateCheck:
+            automaticUpdateCoordinator.checkIfNeeded()
+        case .showWelcome:
+            welcomeWindowController.show()
+        case .showSettings(let section):
+            if needsPermissionReview {
+                markWelcomeCompleted()
+            }
+            settingsWindowController.show(section: section)
+        }
+    }
+
+    nonisolated static func resolvedInitialPresentationAction(
+        isRunningUITests: Bool,
+        forceShowSettings: Bool,
+        isDefaultLaunch: Bool,
+        needsPermissionReview: Bool,
+        hasCompletedWelcome: Bool,
+        isDebugLaunch: Bool,
+        menuBarItemEnabled: Bool
+    ) -> InitialPresentationAction {
+        if isRunningUITests && !forceShowSettings {
+            return .none
+        }
+
+        guard isDefaultLaunch || forceShowSettings else {
+            return .none
+        }
+
+        if needsPermissionReview {
+            return .showSettings(.permissions)
+        }
+
+        if forceShowSettings {
+            return .showSettings(nil)
+        }
+
+        if !hasCompletedWelcome && !isDebugLaunch && menuBarItemEnabled {
+            return .showWelcome
+        }
+
+        if isDebugLaunch || !menuBarItemEnabled {
+            return .showSettings(nil)
+        }
+
+        return .automaticUpdateCheck
+    }
+
+    private var hasCompletedWelcome: Bool {
+        userDefaults.bool(forKey: WelcomeFlowPersistence.completedKey)
+            || userDefaults.bool(forKey: WelcomeFlowPersistence.legacyInitialSettingsKey)
+    }
+
+    private func migrateLegacyWelcomeCompletionIfNeeded() {
+        guard userDefaults.bool(forKey: WelcomeFlowPersistence.legacyInitialSettingsKey),
+              !userDefaults.bool(forKey: WelcomeFlowPersistence.completedKey) else {
+            return
+        }
+
+        userDefaults.set(true, forKey: WelcomeFlowPersistence.completedKey)
+    }
+
+    private func markWelcomeCompleted() {
+        userDefaults.set(true, forKey: WelcomeFlowPersistence.completedKey)
+        userDefaults.set(true, forKey: WelcomeFlowPersistence.legacyInitialSettingsKey)
+        userDefaults.removeObject(forKey: WelcomeFlowPersistence.currentStepKey)
     }
 
     private static var shouldShowSettingsForUITest: Bool {

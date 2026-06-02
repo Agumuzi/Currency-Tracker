@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7 - 2026-06-02
+
+- Adds a standalone first-run welcome window focused on macOS permission setup.
+- Removes the Welcome page from Settings after moving onboarding into its own flow.
+- Refreshes the Settings and menu bar surfaces with a cleaner glass-style layout.
+- Refines the magnifier-style menu bar icon for small macOS status-item rendering.
+- Moves GitHub Pages HTML and screenshot assets out of the application source branch.
+
 ## 1.6.4 - 2026-05-22
 
 - Finalizes the abstract flow-mark menu bar icon selected for this release.

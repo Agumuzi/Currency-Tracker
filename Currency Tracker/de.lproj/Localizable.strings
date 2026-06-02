@@ -187,6 +187,10 @@
 "阿联酋迪拉姆" = "VAE-Dirham";
 "欢迎" = "Willkommen";
 "首次设置与使用建议" = "Erste Einrichtungs- und Nutzungstipps";
+"欢迎使用 Currency Tracker" = "Willkommen bei Currency Tracker";
+"第一次使用时完成几个基础设置，之后启动或应用内更新不会再次弹出这个窗口。" = "Schließen Sie bei der ersten Nutzung einige Grundeinstellungen ab. Dieses Fenster wird beim Start oder nach In-App-Updates nicht erneut angezeigt.";
+"稍后设置" = "Später einrichten";
+"开始设置" = "Einrichtung starten";
 "配置" = "Profiles";
 "提醒" = "Warnungen";
 "权限" = "Berechtigungen";
