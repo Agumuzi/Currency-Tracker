@@ -80,17 +80,23 @@ final class ConfigurationBackupService {
         }
     }
 
-    func makeBackup(appVersion: String) -> ConfigurationBackup {
+    func makeBackup(appVersion: String) throws -> ConfigurationBackup {
         var credentials: [String: String] = [:]
         for kind in EnhancedCredentialKind.allCases {
-            let value = credentialStore.storedValue(for: kind)
+            let value = try secretStore.read(account: kind.account) ?? credentialStore.storedValue(for: kind)
             if !value.isEmpty { credentials[kind.rawValue] = value }
+        }
+        var settings = preferences.backupSettings()
+        for index in settings.customAPIProviders.indices {
+            let provider = settings.customAPIProviders[index]
+            settings.customAPIProviders[index].apiKey = try secretStore.read(account: provider.localSecretAccount)
+                ?? provider.apiKey
         }
         return ConfigurationBackup(
             formatVersion: ConfigurationBackup.currentFormatVersion,
             appVersion: appVersion,
             exportedAt: .now,
-            settings: preferences.backupSettings(),
+            settings: settings,
             enhancedCredentials: credentials,
             selectedEnhancedSources: credentialStore.selectedKinds.map(\.rawValue)
         )
@@ -119,7 +125,7 @@ final class ConfigurationBackupService {
     @discardableResult
     func importBackup(_ backup: ConfigurationBackup, appVersion: String) throws -> URL {
         try validate(backup)
-        let previous = makeBackup(appVersion: appVersion)
+        let previous = try makeBackup(appVersion: appVersion)
         let recoveryURL = backupDirectory.appendingPathComponent("pre-import-\(UUID().uuidString).json")
         try Self.writeOwnerOnly(try encoded(previous), to: recoveryURL)
 

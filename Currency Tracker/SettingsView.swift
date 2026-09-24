@@ -2182,7 +2182,7 @@ struct SettingsView: View {
         guard panel.runModal() == .OK, let url = panel.url else { return }
 
         do {
-            let backup = backupService.makeBackup(appVersion: SoftwareUpdateChecker.currentVersion())
+            let backup = try backupService.makeBackup(appVersion: SoftwareUpdateChecker.currentVersion())
             try backupService.export(backup, to: url)
             backupMessage = String(format: String(localized: "配置已导出到 %@"), url.lastPathComponent)
         } catch {

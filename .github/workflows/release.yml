@@ -3,7 +3,7 @@ name: Release Build
 on:
   push:
     tags:
-      - "v1.8"
+      - "v*"
 
 permissions:
   contents: write
@@ -24,7 +24,7 @@ jobs:
           VERSION="$(awk -F= '/MARKETING_VERSION =/ { gsub(/[ ;]/, "", $2); print $2; exit }' "Currency Tracker.xcodeproj/project.pbxproj")"
           BUILD="$(awk -F= '/CURRENT_PROJECT_VERSION =/ { gsub(/[ ;]/, "", $2); print $2; exit }' "Currency Tracker.xcodeproj/project.pbxproj")"
           test "${GITHUB_REF_NAME}" = "v${VERSION}"
-          test "${BUILD}" = "22"
+          test "${BUILD}" -gt 0
       - name: Check localizations
         run: python3 scripts/check-localizations.py
       - name: Run unit tests

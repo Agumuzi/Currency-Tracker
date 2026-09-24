@@ -78,7 +78,7 @@ struct Currency_TrackerTests {
         custom.apiKey = "custom-original-key"
         preferences.updateCustomAPIProvider(custom)
 
-        let original = service.makeBackup(appVersion: "1.8")
+        let original = try service.makeBackup(appVersion: "1.8")
         let encoded = try service.encoded(original)
         let imported = try service.prepareImport(encoded)
         #expect(imported.enhancedCredentials["twelveData"] == "original-key")
@@ -430,7 +430,7 @@ struct Currency_TrackerTests {
         let store = EnhancedSourceCredentialStore(secretStore: FailingReadSecretStore(), userDefaults: defaults)
 
         #expect(store.storedValue(for: .twelveData).isEmpty)
-        #expect(store.lastLoadError(for: .twelveData) == "本地凭证存储当前不可用，请稍后重试")
+        #expect(store.lastLoadError(for: .twelveData) == String(localized: "本地凭证存储当前不可用，请稍后重试"))
     }
 
     @MainActor

@@ -7,14 +7,14 @@
 
 import Foundation
 
-protocol ExchangeSnapshotFetching: Sendable {
+nonisolated protocol ExchangeSnapshotFetching: Sendable {
     func fetchSnapshots(
         for pairs: [CurrencyPair],
         configuration: EnhancedSourceConfiguration
     ) async -> ExchangeFetchResult
 }
 
-protocol ExchangeStateStoring: Sendable {
+nonisolated protocol ExchangeStateStoring: Sendable {
     func load() async -> CachedExchangeState?
     func save(_ state: CachedExchangeState) async
 }
