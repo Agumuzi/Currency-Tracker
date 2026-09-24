@@ -22,5 +22,12 @@ jobs:
       - name: Run unit tests
         run: xcodebuild test -scheme "Currency Tracker" -destination "platform=macOS" -derivedDataPath "$PWD/.build/DerivedData" -only-testing:"Currency TrackerTests"
 
-      - name: Run UI smoke test
-        run: xcodebuild test -scheme "Currency Tracker" -destination "platform=macOS" -derivedDataPath "$PWD/.build/DerivedData" -only-testing:"Currency TrackerUITests/Currency_TrackerUITests/testSettingsWindowStartsBlankWithEmptyAPIState"
+      - name: Run UI tests and capture all language screenshots
+        run: xcodebuild test -scheme "Currency Tracker" -destination "platform=macOS" -derivedDataPath "$PWD/.build/DerivedData" -resultBundlePath "$PWD/.build/UI-Tests.xcresult" -only-testing:"Currency TrackerUITests"
+
+      - name: Upload UI test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: currency-tracker-ui-tests
+          path: .build/UI-Tests.xcresult

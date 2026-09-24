@@ -5,6 +5,7 @@
 //  Created by Codex on 4/12/26.
 //
 
+import Darwin
 import Foundation
 
 enum EnhancedCredentialKind: String, CaseIterable, Identifiable, Sendable {
@@ -49,10 +50,10 @@ enum EnhancedCredentialKind: String, CaseIterable, Identifiable, Sendable {
     }
 
     var placeholder: String {
-        "留空则不启用"
+        String(localized: "留空则不启用")
     }
 
-    fileprivate var account: String {
+    var account: String {
         switch self {
         case .twelveData:
             "enhanced-source.twelve-data.api-key"
@@ -87,6 +88,29 @@ protocol SecretStoring {
     func read(account: String) throws -> String?
     func write(_ value: String, account: String) throws
     func delete(account: String) throws
+    func replaceValues(_ updates: [String: String]) throws
+}
+
+extension SecretStoring {
+    func replaceValues(_ updates: [String: String]) throws {
+        let previous = try Dictionary(uniqueKeysWithValues: updates.keys.map { account in
+            (account, try read(account: account) ?? "")
+        })
+        do {
+            for account in updates.keys.sorted() {
+                let value = updates[account] ?? ""
+                if value.isEmpty { try delete(account: account) }
+                else { try write(value, account: account) }
+            }
+        } catch {
+            for account in updates.keys.sorted() {
+                let value = previous[account] ?? ""
+                if value.isEmpty { try? delete(account: account) }
+                else { try? write(value, account: account) }
+            }
+            throw error
+        }
+    }
 }
 
 struct LocalSecretStore: SecretStoring {
@@ -129,6 +153,14 @@ struct LocalSecretStore: SecretStoring {
         try saveValues(values)
     }
 
+    func replaceValues(_ updates: [String: String]) throws {
+        var values = try loadValues()
+        for (account, value) in updates {
+            values[account] = value.isEmpty ? nil : value
+        }
+        try saveValues(values)
+    }
+
     private func loadValues() throws -> [String: String] {
         guard let data = try? Data(contentsOf: fileURL) else {
             return [:]
@@ -146,7 +178,14 @@ struct LocalSecretStore: SecretStoring {
 
     private func saveValues(_ values: [String: String]) throws {
         let data = try JSONSerialization.data(withJSONObject: values, options: [.prettyPrinted, .sortedKeys])
-        try data.write(to: fileURL, options: [.atomic])
+        let temporary = fileURL.deletingLastPathComponent().appendingPathComponent(".\(UUID().uuidString).tmp")
+        guard FileManager.default.createFile(atPath: temporary.path, contents: data, attributes: [.posixPermissions: 0o600]) else {
+            throw CocoaError(.fileWriteUnknown)
+        }
+        defer { try? FileManager.default.removeItem(at: temporary) }
+        guard rename(temporary.path, fileURL.path) == 0 else {
+            throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno))
+        }
     }
 }
 
@@ -230,7 +269,7 @@ final class EnhancedSourceCredentialStore {
                     continue
                 }
             } catch {
-                loadErrorsByKind[kind] = "本地凭证存储当前不可用，请稍后重试"
+                loadErrorsByKind[kind] = String(localized: "本地凭证存储当前不可用，请稍后重试")
                 valuesByKind[kind] = legacyValue(for: kind) ?? ""
                 continue
             }
@@ -247,6 +286,12 @@ final class EnhancedSourceCredentialStore {
         }
 
         selectedKinds.append(kind)
+        persistSelectedKinds()
+    }
+
+    func restoreSelectedKinds(_ kinds: [EnhancedCredentialKind]) {
+        var seen = Set<EnhancedCredentialKind>()
+        selectedKinds = kinds.filter { seen.insert($0).inserted }
         persistSelectedKinds()
     }
 

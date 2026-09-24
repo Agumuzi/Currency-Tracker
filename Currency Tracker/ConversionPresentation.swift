@@ -34,7 +34,7 @@ nonisolated enum ServiceConversionFormatting {
 
     private static let sourceFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.locale = AppDisplayLocale.current
         formatter.numberStyle = .decimal
         formatter.usesGroupingSeparator = false
         formatter.minimumFractionDigits = 0

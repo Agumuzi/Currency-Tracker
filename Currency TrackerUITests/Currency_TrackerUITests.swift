@@ -5,7 +5,6 @@
 //  Created by Thomas Tao on 4/10/26.
 //
 
-import AppKit
 import XCTest
 
 final class Currency_TrackerUITests: XCTestCase {
@@ -17,7 +16,6 @@ final class Currency_TrackerUITests: XCTestCase {
         continueAfterFailure = false
 
         // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-        terminateExistingAppInstances()
     }
 
     override func tearDownWithError() throws {
@@ -33,6 +31,8 @@ final class Currency_TrackerUITests: XCTestCase {
         app.launchEnvironment["CURRENCY_TRACKER_RESET_DEFAULTS"] = "1"
         app.launchEnvironment["CURRENCY_TRACKER_UI_TEST_SHOW_SETTINGS"] = "1"
         app.launchEnvironment["CURRENCY_TRACKER_USE_IN_MEMORY_SECRETS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_TEST_DATA_DIR"] = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
         app.launch()
 
         XCTAssertTrue(app.buttons["settings.sidebar.rates"].waitForExistence(timeout: 5))
@@ -50,20 +50,40 @@ final class Currency_TrackerUITests: XCTestCase {
 
     @MainActor
     func testLaunchPerformance() throws {
-        terminateExistingAppInstances()
         let app = XCUIApplication()
+        let suiteName = "CurrencyTrackerUITests.\(UUID().uuidString)"
+        app.launchEnvironment["CURRENCY_TRACKER_DEFAULTS_SUITE"] = suiteName
+        app.launchEnvironment["CURRENCY_TRACKER_RESET_DEFAULTS"] = "1"
         app.launchEnvironment["CURRENCY_TRACKER_USE_IN_MEMORY_SECRETS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_TEST_DATA_DIR"] = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
         app.launch()
         XCTAssertTrue(app.state == .runningForeground || app.state == .runningBackground)
         app.terminate()
     }
 
-    private func terminateExistingAppInstances() {
-        let bundleIdentifier = "com.thomas.Currency-Tracker"
-        for runningApplication in NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier) {
-            if runningApplication.terminate() == false {
-                runningApplication.forceTerminate()
-            }
+    @MainActor
+    func testAllSupportedLanguageSettingsScreenshots() throws {
+        let languages = ["zh-Hans", "zh-Hant", "en", "ru", "ja", "ko", "de", "fr", "es", "it", "pt-BR"]
+        for language in languages {
+            let app = XCUIApplication()
+            let suiteName = "CurrencyTrackerUITests.\(UUID().uuidString)"
+            app.launchArguments += ["-AppleLanguages", "(\(language))", "-CurrencyTrackerUITestShowSettings"]
+            app.launchEnvironment["CURRENCY_TRACKER_DEFAULTS_SUITE"] = suiteName
+            app.launchEnvironment["CURRENCY_TRACKER_RESET_DEFAULTS"] = "1"
+            app.launchEnvironment["CURRENCY_TRACKER_UI_TEST_SHOW_SETTINGS"] = "1"
+            app.launchEnvironment["CURRENCY_TRACKER_USE_IN_MEMORY_SECRETS"] = "1"
+            app.launchEnvironment["CURRENCY_TRACKER_TEST_DATA_DIR"] = FileManager.default.temporaryDirectory
+                .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
+            app.launch()
+            XCTAssertTrue(app.buttons["settings.sidebar.backup"].waitForExistence(timeout: 8), "Missing backup section in \(language)")
+            app.buttons["settings.sidebar.backup"].click()
+            XCTAssertTrue(app.buttons["settings.backup.export"].waitForExistence(timeout: 5))
+            let attachment = XCTAttachment(screenshot: app.screenshot())
+            attachment.name = "settings-\(language)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+            app.terminate()
         }
     }
 

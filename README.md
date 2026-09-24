@@ -94,11 +94,12 @@ The app can check GitHub Releases from Settings. Update packages are downloaded,
 
 ## Current Release
 
-Version `1.7` includes:
+Version `1.8` includes:
 
-- Adds a standalone first-run welcome window focused on macOS permission setup.
-- Refreshes the settings and menu bar UI with a cleaner glass-style layout.
-- Refines the menu bar magnifier icon for small macOS status-item rendering.
+- Converter results now follow the currency you select, with a separate empty amount field ready for typing.
+- Export and import settings, profiles, data sources, and API keys through a versioned JSON backup with a preview and recovery copy.
+- Improves text, currency names, and number and date formatting across all 11 supported languages.
+- Adds isolated UI and backup tests on GitHub macOS runners.
 
 ## Installation
 
@@ -118,7 +119,7 @@ brew upgrade --cask currency-tracker
 
 ### Direct Download
 
-Download `Currency-Tracker-1.7.zip` from the latest GitHub release, unzip it, and move `Currency Tracker.app` to your Applications folder.
+Download [`Currency-Tracker-1.8.zip`](https://github.com/Agumuzi/Currency-Tracker/releases/download/v1.8/Currency-Tracker-1.8.zip) from the latest GitHub release, unzip it, and move `Currency Tracker.app` to your Applications folder.
 
 ### First Launch Approval
 

@@ -16,6 +16,7 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
     case language
     case rates
     case profiles
+    case backup
     case alerts
     case refresh
     case dataSources
@@ -34,6 +35,8 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
             "汇率"
         case .profiles:
             "配置"
+        case .backup:
+            "备份与恢复"
         case .alerts:
             "提醒"
         case .refresh:
@@ -61,6 +64,8 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
             "展示列表与新增汇率"
         case .profiles:
             "保存和切换工作流"
+        case .backup:
+            "导出和导入完整配置"
         case .alerts:
             "价格阈值通知"
         case .refresh:
@@ -88,6 +93,8 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
             "list.bullet.rectangle"
         case .profiles:
             "square.stack.3d.up"
+        case .backup:
+            "externaldrive"
         case .alerts:
             "bell"
         case .refresh:
@@ -230,6 +237,7 @@ struct SettingsView: View {
     let launchController: LaunchAtLoginController
     let viewModel: ExchangePanelViewModel
     let apiConfigurationViewModel: APIConfigurationViewModel
+    let backupService: ConfigurationBackupService
     let globalShortcutHandler: GlobalShortcutHandler
     let softwareUpdateWindowController: SoftwareUpdateWindowController
     let focusSection: SettingsSection?
@@ -251,6 +259,7 @@ struct SettingsView: View {
     @State private var alertDirection: RateAlertDirection = .above
     @State private var alertThresholdText = ""
     @State private var diagnosticExportMessage: String?
+    @State private var backupMessage: String?
     @State private var languageSettingsMessage: String?
 
     private let detailTitlebarClearance: CGFloat = 36
@@ -395,10 +404,13 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(selectedSection.title)
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
                 Text(selectedSection.subtitle)
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Spacer(minLength: 0)
@@ -423,6 +435,8 @@ struct SettingsView: View {
             converterCurrenciesSection
         case .profiles:
             profilesSection
+        case .backup:
+            backupSection
         case .alerts:
             rateAlertsSection
         case .refresh:
@@ -468,6 +482,8 @@ struct SettingsView: View {
                     Text(section.title)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text(section.subtitle)
                         .font(.system(size: 10, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
@@ -772,6 +788,42 @@ struct SettingsView: View {
                 }
             }
             .padding(16)
+            .background(sectionCardBackground)
+        }
+    }
+
+    private var backupSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("备份与恢复")
+
+            VStack(alignment: .leading, spacing: 14) {
+                Text("备份包含货币对、换算页、显示与刷新设置、提醒、Profile、数据源及 API 密钥。汇率缓存、日志和 macOS 权限不会导出。")
+                    .font(.system(size: 12))
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Label("备份是明文 JSON；任何拿到文件的人都能读取 API 密钥。请妥善保管，不要上传到公开仓库。", systemImage: "exclamationmark.shield")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 10) {
+                    Button("导出配置…") { exportConfiguration() }
+                        .buttonStyle(.borderedProminent)
+                        .accessibilityIdentifier("settings.backup.export")
+                    Button("导入配置…") { importConfiguration() }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("settings.backup.import")
+                }
+
+                if let backupMessage {
+                    Text(backupMessage)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(sectionCardBackground)
         }
     }
@@ -2115,6 +2167,62 @@ struct SettingsView: View {
         }
     }
 
+    private func exportConfiguration() {
+        let warning = NSAlert()
+        warning.messageText = String(localized: "导出的备份包含明文 API 密钥")
+        warning.informativeText = String(localized: "任何能读取此 JSON 文件的人都能使用其中的 API 密钥。请仅保存到可信位置。")
+        warning.alertStyle = .warning
+        warning.addButton(withTitle: String(localized: "继续导出"))
+        warning.addButton(withTitle: String(localized: "取消"))
+        guard warning.runModal() == .alertFirstButtonReturn else { return }
+
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.json]
+        panel.nameFieldStringValue = "CurrencyTracker-Backup-\(Self.diagnosticFileFormatter.string(from: .now)).json"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        do {
+            let backup = backupService.makeBackup(appVersion: SoftwareUpdateChecker.currentVersion())
+            try backupService.export(backup, to: url)
+            backupMessage = String(format: String(localized: "配置已导出到 %@"), url.lastPathComponent)
+        } catch {
+            backupMessage = String(format: String(localized: "配置导出失败：%@"), error.localizedDescription)
+        }
+    }
+
+    private func importConfiguration() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        do {
+            let backup = try backupService.prepareImport(Data(contentsOf: url))
+            let alert = NSAlert()
+            alert.messageText = String(localized: "确认替换当前配置？")
+            alert.informativeText = String(
+                format: String(localized: "备份包含 %d 个货币对、%d 个 Profile、%d 个 API 来源。导入前会在本机保存现有配置的恢复副本。"),
+                backup.pairCount, backup.profileCount, backup.sourceCount
+            )
+            alert.addButton(withTitle: String(localized: "替换配置"))
+            alert.addButton(withTitle: String(localized: "取消"))
+            guard alert.runModal() == .alertFirstButtonReturn else { return }
+
+            let recoveryURL = try backupService.importBackup(
+                backup,
+                appVersion: SoftwareUpdateChecker.currentVersion()
+            )
+            apiConfigurationViewModel.reloadFromStore()
+            globalShortcutHandler.refreshRegistration()
+            viewModel.presentationDidChange()
+            viewModel.refreshPolicyDidChange()
+            Task { await viewModel.selectedPairsDidChange() }
+            backupMessage = String(format: String(localized: "配置已恢复；原配置备份在 %@"), recoveryURL.lastPathComponent)
+        } catch {
+            backupMessage = String(format: String(localized: "配置导入失败：%@"), error.localizedDescription)
+        }
+    }
+
     private func exportDiagnostics() {
         let report = diagnosticsReportText()
         let baseURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
@@ -2298,6 +2406,7 @@ struct SettingsView: View {
 struct FirstRunWelcomeView: View {
     let initialStep: WelcomeStep
     let launchController: LaunchAtLoginController
+    let openBackup: () -> Void
     let persistStep: (WelcomeStep) -> Void
     let complete: () -> Void
 
@@ -2308,11 +2417,13 @@ struct FirstRunWelcomeView: View {
     init(
         initialStep: WelcomeStep,
         launchController: LaunchAtLoginController,
+        openBackup: @escaping () -> Void,
         persistStep: @escaping (WelcomeStep) -> Void,
         complete: @escaping () -> Void
     ) {
         self.initialStep = initialStep
         self.launchController = launchController
+        self.openBackup = openBackup
         self.persistStep = persistStep
         self.complete = complete
         _selectedStep = State(initialValue: initialStep)
@@ -2388,7 +2499,7 @@ struct FirstRunWelcomeView: View {
                 title: "辅助功能",
                 detail: "Currency Tracker 用辅助功能权限在你按下全局快捷键时读取当前选中的文本，并在部分应用中使用复制动作作为回退。",
                 unavailableDetail: "不开启时，系统级选中文本换算会不可用，或者只能先手动复制文字再回到应用内换算。",
-                statusText: accessibilityTrusted ? "已开启" : "未开启",
+                statusText: accessibilityTrusted ? String(localized: "已开启") : String(localized: "未开启"),
                 isReady: accessibilityTrusted,
                 actionTitle: "打开辅助功能设置",
                 action: openAccessibilitySettings
@@ -2420,6 +2531,10 @@ struct FirstRunWelcomeView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("接下来只会引导你处理系统权限。")
                 .font(.system(size: 17, weight: .bold, design: .rounded))
+
+            Button("已有备份？导入配置…") { openBackup() }
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("welcome.import-backup")
 
             Text("这些权限不是查看汇率所必需的，但会影响全局快捷键、汇率提醒通知、开机后自动运行等系统级功能。你可以逐项开启，也可以跳过；完成或跳过后，欢迎窗口之后启动和应用内更新后都不会自动弹出。")
                 .font(.system(size: 13, weight: .medium, design: .rounded))

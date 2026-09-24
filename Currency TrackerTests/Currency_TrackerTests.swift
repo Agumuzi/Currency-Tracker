@@ -13,6 +13,104 @@ import Testing
 
 struct Currency_TrackerTests {
     @Test
+    func converterSwitchesBaseAndKeepsDraftSeparateFromResults() {
+        let snapshot = CurrencySnapshot(
+            pair: CurrencyPair(baseCode: "USD", quoteCode: "CNY", baseAmount: 1),
+            rate: 7,
+            updatedAt: .now,
+            effectiveDateText: nil,
+            source: .ecb,
+            isCached: false
+        )
+        let graph = CurrencyConversionGraph(snapshots: [snapshot])
+        let codes = ["USD", "CNY"]
+        var converter = PanelConverterState()
+
+        converter.recalculate(currencyCodes: codes, graph: graph, displayBaseAmount: 100, fractionDigits: 2)
+        #expect(converter.activeCode == "USD")
+        #expect(converter.inputText.isEmpty)
+        #expect(converter.displayTexts["USD"] == "100")
+        #expect(AmountInputParsing.parseDecimal(converter.displayTexts["CNY"] ?? "") == 700)
+
+        converter.select("CNY", currencyCodes: codes, graph: graph, displayBaseAmount: 100, fractionDigits: 2)
+        #expect(converter.inputText.isEmpty)
+        #expect(converter.displayTexts["CNY"] == "100")
+        #expect(AmountInputParsing.parseDecimal(converter.displayTexts["USD"] ?? "") == Decimal(string: "14.29"))
+
+        converter.edit("35", currencyCodes: codes, graph: graph, displayBaseAmount: 100, fractionDigits: 2)
+        #expect(converter.displayTexts["CNY"] == "35")
+        #expect(AmountInputParsing.parseDecimal(converter.displayTexts["USD"] ?? "") == 5)
+
+        converter.edit("oops", currencyCodes: codes, graph: graph, displayBaseAmount: 100, fractionDigits: 2)
+        #expect(converter.hasInvalidInput)
+        #expect(converter.displayTexts.isEmpty)
+
+        converter.edit("", currencyCodes: codes, graph: graph, displayBaseAmount: 1, fractionDigits: 2)
+        #expect(converter.inputText.isEmpty)
+        #expect(converter.displayTexts["CNY"] == "1")
+    }
+
+    @MainActor
+    @Test
+    func configurationBackupRoundTripAndRollback() throws {
+        let suiteName = "CurrencyTrackerBackupTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let secrets = ControllableSecretStore()
+        let preferences = PreferencesStore(userDefaults: defaults, secretStore: secrets)
+        let credentials = EnhancedSourceCredentialStore(secretStore: secrets, userDefaults: defaults)
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let service = ConfigurationBackupService(
+            preferences: preferences,
+            credentialStore: credentials,
+            secretStore: secrets,
+            backupDirectory: directory
+        )
+        preferences.addPair(baseCode: "USD", quoteCode: "CNY")
+        preferences.setBaseCurrencyCode("CNY")
+        preferences.setRateDisplayBaseAmount(100)
+        try credentials.save("original-key", for: .twelveData)
+        preferences.addCustomAPIProvider()
+        var custom = preferences.customAPIProviders[0]
+        custom.name = "Private source"
+        custom.urlTemplate = "https://example.com/rate?key={apiKey}"
+        custom.apiKey = "custom-original-key"
+        preferences.updateCustomAPIProvider(custom)
+
+        let original = service.makeBackup(appVersion: "1.8")
+        let encoded = try service.encoded(original)
+        let imported = try service.prepareImport(encoded)
+        #expect(imported.enhancedCredentials["twelveData"] == "original-key")
+        #expect(imported.settings.customAPIProviders.first?.apiKey == "custom-original-key")
+        #expect(imported.settings.baseCurrencyCode == "CNY")
+
+        preferences.setBaseCurrencyCode("USD")
+        try credentials.save("changed-key", for: .twelveData)
+        let recovery = try service.importBackup(imported, appVersion: "1.8")
+        #expect(FileManager.default.fileExists(atPath: recovery.path))
+        #expect((try FileManager.default.attributesOfItem(atPath: recovery.path)[.posixPermissions] as? Int) == 0o600)
+        #expect(preferences.baseCurrencyCode == "CNY")
+        #expect(credentials.storedValue(for: .twelveData) == "original-key")
+        #expect(preferences.customAPIProviders.first?.apiKey == "custom-original-key")
+
+        var replacement = imported
+        replacement.settings.baseCurrencyCode = "EUR"
+        replacement.enhancedCredentials["twelveData"] = "replacement-key"
+        secrets.failNextWrite = true
+        #expect(throws: SecretStoreFailure.self) {
+            try service.importBackup(replacement, appVersion: "1.8")
+        }
+        #expect(preferences.baseCurrencyCode == "CNY")
+        #expect(credentials.storedValue(for: .twelveData) == "original-key")
+
+        replacement.formatVersion = 99
+        #expect(throws: ConfigurationBackupError.self) {
+            try service.prepareImport(service.encoded(replacement))
+        }
+    }
+
+    @Test
     func cbrParserNormalizesNominalValue() throws {
         let xml = """
         <?xml version="1.0" encoding="windows-1251"?>
@@ -1743,6 +1841,29 @@ private final class InMemorySecretStore: SecretStoring {
     }
 
     func delete(account: String) throws {
+        values[account] = nil
+    }
+}
+
+private final class ControllableSecretStore: SecretStoring {
+    private var values: [String: String] = [:]
+    var failNextWrite = false
+
+    func read(account: String) throws -> String? { values[account] }
+
+    func write(_ value: String, account: String) throws {
+        if failNextWrite {
+            failNextWrite = false
+            throw SecretStoreFailure()
+        }
+        values[account] = value
+    }
+
+    func delete(account: String) throws {
+        if failNextWrite {
+            failNextWrite = false
+            throw SecretStoreFailure()
+        }
         values[account] = nil
     }
 }

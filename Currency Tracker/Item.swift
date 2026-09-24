@@ -119,7 +119,7 @@ nonisolated enum CurrencyCatalog {
             return String(localized: String.LocalizationValue(currency.name))
         }
 
-        return Locale.autoupdatingCurrent.localizedString(forCurrencyCode: currency.code)
+        return appLanguageLocale.localizedString(forCurrencyCode: currency.code)
             ?? currency.englishName
     }
 
@@ -172,11 +172,13 @@ nonisolated enum CurrencyCatalog {
 
     static func searchableTokens(for currency: CurrencyInfo) -> [String] {
         var tokens = [currency.code, currency.name, currency.englishName]
-        if let localizedName = Locale.autoupdatingCurrent.localizedString(forCurrencyCode: currency.code) {
+        if let localizedName = appLanguageLocale.localizedString(forCurrencyCode: currency.code) {
             tokens.append(localizedName)
         }
         return tokens + currency.aliases
     }
+
+    private static var appLanguageLocale: Locale { AppDisplayLocale.current }
 
     static func supportedPair(baseCode: String, quoteCode: String, baseAmount: Int = 1) -> CurrencyPair? {
         guard baseCode != quoteCode else {
@@ -264,6 +266,12 @@ nonisolated enum MenuBarDisplayMode: String, Codable, CaseIterable, Identifiable
     }
 }
 
+nonisolated enum AppDisplayLocale {
+    static var current: Locale {
+        Locale(identifier: Bundle.main.preferredLocalizations.first ?? Locale.autoupdatingCurrent.identifier)
+    }
+}
+
 nonisolated enum CurrencyDisplayFormatting {
     static let displayBaseAmountOptions = [1, 100]
     static let fractionDigitOptions = [2, 4, 6]
@@ -289,7 +297,7 @@ nonisolated enum CurrencyDisplayFormatting {
 
     static func localizedNumber(_ value: Double, fractionDigits: Int) -> String {
         let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.locale = AppDisplayLocale.current
         formatter.numberStyle = .decimal
         formatter.usesGroupingSeparator = true
         formatter.minimumFractionDigits = normalizedFractionDigits(fractionDigits)
@@ -303,7 +311,7 @@ nonisolated enum CurrencyDisplayFormatting {
 
     static func plainNumber(_ value: Double, fractionDigits: Int) -> String {
         let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.locale = AppDisplayLocale.current
         formatter.numberStyle = .decimal
         formatter.usesGroupingSeparator = false
         formatter.minimumFractionDigits = normalizedFractionDigits(fractionDigits)
@@ -1353,7 +1361,7 @@ nonisolated struct CurrencyCardModel: Identifiable, Sendable {
 nonisolated enum ExchangeFormatter {
     static let decimal: NumberFormatter = {
         let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.locale = AppDisplayLocale.current
         formatter.numberStyle = .decimal
         formatter.minimumFractionDigits = 2
         formatter.maximumFractionDigits = 4
@@ -1362,7 +1370,7 @@ nonisolated enum ExchangeFormatter {
 
     static let compactChange: NumberFormatter = {
         let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.locale = AppDisplayLocale.current
         formatter.numberStyle = .decimal
         formatter.minimumFractionDigits = 2
         formatter.maximumFractionDigits = 4
@@ -1371,8 +1379,8 @@ nonisolated enum ExchangeFormatter {
 
     static let time: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "HH:mm"
+        formatter.locale = AppDisplayLocale.current
+        formatter.timeStyle = .short
         return formatter
     }()
 }
@@ -2135,6 +2143,59 @@ final class PreferencesStore {
         persist()
     }
 
+    func backupSettings() -> BackupSettings {
+        BackupSettings(
+            selectedPairIDs: selectedPairIDs,
+            converterCurrenciesFollowSelectedPairs: converterCurrenciesFollowSelectedPairs,
+            converterCurrencyCodes: converterCurrencyCodes,
+            autoRefreshMinutes: autoRefreshMinutes,
+            menuBarOpenRefreshEnabled: menuBarOpenRefreshEnabled,
+            trendPointLimit: trendPointLimit,
+            featuredPairID: featuredPairID,
+            showsFlags: showsFlags,
+            baseCurrencyCode: baseCurrencyCode,
+            textConversionShortcut: textConversionShortcut,
+            automaticUpdateChecksEnabled: automaticUpdateChecksEnabled,
+            menuBarItemEnabled: menuBarItemEnabled,
+            backgroundActivityEnabled: backgroundActivityEnabled,
+            menuBarDisplayMode: menuBarDisplayMode,
+            rateDisplayBaseAmount: rateDisplayBaseAmount,
+            conversionFractionDigits: conversionFractionDigits,
+            rateAlerts: rateAlerts.map { alert in
+                var copy = alert
+                copy.lastTriggeredAt = nil
+                return copy
+            },
+            settingsProfiles: settingsProfiles,
+            activeProfileID: activeProfileID,
+            customAPIProviders: customAPIProviders
+        )
+    }
+
+    func restoreBackupSettings(_ settings: BackupSettings) {
+        selectedPairIDs = settings.selectedPairIDs
+        converterCurrenciesFollowSelectedPairs = settings.converterCurrenciesFollowSelectedPairs
+        converterCurrencyCodes = settings.converterCurrencyCodes
+        autoRefreshMinutes = settings.autoRefreshMinutes
+        menuBarOpenRefreshEnabled = settings.menuBarOpenRefreshEnabled
+        trendPointLimit = settings.trendPointLimit
+        featuredPairID = settings.featuredPairID
+        showsFlags = settings.showsFlags
+        baseCurrencyCode = settings.baseCurrencyCode
+        textConversionShortcut = settings.textConversionShortcut
+        automaticUpdateChecksEnabled = settings.automaticUpdateChecksEnabled
+        menuBarItemEnabled = settings.menuBarItemEnabled
+        backgroundActivityEnabled = settings.backgroundActivityEnabled
+        menuBarDisplayMode = settings.menuBarDisplayMode
+        rateDisplayBaseAmount = settings.rateDisplayBaseAmount
+        conversionFractionDigits = settings.conversionFractionDigits
+        rateAlerts = settings.rateAlerts
+        settingsProfiles = settings.settingsProfiles
+        activeProfileID = settings.activeProfileID
+        customAPIProviders = settings.customAPIProviders
+        persist()
+    }
+
     private func persist() {
         userDefaults.set(selectedPairIDs, forKey: selectedPairsKey)
         userDefaults.set(converterCurrenciesFollowSelectedPairs, forKey: converterCurrenciesFollowSelectedPairsKey)
@@ -2397,10 +2458,10 @@ actor ExchangeRateStore {
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
 
-    init() {
+    init(directoryURL overrideDirectoryURL: URL? = nil) {
         let baseURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        let directoryURL = baseURL.appendingPathComponent("CurrencyTracker", isDirectory: true)
+        let directoryURL = overrideDirectoryURL ?? baseURL.appendingPathComponent("CurrencyTracker", isDirectory: true)
 
         try? FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
 

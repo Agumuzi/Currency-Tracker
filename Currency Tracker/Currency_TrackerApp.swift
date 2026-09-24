@@ -37,7 +37,15 @@ struct Currency_TrackerApp: App {
         let credentialStore = EnhancedSourceCredentialStore(secretStore: secretStore, userDefaults: userDefaults)
         let launchController = LaunchAtLoginController()
         let service = ExchangeRateService()
-        let store = ExchangeRateStore()
+        let testDataDirectory = ProcessInfo.processInfo.environment["CURRENCY_TRACKER_TEST_DATA_DIR"]
+            .map { URL(fileURLWithPath: $0, isDirectory: true) }
+        let store = ExchangeRateStore(directoryURL: testDataDirectory)
+        let backupService = ConfigurationBackupService(
+            preferences: preferences,
+            credentialStore: credentialStore,
+            secretStore: secretStore,
+            backupDirectory: testDataDirectory?.appendingPathComponent("Backups", isDirectory: true)
+        )
         let viewModel = ExchangePanelViewModel(
             preferences: preferences,
             credentialStore: credentialStore,
@@ -78,6 +86,7 @@ struct Currency_TrackerApp: App {
         let settingsWindowController = SettingsWindowController(
             preferences: preferences,
             credentialStore: credentialStore,
+            backupService: backupService,
             launchController: launchController,
             viewModel: viewModel,
             service: service,
@@ -87,7 +96,8 @@ struct Currency_TrackerApp: App {
         )
         let welcomeWindowController = WelcomeWindowController(
             userDefaults: userDefaults,
-            launchController: launchController
+            launchController: launchController,
+            openBackup: { settingsWindowController.show(section: .backup) }
         )
         panelWindowController.configurePinnedContent { controller in
             AnyView(
@@ -653,6 +663,7 @@ private final class EphemeralSecretStore: SecretStoring {
 final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let preferences: PreferencesStore
     private let credentialStore: EnhancedSourceCredentialStore
+    private let backupService: ConfigurationBackupService
     private let launchController: LaunchAtLoginController
     private let viewModel: ExchangePanelViewModel
     private let service: ExchangeRateService
@@ -672,6 +683,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     init(
         preferences: PreferencesStore,
         credentialStore: EnhancedSourceCredentialStore,
+        backupService: ConfigurationBackupService,
         launchController: LaunchAtLoginController,
         viewModel: ExchangePanelViewModel,
         service: ExchangeRateService,
@@ -681,6 +693,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     ) {
         self.preferences = preferences
         self.credentialStore = credentialStore
+        self.backupService = backupService
         self.launchController = launchController
         self.viewModel = viewModel
         self.service = service
@@ -750,6 +763,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             launchController: launchController,
             viewModel: viewModel,
             apiConfigurationViewModel: apiConfigurationViewModel,
+            backupService: backupService,
             globalShortcutHandler: globalShortcutHandler,
             softwareUpdateWindowController: softwareUpdateWindowController,
             focusSection: focusSection
@@ -761,16 +775,19 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 final class WelcomeWindowController: NSObject, NSWindowDelegate {
     private let userDefaults: UserDefaults
     private let launchController: LaunchAtLoginController
+    private let openBackup: () -> Void
     private var windowController: NSWindowController?
     private var onComplete: (() -> Void)?
     private var didCompleteWelcome = false
 
     init(
         userDefaults: UserDefaults,
-        launchController: LaunchAtLoginController
+        launchController: LaunchAtLoginController,
+        openBackup: @escaping () -> Void
     ) {
         self.userDefaults = userDefaults
         self.launchController = launchController
+        self.openBackup = openBackup
         super.init()
     }
 
@@ -816,6 +833,7 @@ final class WelcomeWindowController: NSObject, NSWindowDelegate {
         FirstRunWelcomeView(
             initialStep: currentStep,
             launchController: launchController,
+            openBackup: openBackup,
             persistStep: { [weak self] step in
                 self?.persistStep(step)
             },

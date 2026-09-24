@@ -554,7 +554,7 @@ struct ContentView: View {
             return 112
         }
 
-        return 12 + CGFloat(converterCurrencyCodes.count) * 62 + CGFloat(max(0, converterCurrencyCodes.count - 1)) * 10 + 34
+        return 12 + CGFloat(converterCurrencyCodes.count) * 62 + CGFloat(max(0, converterCurrencyCodes.count - 1)) * 10 + 76
     }
 
     private var shouldScrollConverter: Bool {
@@ -822,10 +822,7 @@ private struct PanelCurrencyConverterView: View {
     let fractionDigits: Int
     let showsFlags: Bool
 
-    @State private var inputTexts: [String: String] = [:]
-    @State private var userEnteredTexts: [String: String] = [:]
-    @State private var activeCode: String?
-    @State private var isSynchronizing = false
+    @State private var state = PanelConverterState()
     @FocusState private var focusedCode: String?
     @Environment(\.colorScheme) private var colorScheme
 
@@ -838,11 +835,11 @@ private struct PanelCurrencyConverterView: View {
                     converterRow(for: code)
                 }
 
-                if !unreachableCodes.isEmpty {
+                if !state.unreachableCodes.isEmpty {
                     HStack(spacing: 7) {
                         Image(systemName: "exclamationmark.circle.fill")
                             .font(.system(size: 10, weight: .semibold))
-                        Text(String(format: String(localized: "缺少 %@ 的汇率路径"), unreachableCodes.joined(separator: "、")))
+                        Text(String(format: String(localized: "缺少 %@ 的汇率路径"), state.unreachableCodes.joined(separator: "、")))
                             .font(.system(size: 10, weight: .medium, design: .rounded))
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
@@ -859,23 +856,22 @@ private struct PanelCurrencyConverterView: View {
             }
         }
         .onAppear {
-            initializeIfNeeded()
+            recalculate()
         }
         .onChange(of: currencyCodes) { _, _ in
-            reconcileInputs()
+            recalculate()
         }
         .onChange(of: rateSignature) { _, _ in
-            recalculateFromActive()
+            recalculate()
         }
         .onChange(of: fractionDigits) { _, _ in
-            recalculateFromActive()
+            recalculate()
         }
         .onChange(of: displayBaseAmount) { _, _ in
-            if activeCode == nil || activeTextIsEmpty {
-                initializeWithDefaultAmount()
-            } else {
-                recalculateFromActive()
-            }
+            recalculate()
+        }
+        .onChange(of: focusedCode) { _, code in
+            if let code { activate(code) }
         }
     }
 
@@ -901,25 +897,6 @@ private struct PanelCurrencyConverterView: View {
             "\(snapshot.id):\(snapshot.rate):\(snapshot.updatedAt.timeIntervalSince1970)"
         }
         .joined(separator: "|")
-    }
-
-    private var activeTextIsEmpty: Bool {
-        guard let activeCode else {
-            return true
-        }
-
-        return (inputTexts[activeCode] ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    private var unreachableCodes: [String] {
-        guard let activeCode,
-              let sourceText = inputTexts[activeCode],
-              AmountInputParsing.parseDecimal(sourceText) != nil else {
-            return []
-        }
-
-        let multipliers = graph.conversionMultipliers(from: activeCode)
-        return currencyCodes.filter { $0 != activeCode && multipliers[$0] == nil }
     }
 
     private func converterRow(for code: String) -> some View {
@@ -954,25 +931,40 @@ private struct PanelCurrencyConverterView: View {
 
             Spacer(minLength: 10)
 
-            TextField("0", text: binding(for: code))
-                .textFieldStyle(.plain)
-                .font(.system(size: 21, weight: .semibold, design: .rounded))
-                .multilineTextAlignment(.trailing)
-                .focused($focusedCode, equals: code)
-                .onTapGesture {
-                    activate(code)
+            VStack(alignment: .trailing, spacing: 5) {
+                Text(state.displayTexts[code] ?? "—")
+                    .font(.system(size: 21, weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .accessibilityIdentifier("converter.result.\(code)")
+
+                if state.activeCode == code {
+                    TextField("输入金额", text: binding)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .multilineTextAlignment(.trailing)
+                        .focused($focusedCode, equals: code)
+                        .accessibilityIdentifier("converter.input.\(code)")
+                        .frame(width: 142)
+                    if state.hasInvalidInput {
+                        Text("金额格式无效")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.red)
+                    }
                 }
-                .frame(minWidth: 116, maxWidth: 190, alignment: .trailing)
+            }
+            .frame(minWidth: 116, maxWidth: 190, alignment: .trailing)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, minHeight: 58, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: state.activeCode == code ? 96 : 58, alignment: .leading)
         .background(rowBackground(isActive: isRowActive(code)))
         .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .onTapGesture {
             activate(code)
             focusedCode = code
         }
+        .accessibilityIdentifier("converter.row.\(code)")
     }
 
     private func rowBackground(isActive: Bool) -> some View {
@@ -1001,123 +993,38 @@ private struct PanelCurrencyConverterView: View {
         colorScheme == .dark ? Color.white.opacity(0.13) : Color.black.opacity(0.070)
     }
 
-    private func binding(for code: String) -> Binding<String> {
+    private var binding: Binding<String> {
         Binding(
-            get: {
-                inputTexts[code] ?? ""
-            },
+            get: { state.inputText },
             set: { newValue in
-                handleInputChange(newValue, sourceCode: code)
+                state.edit(
+                    newValue,
+                    currencyCodes: currencyCodes,
+                    graph: graph,
+                    displayBaseAmount: displayBaseAmount,
+                    fractionDigits: fractionDigits
+                )
             }
         )
     }
 
-    private func initializeIfNeeded() {
-        guard activeCode == nil || currencyCodes.contains(activeCode ?? "") == false else {
-            recalculateFromActive()
-            return
-        }
-
-        initializeWithDefaultAmount()
-    }
-
-    private func initializeWithDefaultAmount() {
-        guard let firstCode = currencyCodes.first else {
-            inputTexts = [:]
-            userEnteredTexts = [:]
-            activeCode = nil
-            return
-        }
-
-        let defaultText = "\(CurrencyDisplayFormatting.normalizedDisplayBaseAmount(displayBaseAmount))"
-        inputTexts[firstCode] = defaultText
-        userEnteredTexts[firstCode] = defaultText
-        activeCode = firstCode
-        focusedCode = firstCode
-        synchronize(sourceCode: firstCode, sourceText: defaultText)
-    }
-
-    private func reconcileInputs() {
-        let validCodes = Set(currencyCodes)
-        inputTexts = inputTexts.filter { validCodes.contains($0.key) }
-        userEnteredTexts = userEnteredTexts.filter { validCodes.contains($0.key) }
-
-        if let activeCode, validCodes.contains(activeCode) {
-            recalculateFromActive()
-        } else {
-            initializeWithDefaultAmount()
-        }
-    }
-
-    private func recalculateFromActive() {
-        guard let activeCode else {
-            initializeWithDefaultAmount()
-            return
-        }
-
-        let sourceText = inputTexts[activeCode] ?? ""
-        synchronize(sourceCode: activeCode, sourceText: sourceText)
+    private func recalculate() {
+        state.recalculate(
+            currencyCodes: currencyCodes,
+            graph: graph,
+            displayBaseAmount: displayBaseAmount,
+            fractionDigits: fractionDigits
+        )
     }
 
     private func activate(_ code: String) {
-        guard (inputTexts[code] ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return
-        }
-
-        let defaultText = "\(CurrencyDisplayFormatting.normalizedDisplayBaseAmount(displayBaseAmount))"
-        inputTexts[code] = defaultText
-        userEnteredTexts[code] = defaultText
-        activeCode = code
-        synchronize(sourceCode: code, sourceText: defaultText)
-    }
-
-    private func handleInputChange(_ newValue: String, sourceCode: String) {
-        inputTexts[sourceCode] = newValue
-        guard !isSynchronizing else {
-            return
-        }
-
-        if newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            userEnteredTexts.removeValue(forKey: sourceCode)
-        } else {
-            userEnteredTexts[sourceCode] = newValue
-        }
-        activeCode = sourceCode
-        synchronize(sourceCode: sourceCode, sourceText: newValue)
-    }
-
-    private func synchronize(sourceCode: String, sourceText: String) {
-        let trimmed = sourceText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            clearCounterpartTexts(sourceCode: sourceCode)
-            return
-        }
-
-        guard let amount = AmountInputParsing.parseDecimal(trimmed) else {
-            clearCounterpartTexts(sourceCode: sourceCode)
-            return
-        }
-
-        let sourceAmount = NSDecimalNumber(decimal: amount).doubleValue
-        let multipliers = graph.conversionMultipliers(from: sourceCode)
-
-        isSynchronizing = true
-        for code in currencyCodes where code != sourceCode {
-            if let multiplier = multipliers[code] {
-                inputTexts[code] = displayText(for: code, amount: sourceAmount * multiplier)
-            } else {
-                inputTexts[code] = ""
-            }
-        }
-        isSynchronizing = false
-    }
-
-    private func clearCounterpartTexts(sourceCode: String) {
-        isSynchronizing = true
-        for code in currencyCodes where code != sourceCode {
-            inputTexts[code] = ""
-        }
-        isSynchronizing = false
+        state.select(
+            code,
+            currencyCodes: currencyCodes,
+            graph: graph,
+            displayBaseAmount: displayBaseAmount,
+            fractionDigits: fractionDigits
+        )
     }
 
     private func isRowActive(_ code: String) -> Bool {
@@ -1125,29 +1032,7 @@ private struct PanelCurrencyConverterView: View {
             return focusedCode == code
         }
 
-        return activeCode == code
-    }
-
-    private func displayText(for code: String, amount: Double) -> String {
-        if let enteredText = userEnteredTexts[code],
-           shouldPreserveUserEnteredText(enteredText, for: amount) {
-            return enteredText
-        }
-
-        return CurrencyDisplayFormatting.plainNumber(amount, fractionDigits: fractionDigits)
-    }
-
-    private func shouldPreserveUserEnteredText(_ text: String, for amount: Double) -> Bool {
-        guard let enteredAmount = AmountInputParsing.parseDecimal(text) else {
-            return false
-        }
-
-        let enteredValue = NSDecimalNumber(decimal: enteredAmount).doubleValue
-        guard enteredValue.isFinite, amount.isFinite else {
-            return false
-        }
-
-        return abs(enteredValue - amount) < 0.000_000_5
+        return state.activeCode == code
     }
 }
 
@@ -1863,8 +1748,8 @@ private struct CurrencyCardView: View {
 
     private static let fullDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = AppDisplayLocale.current
+        formatter.dateStyle = .medium
         return formatter
     }()
 }
@@ -2044,7 +1929,7 @@ private struct TrendChartView: View {
 
     private static let axisFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.locale = AppDisplayLocale.current
         formatter.numberStyle = .decimal
         formatter.minimumFractionDigits = 2
         formatter.maximumFractionDigits = 4
@@ -2053,8 +1938,8 @@ private struct TrendChartView: View {
 
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = AppDisplayLocale.current
+        formatter.dateStyle = .short
         return formatter
     }()
 }
@@ -2173,6 +2058,12 @@ extension View {
     let settingsController = SettingsWindowController(
         preferences: preferences,
         credentialStore: credentialStore,
+        backupService: ConfigurationBackupService(
+            preferences: preferences,
+            credentialStore: credentialStore,
+            secretStore: LocalSecretStore(service: "com.thomas.currency-tracker.preview"),
+            backupDirectory: FileManager.default.temporaryDirectory.appendingPathComponent("CurrencyTrackerPreviewBackups")
+        ),
         launchController: LaunchAtLoginController(),
         viewModel: viewModel,
         service: service,

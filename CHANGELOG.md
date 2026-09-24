@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8 - 2026-09-24
+
+- Makes the selected currency the converter base and separates editable amounts from calculated results.
+- Adds versioned JSON configuration export and previewed import with a local recovery copy, including API keys.
+- Improves localization, currency names, and number and date display across 11 languages.
+- Isolates UI test storage and removes process termination by the production bundle identifier.
+- Requires the tagged commit to pass macOS tests before packaging the release.
+
 ## 1.7 - 2026-06-02
 
 - Adds a standalone first-run welcome window focused on macOS permission setup.
