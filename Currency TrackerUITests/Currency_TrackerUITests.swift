@@ -92,4 +92,29 @@ final class Currency_TrackerUITests: XCTestCase {
         }
     }
 
+    @MainActor
+    func testSettingsNavigationScreenshots() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-AppleLanguages", "(en)", "-CurrencyTrackerUITestShowSettings"]
+        app.launchEnvironment["CURRENCY_TRACKER_DEFAULTS_SUITE"] = "CurrencyTrackerUITests.\(UUID().uuidString)"
+        app.launchEnvironment["CURRENCY_TRACKER_RESET_DEFAULTS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_UI_TEST_SHOW_SETTINGS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_USE_IN_MEMORY_SECRETS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_TEST_DATA_DIR"] = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
+        app.launch()
+
+        let sections = ["general", "language", "rates", "profiles", "backup", "alerts",
+                        "refresh", "dataSources", "permissions", "updates", "diagnostics", "system"]
+        for section in sections {
+            let button = app.buttons["settings.sidebar.\(section)"]
+            XCTAssertTrue(button.waitForExistence(timeout: 5), "Missing \(section) section")
+            button.click()
+            let attachment = XCTAttachment(screenshot: app.screenshot())
+            attachment.name = "settings-flow-\(section)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+        }
+    }
+
 }

@@ -81,7 +81,7 @@ jobs:
         run: |
           mkdir -p build/release
           COPYFILE_DISABLE=1 ditto -c -k --norsrc --keepParent "build/Currency Tracker.xcarchive/Products/Applications/Currency Tracker.app" "build/release/Currency-Tracker-${VERSION}.zip"
-          shasum -a 256 "build/release/Currency-Tracker-${VERSION}.zip" > "build/release/Currency-Tracker-${VERSION}.zip.sha256"
+          (cd build/release && shasum -a 256 "Currency-Tracker-${VERSION}.zip" > "Currency-Tracker-${VERSION}.zip.sha256")
           (cd build/release && shasum -a 256 -c "Currency-Tracker-${VERSION}.zip.sha256")
 
       - name: Write release notes

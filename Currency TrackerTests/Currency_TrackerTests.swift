@@ -50,6 +50,35 @@ struct Currency_TrackerTests {
         #expect(converter.displayTexts["CNY"] == "1")
     }
 
+    @Test
+    func converterRespectsPairNominalAndSwitchesBackToBlankInput() {
+        let snapshot = CurrencySnapshot(
+            pair: CurrencyPair(baseCode: "JPY", quoteCode: "CNY", baseAmount: 100),
+            rate: 5,
+            updatedAt: .now,
+            effectiveDateText: nil,
+            source: .ecb,
+            isCached: false
+        )
+        let graph = CurrencyConversionGraph(snapshots: [snapshot])
+        let codes = ["JPY", "CNY"]
+        var converter = PanelConverterState()
+
+        converter.recalculate(currencyCodes: codes, graph: graph, displayBaseAmount: 100, fractionDigits: 2)
+        #expect(AmountInputParsing.parseDecimal(converter.displayTexts["CNY"] ?? "") == 5)
+
+        converter.select("CNY", currencyCodes: codes, graph: graph, displayBaseAmount: 100, fractionDigits: 2)
+        #expect(converter.inputText.isEmpty)
+        #expect(AmountInputParsing.parseDecimal(converter.displayTexts["JPY"] ?? "") == 2_000)
+
+        converter.edit("7.5", currencyCodes: codes, graph: graph, displayBaseAmount: 100, fractionDigits: 2)
+        #expect(AmountInputParsing.parseDecimal(converter.displayTexts["JPY"] ?? "") == 150)
+
+        converter.select("JPY", currencyCodes: codes, graph: graph, displayBaseAmount: 100, fractionDigits: 2)
+        #expect(converter.inputText.isEmpty)
+        #expect(AmountInputParsing.parseDecimal(converter.displayTexts["CNY"] ?? "") == 5)
+    }
+
     @MainActor
     @Test
     func configurationBackupRoundTripAndRollback() throws {

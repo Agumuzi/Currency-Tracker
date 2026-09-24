@@ -2184,7 +2184,7 @@ struct SettingsView: View {
         do {
             let backup = try backupService.makeBackup(appVersion: SoftwareUpdateChecker.currentVersion())
             try backupService.export(backup, to: url)
-            backupMessage = String(format: String(localized: "配置已导出到 %@"), url.lastPathComponent)
+            backupMessage = String(format: String(localized: "配置已导出到 %@"), url.path)
         } catch {
             backupMessage = String(format: String(localized: "配置导出失败：%@"), error.localizedDescription)
         }
@@ -2217,7 +2217,7 @@ struct SettingsView: View {
             viewModel.presentationDidChange()
             viewModel.refreshPolicyDidChange()
             Task { await viewModel.selectedPairsDidChange() }
-            backupMessage = String(format: String(localized: "配置已恢复；原配置备份在 %@"), recoveryURL.lastPathComponent)
+            backupMessage = String(format: String(localized: "配置已恢复；原配置备份在 %@"), recoveryURL.path)
         } catch {
             backupMessage = String(format: String(localized: "配置导入失败：%@"), error.localizedDescription)
         }
