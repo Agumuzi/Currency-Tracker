@@ -139,7 +139,7 @@ final class Currency_TrackerUITests: XCTestCase {
         add(openedScreenshot)
         let usd = app.staticTexts["converter.result.USD"]
         XCTAssertTrue(usd.waitForExistence(timeout: 5), app.debugDescription)
-        let exampleResult = usd.label
+        let exampleResult = usd.value as? String ?? ""
         XCTAssertFalse(exampleResult.isEmpty)
         let defaultScreenshot = XCTAttachment(screenshot: app.screenshot())
         defaultScreenshot.name = "converter-default-base"
@@ -160,8 +160,8 @@ final class Currency_TrackerUITests: XCTestCase {
         XCTAssertEqual(yuanInput.value as? String, "35")
         let convertedUSD = app.staticTexts["converter.result.USD"]
         XCTAssertTrue(convertedUSD.waitForExistence(timeout: 5), app.debugDescription)
-        XCTAssertNotEqual(convertedUSD.label, exampleResult)
-        XCTAssertEqual(app.staticTexts["converter.result.CNY"].label, "35")
+        XCTAssertNotEqual(convertedUSD.value as? String, exampleResult)
+        XCTAssertEqual(app.staticTexts["converter.result.CNY"].value as? String, "35")
     }
 
 }
