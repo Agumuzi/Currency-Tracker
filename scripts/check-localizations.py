@@ -12,7 +12,7 @@ LOCALIZATION_FILES = sorted(APP.glob("*.lproj/Localizable.strings"))
 REFERENCE_FILE = APP / "zh-Hans.lproj" / "Localizable.strings"
 ENTRY = re.compile(r'^\s*"((?:[^"\\]|\\.)*)"\s*=\s*"((?:[^"\\]|\\.)*)"\s*;', re.MULTILINE)
 SWIFT_REFERENCES = [
-    re.compile(r'\b(?:Text|Button|Label|Picker|TextField|sectionTitle)\s*\(\s*"((?:[^"\\]|\\.)*)"'),
+    re.compile(r'\b(?:Text|Button|Label|Picker|TextField|Toggle|sectionTitle|displayPreferencePicker)\s*\(\s*"((?:[^"\\]|\\.)*)"'),
     re.compile(r'String\s*\(\s*localized:\s*"((?:[^"\\]|\\.)*)"'),
 ]
 FORMAT = re.compile(r'(?<!%)%(?:\d+\$)?[-+0 #]*\d*(?:\.\d+)?(?:hh|h|ll|l|z|t|j)?([@diuoxXfFeEgGaAcCsSp])')
@@ -43,6 +43,11 @@ def referenced_keys() -> set[str]:
     welcome = (APP / 'SettingsView.swift').read_text(encoding='utf-8').split('struct FirstRunWelcomeView: View', 1)[1]
     for key in re.findall(r'"((?:[^"\\]|\\.)*)"', welcome):
         if '\\(' not in key and any('\u4e00' <= ch <= '\u9fff' for ch in key):
+            result.add(key)
+    settings = (APP / 'SettingsView.swift').read_text(encoding='utf-8')
+    native_language_names = {'简体中文', '繁體中文', '日本語'}
+    for key in re.findall(r'"((?:[^"\\]|\\.)*)"', settings):
+        if key not in native_language_names and '\\(' not in key and any('\u4e00' <= ch <= '\u9fff' for ch in key):
             result.add(key)
     return result
 

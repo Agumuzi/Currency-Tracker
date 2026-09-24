@@ -477,7 +477,8 @@ struct ContentView: View {
             }
             .buttonStyle(.plain)
             .disabled(!canOpenConverter)
-            .help(panelContentMode == .rates ? "打开换算界面" : "返回汇率列表")
+            .accessibilityIdentifier("panel.toggleConverter")
+            .help(panelContentMode == .rates ? String(localized: "换算") : String(localized: "汇率"))
         }
         .foregroundStyle(.secondary)
         .padding(.horizontal, 10)

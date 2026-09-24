@@ -26,6 +26,7 @@ struct Currency_TrackerApp: App {
     private let globalShortcutHandler: GlobalShortcutHandler
     private let initialLaunchCoordinator: InitialLaunchCoordinator
     private let statusItemController: StatusItemController
+    private let uiTestPanelWindowController: NSWindowController?
     private let isRunningUITests: Bool
     @State private var viewModel: ExchangePanelViewModel
 
@@ -34,6 +35,12 @@ struct Currency_TrackerApp: App {
         let userDefaults = Self.makeUserDefaults()
         let secretStore = Self.makeSecretStore()
         let preferences = PreferencesStore(userDefaults: userDefaults, secretStore: secretStore)
+        let showUITestPanel = isRunningUITests
+            && ProcessInfo.processInfo.environment["CURRENCY_TRACKER_UI_TEST_SHOW_PANEL"] == "1"
+        if showUITestPanel {
+            preferences.addPair(baseCode: "USD", quoteCode: "CNY")
+            preferences.setRateDisplayBaseAmount(100)
+        }
         let credentialStore = EnhancedSourceCredentialStore(secretStore: secretStore, userDefaults: userDefaults)
         let launchController = LaunchAtLoginController()
         let service = ExchangeRateService()
@@ -112,6 +119,31 @@ struct Currency_TrackerApp: App {
                 )
             )
         }
+        if showUITestPanel {
+            let window = NSWindow(contentViewController: NSHostingController(rootView: ContentView(
+                viewModel: viewModel,
+                preferences: preferences,
+                settingsWindowController: settingsWindowController,
+                panelWindowController: panelWindowController,
+                autoBootstrap: false,
+                presentationMode: .pinned,
+                menuBarMaximumPanelHeight: nil
+            )))
+            window.identifier = NSUserInterfaceItemIdentifier("currency-tracker-ui-test-panel")
+            window.title = "Currency Tracker"
+            window.styleMask = [.titled, .closable, .resizable]
+            window.setContentSize(NSSize(width: 480, height: 640))
+            window.center()
+            let controller = NSWindowController(window: window)
+            uiTestPanelWindowController = controller
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 200_000_000)
+                NSApplication.shared.activate(ignoringOtherApps: true)
+                controller.showWindow(nil)
+            }
+        } else {
+            uiTestPanelWindowController = nil
+        }
         let automaticUpdateCoordinator = AutomaticSoftwareUpdateCoordinator(
             preferences: preferences,
             updateWindowController: softwareUpdateWindowController,
@@ -189,6 +221,7 @@ struct Currency_TrackerApp: App {
 
         return environment["XCTestConfigurationFilePath"] != nil
             || environment["CURRENCY_TRACKER_UI_TEST_SHOW_SETTINGS"] == "1"
+            || environment["CURRENCY_TRACKER_UI_TEST_SHOW_PANEL"] == "1"
             || arguments.contains("-CurrencyTrackerUITestShowSettings")
     }
 

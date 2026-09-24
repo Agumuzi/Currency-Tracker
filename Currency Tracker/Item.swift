@@ -2427,7 +2427,7 @@ final class LaunchAtLoginController {
         requiresApproval = status == .requiresApproval
 
         if status == .notFound {
-            lastErrorMessage = "系统暂时无法确认开机启动状态。"
+            lastErrorMessage = String(localized: "系统暂时无法确认开机启动状态。")
         } else {
             lastErrorMessage = nil
         }

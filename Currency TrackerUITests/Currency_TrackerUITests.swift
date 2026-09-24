@@ -117,4 +117,42 @@ final class Currency_TrackerUITests: XCTestCase {
         }
     }
 
+    @MainActor
+    func testConverterSwitchesCurrenciesWithBlankEditableInput() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-AppleLanguages", "(en)"]
+        app.launchEnvironment["CURRENCY_TRACKER_DEFAULTS_SUITE"] = "CurrencyTrackerUITests.\(UUID().uuidString)"
+        app.launchEnvironment["CURRENCY_TRACKER_RESET_DEFAULTS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_UI_TEST_SHOW_PANEL"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_USE_IN_MEMORY_SECRETS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_TEST_DATA_DIR"] = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
+        app.launch()
+
+        let toggle = app.buttons["panel.toggleConverter"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 8))
+        toggle.click()
+        let usd = app.staticTexts["converter.result.USD"]
+        XCTAssertTrue(usd.waitForExistence(timeout: 5))
+        let defaultScreenshot = XCTAttachment(screenshot: app.screenshot())
+        defaultScreenshot.name = "converter-default-base"
+        defaultScreenshot.lifetime = .keepAlways
+        add(defaultScreenshot)
+
+        let yuanRow = app.descendants(matching: .any)["converter.row.CNY"]
+        XCTAssertTrue(yuanRow.waitForExistence(timeout: 5))
+        yuanRow.click()
+        let yuanInput = app.textFields["converter.input.CNY"]
+        XCTAssertTrue(yuanInput.waitForExistence(timeout: 5))
+        let exampleResult = usd.label
+        yuanInput.click()
+        yuanInput.typeText("35")
+        XCTAssertEqual(yuanInput.value as? String, "35")
+        XCTAssertNotEqual(usd.label, exampleResult)
+        let editedScreenshot = XCTAttachment(screenshot: app.screenshot())
+        editedScreenshot.name = "converter-yuan-input"
+        editedScreenshot.lifetime = .keepAlways
+        add(editedScreenshot)
+    }
+
 }

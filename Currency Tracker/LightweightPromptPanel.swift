@@ -417,7 +417,7 @@ private struct ManualCurrencyPromptView: View {
 
     private func submit() {
         guard let code = CurrencyInputNormalization.normalize(input) else {
-            errorMessage = "未识别该币种，请输入标准代码或常见名称。"
+            errorMessage = String(localized: "未识别该币种，请输入标准代码或常见名称。")
             return
         }
 

@@ -428,3 +428,16 @@
 "让应用在重启电脑后自动恢复" = "Restart the app automatically after login";
 "让汇率提醒可以通过系统通知出现" = "Show rate alerts as system notifications";
 "通知权限用于在汇率提醒达到阈值时弹出系统通知，让你不必一直打开应用查看。" = "The notification permission is used to pop up a system notification when the exchange rate reminder reaches the threshold, so that you do not have to keep opening the app to view it.";
+
+/* 1.8 settings labels and permission titles */
+"显示基数" = "Display base";
+"小数位" = "Decimal places";
+"跟随汇率列表" = "Follow rate list";
+"辅助功能权限" = "Accessibility permission";
+"通知权限" = "Notifications permission";
+"登录项权限" = "Login items permission";
+
+/* 1.8 user-facing error messages */
+"未识别该币种，请输入标准代码或常见名称。" = "Currency not recognized. Enter a standard code or common name.";
+"系统暂时无法确认开机启动状态。" = "macOS cannot confirm the launch at login status right now.";
+"无法读取选中文本" = "Unable to read the selected text";

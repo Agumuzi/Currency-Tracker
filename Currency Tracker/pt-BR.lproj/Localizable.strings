@@ -416,3 +416,16 @@
 "让应用在重启电脑后自动恢复" = "Deixe o aplicativo reiniciar automaticamente após reiniciar o computador";
 "让汇率提醒可以通过系统通知出现" = "Permitir que alertas de taxa de câmbio apareçam por meio de notificações do sistema";
 "通知权限用于在汇率提醒达到阈值时弹出系统通知，让你不必一直打开应用查看。" = "A permissão de notificação é usada para exibir uma notificação do sistema quando o lembrete da taxa de câmbio atinge o limite, para que você não precise ficar abrindo o aplicativo para visualizá-lo.";
+
+/* 1.8 settings labels and permission titles */
+"显示基数" = "Valor base";
+"小数位" = "Casas decimais";
+"跟随汇率列表" = "Seguir a lista de taxas";
+"辅助功能权限" = "Permissão de Acessibilidade";
+"通知权限" = "Permissão para notificações";
+"登录项权限" = "Permissão para itens de início de sessão";
+
+/* 1.8 user-facing error messages */
+"未识别该币种，请输入标准代码或常见名称。" = "Moeda não reconhecida. Digite um código padrão ou um nome comum.";
+"系统暂时无法确认开机启动状态。" = "Não foi possível verificar agora o início de sessão automático.";
+"无法读取选中文本" = "Não foi possível ler o texto selecionado";
