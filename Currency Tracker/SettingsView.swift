@@ -2656,6 +2656,7 @@ struct FirstRunWelcomeView: View {
                 Text(detail)
                     .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }

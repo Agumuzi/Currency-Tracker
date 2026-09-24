@@ -144,7 +144,7 @@ final class Currency_TrackerUITests: XCTestCase {
         defaultScreenshot.lifetime = .keepAlways
         add(defaultScreenshot)
 
-        let yuanRow = app.descendants(matching: .any)["converter.row.CNY"]
+        let yuanRow = app.staticTexts["CNY"]
         XCTAssertTrue(yuanRow.waitForExistence(timeout: 5))
         yuanRow.click()
         let yuanInput = app.textFields["converter.input.CNY"]

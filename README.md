@@ -100,6 +100,7 @@ Version `1.8` includes:
 - Export and import settings, profiles, data sources, and API keys through a versioned JSON backup with a preview and recovery copy.
 - Improves text, currency names, and number and date formatting across all 11 supported languages.
 - Adds isolated UI and backup tests on GitHub macOS runners.
+- Makes Settings easier to scan with larger text, compact navigation, and clearer alert controls.
 
 ## Installation
 

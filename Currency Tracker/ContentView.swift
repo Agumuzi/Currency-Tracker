@@ -965,7 +965,6 @@ private struct PanelCurrencyConverterView: View {
             activate(code)
             focusedCode = code
         }
-        .accessibilityIdentifier("converter.row.\(code)")
     }
 
     private func rowBackground(isActive: Bool) -> some View {

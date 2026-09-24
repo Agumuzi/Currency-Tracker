@@ -5,6 +5,7 @@
 - Makes the selected currency the converter base and separates editable amounts from calculated results.
 - Adds versioned JSON configuration export and previewed import with a local recovery copy, including API keys.
 - Improves localization, currency names, and number and date display across 11 languages.
+- Makes Settings easier to scan with larger text and a compact sidebar, and improves alert controls in narrow windows.
 - Isolates UI test storage and removes process termination by the production bundle identifier.
 - Requires the tagged commit to pass macOS tests before packaging the release.
 
