@@ -396,3 +396,23 @@
 "请重新选择包含金额的文本，例如 1234 USD、€299、599.99 土耳其里拉 或 1,234.56。" = "Vuelva a seleccionar el texto que contenga una cantidad, como 1234 USD, 299 €, 599,99 liras turcas o 1234,56.";
 "这个币种已经在换算页里。" = "Esta moneda ya está en la página de conversión.";
 "这个货币对已经在展示列表里。" = "Este par de divisas ya está en la lista de visualización.";
+
+/* 1.8: converter, backup, onboarding and missing UI labels */
+"Currency Tracker 用辅助功能权限在你按下全局快捷键时读取当前选中的文本，并在部分应用中使用复制动作作为回退。" = "Currency Tracker usa permisos de accesibilidad para leer el texto actualmente seleccionado cuando presionas una tecla de acceso directo global y usa la acción de copiar como alternativa en algunas aplicaciones.";
+"下一步" = "Siguiente paso";
+"不开启时，提醒仍可保存在应用内，但触发后不会弹出系统通知。" = "Cuando no está habilitado, el recordatorio aún se puede guardar en la aplicación, pero la notificación del sistema no aparecerá después de activarse.";
+"不开启时，每次重启电脑后需要手动打开应用，后台刷新和快捷键监听也会等应用启动后才工作。" = "Cuando no está habilitado, la aplicación debe abrirse manualmente cada vez que se reinicia la computadora. La actualización en segundo plano y el monitoreo de teclas de acceso directo también esperarán a que la aplicación se inicie antes de funcionar.";
+"不开启时，系统级选中文本换算会不可用，或者只能先手动复制文字再回到应用内换算。" = "Cuando no está habilitado, la conversión de texto seleccionado a nivel del sistema no estará disponible, o solo podrás copiar el texto manualmente y luego regresar a la conversión en la aplicación.";
+"先了解接下来要开启哪些能力" = "Primero, comprenda qué habilidades deben habilitarse a continuación.";
+"完成" = "Completo";
+"开启通知权限" = "Activar permisos de notificación";
+"打开登录项设置" = "Abrir la configuración del elemento de inicio de sesión";
+"打开辅助功能设置" = "Abrir configuración de accesibilidad";
+"用于全局快捷键读取选中文本。" = "se utiliza para teclas de acceso directo globales para leer el texto seleccionado.";
+"用于汇率提醒触发时弹出系统通知。" = "Se utiliza para mostrar una notificación del sistema cuando se activa el recordatorio del tipo de cambio.";
+"用于重启电脑后自动恢复菜单栏和后台能力。" = "Se utiliza para restaurar automáticamente la barra de menú y las capacidades de fondo después de reiniciar la computadora.";
+"登录项权限用于开机后自动启动 Currency Tracker，让菜单栏汇率、后台刷新和全局快捷键监听持续可用。" = "El permiso del elemento de inicio de sesión se utiliza para iniciar automáticamente el rastreador de divisas después del inicio, de modo que el tipo de cambio de la barra de menú, la actualización en segundo plano y el monitoreo de teclas de acceso directo global estén disponibles continuamente.";
+"让全局快捷键可以读取选中文本" = "Permitir que las teclas de acceso directo globales lean el texto seleccionado";
+"让应用在重启电脑后自动恢复" = "Deje que la aplicación se reanude automáticamente después de reiniciar la computadora";
+"让汇率提醒可以通过系统通知出现" = "Permitir que aparezcan alertas de tipo de cambio a través de notificaciones del sistema";
+"通知权限用于在汇率提醒达到阈值时弹出系统通知，让你不必一直打开应用查看。" = "El permiso de notificación se utiliza para mostrar una notificación del sistema cuando el recordatorio del tipo de cambio alcanza el umbral, de modo que no tenga que seguir abriendo la aplicación para verlo.";

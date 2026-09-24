@@ -408,3 +408,23 @@
 "请重新选择包含金额的文本，例如 1234 USD、€299、599.99 土耳其里拉 或 1,234.56。" = "Please reselect text that contains an amount, such as 1234 USD, €299, 599.99 Turkish Lira, or 1,234.56.";
 "这个币种已经在换算页里。" = "This currency is already on the conversion page.";
 "这个货币对已经在展示列表里。" = "This currency pair is already in the display list.";
+
+/* 1.8: converter, backup, onboarding and missing UI labels */
+"Currency Tracker 用辅助功能权限在你按下全局快捷键时读取当前选中的文本，并在部分应用中使用复制动作作为回退。" = "Currency Tracker uses accessibility permissions to read the currently selected text when you press a global shortcut key, and uses the copy action as a fallback in some apps.";
+"下一步" = "Next";
+"不开启时，提醒仍可保存在应用内，但触发后不会弹出系统通知。" = "When not enabled, the reminder can still be saved in the app, but the system notification will not pop up after being triggered.";
+"不开启时，每次重启电脑后需要手动打开应用，后台刷新和快捷键监听也会等应用启动后才工作。" = "When not enabled, the application needs to be opened manually every time the computer is restarted. Background refresh and shortcut key monitoring will also wait for the application to start before working.";
+"不开启时，系统级选中文本换算会不可用，或者只能先手动复制文字再回到应用内换算。" = "When not enabled, system-level selected text conversion will be unavailable, or you can only manually copy the text and then return to the in-app conversion.";
+"先了解接下来要开启哪些能力" = "Choose which features to enable";
+"完成" = "Complete";
+"开启通知权限" = "Enable Notifications";
+"打开登录项设置" = "Open Login Items Settings";
+"打开辅助功能设置" = "Open Accessibility Settings";
+"用于全局快捷键读取选中文本。" = "Reads selected text for the global shortcut.";
+"用于汇率提醒触发时弹出系统通知。" = "Shows a system notification when a rate alert triggers.";
+"用于重启电脑后自动恢复菜单栏和后台能力。" = "Restores the menu bar and background features after login.";
+"登录项权限用于开机后自动启动 Currency Tracker，让菜单栏汇率、后台刷新和全局快捷键监听持续可用。" = "The login item permission is used to automatically start the Currency Tracker after booting, so that the menu bar currency rate, background refresh and global shortcut key monitoring are continuously available.";
+"让全局快捷键可以读取选中文本" = "Let the global shortcut read selected text";
+"让应用在重启电脑后自动恢复" = "Restart the app automatically after login";
+"让汇率提醒可以通过系统通知出现" = "Show rate alerts as system notifications";
+"通知权限用于在汇率提醒达到阈值时弹出系统通知，让你不必一直打开应用查看。" = "The notification permission is used to pop up a system notification when the exchange rate reminder reaches the threshold, so that you do not have to keep opening the app to view it.";

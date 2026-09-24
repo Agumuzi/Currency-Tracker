@@ -40,6 +40,10 @@ def referenced_keys() -> set[str]:
             for key in pattern.findall(code):
                 if '\\(' not in key and (any(ch.isalpha() for ch in key) or any(ord(ch) > 127 for ch in key)):
                     result.add(key)
+    welcome = (APP / 'SettingsView.swift').read_text(encoding='utf-8').split('struct FirstRunWelcomeView: View', 1)[1]
+    for key in re.findall(r'"((?:[^"\\]|\\.)*)"', welcome):
+        if '\\(' not in key and any('\u4e00' <= ch <= '\u9fff' for ch in key):
+            result.add(key)
     return result
 
 

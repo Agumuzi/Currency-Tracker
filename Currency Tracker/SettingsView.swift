@@ -374,7 +374,7 @@ struct SettingsView: View {
                 Text("管理汇率展示、刷新行为和系统级文本换算入口")
                     .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
-                    .lineLimit(2)
+                    .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -2444,7 +2444,7 @@ struct FirstRunWelcomeView: View {
             bottomBar
         }
         .padding(24)
-        .frame(width: 620, height: 480, alignment: .leading)
+        .frame(width: 680, height: 540, alignment: .leading)
         .background(
             SettingsInsetGlassBackground(cornerRadius: 0, material: .regularMaterial)
         )

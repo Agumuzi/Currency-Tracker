@@ -77,6 +77,11 @@ final class Currency_TrackerUITests: XCTestCase {
                 .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
             app.launch()
             XCTAssertTrue(app.buttons["settings.sidebar.backup"].waitForExistence(timeout: 8), "Missing backup section in \(language)")
+            if language != "zh-Hans" {
+                XCTAssertFalse(app.staticTexts["先了解接下来要开启哪些能力"].exists, "Untranslated welcome subtitle in \(language)")
+                XCTAssertFalse(app.staticTexts["用于全局快捷键读取选中文本。"].exists, "Untranslated permission detail in \(language)")
+                XCTAssertFalse(app.buttons["下一步"].exists, "Untranslated welcome button in \(language)")
+            }
             app.buttons["settings.sidebar.backup"].click()
             XCTAssertTrue(app.buttons["settings.backup.export"].waitForExistence(timeout: 5))
             let attachment = XCTAttachment(screenshot: app.screenshot())

@@ -807,7 +807,7 @@ final class WelcomeWindowController: NSObject, NSWindowDelegate {
             window.isReleasedWhenClosed = false
             window.isOpaque = true
             window.backgroundColor = .windowBackgroundColor
-            window.setContentSize(NSSize(width: 620, height: 480))
+            window.setContentSize(NSSize(width: 680, height: 540))
             window.center()
             windowController = NSWindowController(window: window)
         } else if let window = windowController?.window {
