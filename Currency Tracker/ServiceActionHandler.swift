@@ -32,7 +32,7 @@ final class ServiceActionHandler: NSObject {
     ) {
         guard let selectedText = pasteboard.string(forType: .string),
               selectedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false else {
-            error.pointee = "无法读取选中文本" as NSString
+            error.pointee = String(localized: "无法读取选中文本") as NSString
             Task { @MainActor in
                 await coordinator.handleSelectedText("", source: .services)
             }

@@ -5,7 +5,6 @@
 //  Created by Thomas Tao on 4/10/26.
 //
 
-import AppKit
 import XCTest
 
 final class Currency_TrackerUITests: XCTestCase {
@@ -17,7 +16,6 @@ final class Currency_TrackerUITests: XCTestCase {
         continueAfterFailure = false
 
         // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-        terminateExistingAppInstances()
     }
 
     override func tearDownWithError() throws {
@@ -33,6 +31,8 @@ final class Currency_TrackerUITests: XCTestCase {
         app.launchEnvironment["CURRENCY_TRACKER_RESET_DEFAULTS"] = "1"
         app.launchEnvironment["CURRENCY_TRACKER_UI_TEST_SHOW_SETTINGS"] = "1"
         app.launchEnvironment["CURRENCY_TRACKER_USE_IN_MEMORY_SECRETS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_TEST_DATA_DIR"] = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
         app.launch()
 
         XCTAssertTrue(app.buttons["settings.sidebar.rates"].waitForExistence(timeout: 5))
@@ -50,21 +50,118 @@ final class Currency_TrackerUITests: XCTestCase {
 
     @MainActor
     func testLaunchPerformance() throws {
-        terminateExistingAppInstances()
         let app = XCUIApplication()
+        let suiteName = "CurrencyTrackerUITests.\(UUID().uuidString)"
+        app.launchEnvironment["CURRENCY_TRACKER_DEFAULTS_SUITE"] = suiteName
+        app.launchEnvironment["CURRENCY_TRACKER_RESET_DEFAULTS"] = "1"
         app.launchEnvironment["CURRENCY_TRACKER_USE_IN_MEMORY_SECRETS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_TEST_DATA_DIR"] = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
         app.launch()
         XCTAssertTrue(app.state == .runningForeground || app.state == .runningBackground)
         app.terminate()
     }
 
-    private func terminateExistingAppInstances() {
-        let bundleIdentifier = "com.thomas.Currency-Tracker"
-        for runningApplication in NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier) {
-            if runningApplication.terminate() == false {
-                runningApplication.forceTerminate()
+    @MainActor
+    func testAllSupportedLanguageSettingsScreenshots() throws {
+        let languages = ["zh-Hans", "zh-Hant", "en", "ru", "ja", "ko", "de", "fr", "es", "it", "pt-BR"]
+        for language in languages {
+            let app = XCUIApplication()
+            let suiteName = "CurrencyTrackerUITests.\(UUID().uuidString)"
+            app.launchArguments += ["-AppleLanguages", "(\(language))", "-CurrencyTrackerUITestShowSettings"]
+            app.launchEnvironment["CURRENCY_TRACKER_DEFAULTS_SUITE"] = suiteName
+            app.launchEnvironment["CURRENCY_TRACKER_RESET_DEFAULTS"] = "1"
+            app.launchEnvironment["CURRENCY_TRACKER_UI_TEST_SHOW_SETTINGS"] = "1"
+            app.launchEnvironment["CURRENCY_TRACKER_USE_IN_MEMORY_SECRETS"] = "1"
+            app.launchEnvironment["CURRENCY_TRACKER_TEST_DATA_DIR"] = FileManager.default.temporaryDirectory
+                .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
+            app.launch()
+            XCTAssertTrue(app.buttons["settings.sidebar.backup"].waitForExistence(timeout: 8), "Missing backup section in \(language)")
+            if language != "zh-Hans" {
+                XCTAssertFalse(app.staticTexts["先了解接下来要开启哪些能力"].exists, "Untranslated welcome subtitle in \(language)")
+                XCTAssertFalse(app.staticTexts["用于全局快捷键读取选中文本。"].exists, "Untranslated permission detail in \(language)")
+                XCTAssertFalse(app.buttons["下一步"].exists, "Untranslated welcome button in \(language)")
             }
+            app.buttons["settings.sidebar.backup"].click()
+            XCTAssertTrue(app.buttons["settings.backup.export"].waitForExistence(timeout: 5))
+            let attachment = XCTAttachment(screenshot: app.screenshot())
+            attachment.name = "settings-\(language)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+            app.terminate()
         }
+    }
+
+    @MainActor
+    func testSettingsNavigationScreenshots() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-AppleLanguages", "(en)", "-CurrencyTrackerUITestShowSettings"]
+        app.launchEnvironment["CURRENCY_TRACKER_DEFAULTS_SUITE"] = "CurrencyTrackerUITests.\(UUID().uuidString)"
+        app.launchEnvironment["CURRENCY_TRACKER_RESET_DEFAULTS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_UI_TEST_SHOW_SETTINGS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_USE_IN_MEMORY_SECRETS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_TEST_DATA_DIR"] = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
+        app.launch()
+
+        let sections = ["general", "language", "rates", "profiles", "backup", "alerts",
+                        "refresh", "dataSources", "permissions", "updates", "diagnostics", "system"]
+        for section in sections {
+            let button = app.buttons["settings.sidebar.\(section)"]
+            XCTAssertTrue(button.waitForExistence(timeout: 5), "Missing \(section) section")
+            button.click()
+            let attachment = XCTAttachment(screenshot: app.screenshot())
+            attachment.name = "settings-flow-\(section)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+        }
+    }
+
+    @MainActor
+    func testConverterSwitchesCurrenciesWithBlankEditableInput() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-AppleLanguages", "(en)"]
+        app.launchEnvironment["CURRENCY_TRACKER_DEFAULTS_SUITE"] = "CurrencyTrackerUITests.\(UUID().uuidString)"
+        app.launchEnvironment["CURRENCY_TRACKER_RESET_DEFAULTS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_UI_TEST_SHOW_PANEL"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_USE_IN_MEMORY_SECRETS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_TEST_DATA_DIR"] = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
+        app.launch()
+
+        let toggle = app.buttons["panel.toggleConverter"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 8))
+        XCTAssertTrue(toggle.isEnabled)
+        toggle.click()
+        let openedScreenshot = XCTAttachment(screenshot: app.screenshot())
+        openedScreenshot.name = "converter-after-toggle"
+        openedScreenshot.lifetime = .keepAlways
+        add(openedScreenshot)
+        let usd = app.staticTexts["converter.result.USD"]
+        XCTAssertTrue(usd.waitForExistence(timeout: 5), app.debugDescription)
+        let exampleResult = usd.value as? String ?? ""
+        XCTAssertFalse(exampleResult.isEmpty)
+        let defaultScreenshot = XCTAttachment(screenshot: app.screenshot())
+        defaultScreenshot.name = "converter-default-base"
+        defaultScreenshot.lifetime = .keepAlways
+        add(defaultScreenshot)
+
+        let yuanRow = app.buttons["converter.select.CNY"]
+        XCTAssertTrue(yuanRow.waitForExistence(timeout: 5))
+        yuanRow.click()
+        let yuanInput = app.textFields["converter.input.CNY"]
+        XCTAssertTrue(yuanInput.waitForExistence(timeout: 5))
+        yuanInput.click()
+        yuanInput.typeText("35")
+        let editedScreenshot = XCTAttachment(screenshot: app.screenshot())
+        editedScreenshot.name = "converter-yuan-input"
+        editedScreenshot.lifetime = .keepAlways
+        add(editedScreenshot)
+        XCTAssertEqual(yuanInput.value as? String, "35")
+        let convertedUSD = app.staticTexts["converter.result.USD"]
+        XCTAssertTrue(convertedUSD.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertNotEqual(convertedUSD.value as? String, exampleResult)
+        XCTAssertEqual(app.staticTexts["converter.result.CNY"].value as? String, "35")
     }
 
 }

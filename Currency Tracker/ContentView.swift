@@ -477,7 +477,8 @@ struct ContentView: View {
             }
             .buttonStyle(.plain)
             .disabled(!canOpenConverter)
-            .help(panelContentMode == .rates ? "打开换算界面" : "返回汇率列表")
+            .accessibilityIdentifier("panel.toggleConverter")
+            .help(panelContentMode == .rates ? String(localized: "换算") : String(localized: "汇率"))
         }
         .foregroundStyle(.secondary)
         .padding(.horizontal, 10)
@@ -554,7 +555,7 @@ struct ContentView: View {
             return 112
         }
 
-        return 12 + CGFloat(converterCurrencyCodes.count) * 62 + CGFloat(max(0, converterCurrencyCodes.count - 1)) * 10 + 34
+        return 12 + CGFloat(converterCurrencyCodes.count) * 62 + CGFloat(max(0, converterCurrencyCodes.count - 1)) * 10 + 76
     }
 
     private var shouldScrollConverter: Bool {
@@ -822,11 +823,9 @@ private struct PanelCurrencyConverterView: View {
     let fractionDigits: Int
     let showsFlags: Bool
 
-    @State private var inputTexts: [String: String] = [:]
-    @State private var userEnteredTexts: [String: String] = [:]
-    @State private var activeCode: String?
-    @State private var isSynchronizing = false
+    @State private var state = PanelConverterState()
     @FocusState private var focusedCode: String?
+    @FocusState private var focusedCurrencySelector: String?
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -838,11 +837,11 @@ private struct PanelCurrencyConverterView: View {
                     converterRow(for: code)
                 }
 
-                if !unreachableCodes.isEmpty {
+                if !state.unreachableCodes.isEmpty {
                     HStack(spacing: 7) {
                         Image(systemName: "exclamationmark.circle.fill")
                             .font(.system(size: 10, weight: .semibold))
-                        Text(String(format: String(localized: "缺少 %@ 的汇率路径"), unreachableCodes.joined(separator: "、")))
+                        Text(String(format: String(localized: "缺少 %@ 的汇率路径"), state.unreachableCodes.joined(separator: "、")))
                             .font(.system(size: 10, weight: .medium, design: .rounded))
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
@@ -859,22 +858,27 @@ private struct PanelCurrencyConverterView: View {
             }
         }
         .onAppear {
-            initializeIfNeeded()
+            recalculate()
         }
         .onChange(of: currencyCodes) { _, _ in
-            reconcileInputs()
+            recalculate()
         }
         .onChange(of: rateSignature) { _, _ in
-            recalculateFromActive()
+            recalculate()
         }
         .onChange(of: fractionDigits) { _, _ in
-            recalculateFromActive()
+            recalculate()
         }
         .onChange(of: displayBaseAmount) { _, _ in
-            if activeCode == nil || activeTextIsEmpty {
-                initializeWithDefaultAmount()
-            } else {
-                recalculateFromActive()
+            recalculate()
+        }
+        .onChange(of: focusedCode) { _, code in
+            if let code { activate(code) }
+        }
+        .onChange(of: focusedCurrencySelector) { _, code in
+            if let code {
+                activate(code)
+                focusedCode = code
             }
         }
     }
@@ -903,25 +907,6 @@ private struct PanelCurrencyConverterView: View {
         .joined(separator: "|")
     }
 
-    private var activeTextIsEmpty: Bool {
-        guard let activeCode else {
-            return true
-        }
-
-        return (inputTexts[activeCode] ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    private var unreachableCodes: [String] {
-        guard let activeCode,
-              let sourceText = inputTexts[activeCode],
-              AmountInputParsing.parseDecimal(sourceText) != nil else {
-            return []
-        }
-
-        let multipliers = graph.conversionMultipliers(from: activeCode)
-        return currencyCodes.filter { $0 != activeCode && multipliers[$0] == nil }
-    }
-
     private func converterRow(for code: String) -> some View {
         HStack(spacing: 12) {
             if showsFlags {
@@ -942,31 +927,53 @@ private struct PanelCurrencyConverterView: View {
                     )
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(code)
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
-                    .lineLimit(1)
-                Text(CurrencyCatalog.name(for: code))
-                    .font(.system(size: 10, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+            Button {
+                activate(code)
+                focusedCode = code
+            } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(code)
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                    Text(CurrencyCatalog.name(for: code))
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
+            .buttonStyle(.plain)
+            .focused($focusedCurrencySelector, equals: code)
+            .accessibilityIdentifier("converter.select.\(code)")
 
             Spacer(minLength: 10)
 
-            TextField("0", text: binding(for: code))
-                .textFieldStyle(.plain)
-                .font(.system(size: 21, weight: .semibold, design: .rounded))
-                .multilineTextAlignment(.trailing)
-                .focused($focusedCode, equals: code)
-                .onTapGesture {
-                    activate(code)
+            VStack(alignment: .trailing, spacing: 5) {
+                Text(state.displayTexts[code] ?? "—")
+                    .font(.system(size: 21, weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .accessibilityIdentifier("converter.result.\(code)")
+
+                if state.activeCode == code {
+                    TextField("输入金额", text: binding)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .multilineTextAlignment(.trailing)
+                        .focused($focusedCode, equals: code)
+                        .accessibilityIdentifier("converter.input.\(code)")
+                        .frame(width: 142)
+                    if state.hasInvalidInput {
+                        Text("金额格式无效")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.red)
+                    }
                 }
-                .frame(minWidth: 116, maxWidth: 190, alignment: .trailing)
+            }
+            .frame(minWidth: 116, maxWidth: 190, alignment: .trailing)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, minHeight: 58, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: state.activeCode == code ? 96 : 58, alignment: .leading)
         .background(rowBackground(isActive: isRowActive(code)))
         .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .onTapGesture {
@@ -1001,123 +1008,38 @@ private struct PanelCurrencyConverterView: View {
         colorScheme == .dark ? Color.white.opacity(0.13) : Color.black.opacity(0.070)
     }
 
-    private func binding(for code: String) -> Binding<String> {
+    private var binding: Binding<String> {
         Binding(
-            get: {
-                inputTexts[code] ?? ""
-            },
+            get: { state.inputText },
             set: { newValue in
-                handleInputChange(newValue, sourceCode: code)
+                state.edit(
+                    newValue,
+                    currencyCodes: currencyCodes,
+                    graph: graph,
+                    displayBaseAmount: displayBaseAmount,
+                    fractionDigits: fractionDigits
+                )
             }
         )
     }
 
-    private func initializeIfNeeded() {
-        guard activeCode == nil || currencyCodes.contains(activeCode ?? "") == false else {
-            recalculateFromActive()
-            return
-        }
-
-        initializeWithDefaultAmount()
-    }
-
-    private func initializeWithDefaultAmount() {
-        guard let firstCode = currencyCodes.first else {
-            inputTexts = [:]
-            userEnteredTexts = [:]
-            activeCode = nil
-            return
-        }
-
-        let defaultText = "\(CurrencyDisplayFormatting.normalizedDisplayBaseAmount(displayBaseAmount))"
-        inputTexts[firstCode] = defaultText
-        userEnteredTexts[firstCode] = defaultText
-        activeCode = firstCode
-        focusedCode = firstCode
-        synchronize(sourceCode: firstCode, sourceText: defaultText)
-    }
-
-    private func reconcileInputs() {
-        let validCodes = Set(currencyCodes)
-        inputTexts = inputTexts.filter { validCodes.contains($0.key) }
-        userEnteredTexts = userEnteredTexts.filter { validCodes.contains($0.key) }
-
-        if let activeCode, validCodes.contains(activeCode) {
-            recalculateFromActive()
-        } else {
-            initializeWithDefaultAmount()
-        }
-    }
-
-    private func recalculateFromActive() {
-        guard let activeCode else {
-            initializeWithDefaultAmount()
-            return
-        }
-
-        let sourceText = inputTexts[activeCode] ?? ""
-        synchronize(sourceCode: activeCode, sourceText: sourceText)
+    private func recalculate() {
+        state.recalculate(
+            currencyCodes: currencyCodes,
+            graph: graph,
+            displayBaseAmount: displayBaseAmount,
+            fractionDigits: fractionDigits
+        )
     }
 
     private func activate(_ code: String) {
-        guard (inputTexts[code] ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return
-        }
-
-        let defaultText = "\(CurrencyDisplayFormatting.normalizedDisplayBaseAmount(displayBaseAmount))"
-        inputTexts[code] = defaultText
-        userEnteredTexts[code] = defaultText
-        activeCode = code
-        synchronize(sourceCode: code, sourceText: defaultText)
-    }
-
-    private func handleInputChange(_ newValue: String, sourceCode: String) {
-        inputTexts[sourceCode] = newValue
-        guard !isSynchronizing else {
-            return
-        }
-
-        if newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            userEnteredTexts.removeValue(forKey: sourceCode)
-        } else {
-            userEnteredTexts[sourceCode] = newValue
-        }
-        activeCode = sourceCode
-        synchronize(sourceCode: sourceCode, sourceText: newValue)
-    }
-
-    private func synchronize(sourceCode: String, sourceText: String) {
-        let trimmed = sourceText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            clearCounterpartTexts(sourceCode: sourceCode)
-            return
-        }
-
-        guard let amount = AmountInputParsing.parseDecimal(trimmed) else {
-            clearCounterpartTexts(sourceCode: sourceCode)
-            return
-        }
-
-        let sourceAmount = NSDecimalNumber(decimal: amount).doubleValue
-        let multipliers = graph.conversionMultipliers(from: sourceCode)
-
-        isSynchronizing = true
-        for code in currencyCodes where code != sourceCode {
-            if let multiplier = multipliers[code] {
-                inputTexts[code] = displayText(for: code, amount: sourceAmount * multiplier)
-            } else {
-                inputTexts[code] = ""
-            }
-        }
-        isSynchronizing = false
-    }
-
-    private func clearCounterpartTexts(sourceCode: String) {
-        isSynchronizing = true
-        for code in currencyCodes where code != sourceCode {
-            inputTexts[code] = ""
-        }
-        isSynchronizing = false
+        state.select(
+            code,
+            currencyCodes: currencyCodes,
+            graph: graph,
+            displayBaseAmount: displayBaseAmount,
+            fractionDigits: fractionDigits
+        )
     }
 
     private func isRowActive(_ code: String) -> Bool {
@@ -1125,29 +1047,7 @@ private struct PanelCurrencyConverterView: View {
             return focusedCode == code
         }
 
-        return activeCode == code
-    }
-
-    private func displayText(for code: String, amount: Double) -> String {
-        if let enteredText = userEnteredTexts[code],
-           shouldPreserveUserEnteredText(enteredText, for: amount) {
-            return enteredText
-        }
-
-        return CurrencyDisplayFormatting.plainNumber(amount, fractionDigits: fractionDigits)
-    }
-
-    private func shouldPreserveUserEnteredText(_ text: String, for amount: Double) -> Bool {
-        guard let enteredAmount = AmountInputParsing.parseDecimal(text) else {
-            return false
-        }
-
-        let enteredValue = NSDecimalNumber(decimal: enteredAmount).doubleValue
-        guard enteredValue.isFinite, amount.isFinite else {
-            return false
-        }
-
-        return abs(enteredValue - amount) < 0.000_000_5
+        return state.activeCode == code
     }
 }
 
@@ -1161,17 +1061,9 @@ private struct CurrencyCardView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var selectedRange: CardTrendRange = .oneMonth
-    @State private var baseAmountText = ""
-    @State private var quoteAmountText = ""
-    @State private var isSynchronizingConversion = false
-    @State private var lastEditedField: ConversionField = .base
+    @State private var converterState = PanelConverterState()
     @State private var selectedDetailMode: CardDetailMode = .trend
-    @FocusState private var focusedField: ConversionField?
-
-    private enum ConversionField {
-        case base
-        case quote
-    }
+    @FocusState private var focusedCode: String?
 
     private enum CardDetailMode: String, CaseIterable, Identifiable {
         case trend
@@ -1225,21 +1117,27 @@ private struct CurrencyCardView: View {
             expandCard()
         }
         .onAppear {
-            resetConversionFields()
+            recalculateConversion()
         }
         .onChange(of: isExpanded) { _, newValue in
             if newValue {
                 selectedDetailMode = .trend
-                resetConversionFields()
-                focusedField = nil
+                converterState = PanelConverterState()
+                recalculateConversion()
+                focusedCode = nil
             } else {
-                focusedField = nil
+                focusedCode = nil
             }
         }
         .onChange(of: card.snapshot?.rate) { _, _ in
             if isExpanded {
-                refreshConversionForCurrentFocus()
+                recalculateConversion()
             }
+        }
+        .onChange(of: card.displayBaseAmount) { _, _ in recalculateConversion() }
+        .onChange(of: card.fractionDigits) { _, _ in recalculateConversion() }
+        .onChange(of: focusedCode) { _, code in
+            if let code { activateConversion(code) }
         }
         .contextMenu {
             Button("复制货币对") {
@@ -1409,24 +1307,14 @@ private struct CurrencyCardView: View {
     @ViewBuilder
     private var converterSection: some View {
         HStack(spacing: 10) {
-            converterField(
-                title: card.pair.baseCode,
-                text: converterBinding(for: .base),
-                field: .base,
-                alignment: .leading
-            )
+            converterField(code: card.pair.baseCode, alignment: .leading)
 
             Text("=")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundStyle(.secondary)
                 .padding(.top, 14)
 
-            converterField(
-                title: card.pair.quoteCode,
-                text: converterBinding(for: .quote),
-                field: .quote,
-                alignment: .trailing
-            )
+            converterField(code: card.pair.quoteCode, alignment: .trailing)
         }
         .frame(height: 132, alignment: .center)
     }
@@ -1601,30 +1489,39 @@ private struct CurrencyCardView: View {
             )
     }
 
-    private func converterField(
-        title: String,
-        text: Binding<String>,
-        field: ConversionField,
-        alignment: Alignment
-    ) -> some View {
+    private func converterField(code: String, alignment: Alignment) -> some View {
         VStack(alignment: alignment == .leading ? .leading : .trailing, spacing: 6) {
-            Text(title)
+            Text(code)
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)
 
-            TextField("0", text: text)
-                .textFieldStyle(.plain)
+            Text(converterState.displayTexts[code] ?? "—")
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
-                .multilineTextAlignment(alignment == .leading ? .leading : .trailing)
-                .focused($focusedField, equals: field)
-                .onTapGesture {
-                    focusedField = field
-                    lastEditedField = field
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .accessibilityIdentifier("card.converter.result.\(code)")
+
+            if converterState.activeCode == code {
+                TextField("输入金额", text: converterBinding)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .focused($focusedCode, equals: code)
+                    .accessibilityIdentifier("card.converter.input.\(code)")
+                if converterState.hasInvalidInput {
+                    Text("金额格式无效")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.red)
                 }
+            }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 11)
         .frame(maxWidth: .infinity, alignment: alignment)
+        .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .onTapGesture {
+            activateConversion(code)
+            focusedCode = code
+        }
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(colorScheme == .dark ? Color.black.opacity(0.18) : Color(red: 0.955, green: 0.962, blue: 0.974))
@@ -1641,7 +1538,8 @@ private struct CurrencyCardView: View {
                 Button {
                     selectedDetailMode = mode
                     if mode == .converter {
-                        focusedField = .base
+                        recalculateConversion()
+                        focusedCode = card.pair.baseCode
                     }
                 } label: {
                     HStack(spacing: 6) {
@@ -1689,111 +1587,46 @@ private struct CurrencyCardView: View {
         colorScheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.08)
     }
 
-    private func converterBinding(for field: ConversionField) -> Binding<String> {
+    private var converterBinding: Binding<String> {
         Binding(
-            get: {
-                switch field {
-                case .base:
-                    return baseAmountText
-                case .quote:
-                    return quoteAmountText
-                }
-            },
+            get: { converterState.inputText },
             set: { newValue in
-                handleConversionChange(newValue, editedField: field)
+                converterState.edit(
+                    newValue,
+                    currencyCodes: conversionCodes,
+                    graph: conversionGraph,
+                    displayBaseAmount: card.displayBaseAmount,
+                    fractionDigits: card.fractionDigits
+                )
             }
         )
     }
 
-    private func resetConversionFields() {
-        guard let snapshot = card.snapshot else {
-            baseAmountText = ""
-            quoteAmountText = ""
-            return
-        }
-
-        lastEditedField = .base
-        synchronizeFromBase(Double(card.displayBaseAmount), snapshot: snapshot)
+    private var conversionCodes: [String] {
+        [card.pair.baseCode, card.pair.quoteCode]
     }
 
-    private func handleConversionChange(_ newValue: String, editedField: ConversionField) {
-        if isSynchronizingConversion {
-            setText(newValue, for: editedField)
-            return
-        }
-
-        setText(newValue, for: editedField)
-        lastEditedField = editedField
-
-        guard isExpanded, let snapshot = card.snapshot else {
-            return
-        }
-
-        let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty {
-            setCounterpartText("", for: editedField)
-            return
-        }
-
-        guard let value = parseAmount(trimmed) else {
-            setCounterpartText("", for: editedField)
-            return
-        }
-
-        switch editedField {
-        case .base:
-            let quoteAmount = value * unitRate(from: snapshot)
-            setCounterpartText(formattedAmount(quoteAmount), for: editedField)
-        case .quote:
-            let unitRate = unitRate(from: snapshot)
-            guard unitRate > 0 else {
-                return
-            }
-
-            let baseAmount = value / unitRate
-            setCounterpartText(formattedAmount(baseAmount), for: editedField)
-        }
+    private var conversionGraph: CurrencyConversionGraph {
+        CurrencyConversionGraph(snapshots: card.snapshot.map { [$0] } ?? [])
     }
 
-    private func refreshConversionForCurrentFocus() {
-        guard let snapshot = card.snapshot else {
-            return
-        }
-
-        if lastEditedField == .quote, let quoteValue = parseAmount(quoteAmountText) {
-            synchronizeFromQuote(quoteValue, snapshot: snapshot)
-            return
-        }
-
-        if let baseValue = parseAmount(baseAmountText) {
-            synchronizeFromBase(baseValue, snapshot: snapshot)
-            return
-        }
-
-        synchronizeFromBase(Double(card.pair.baseAmount), snapshot: snapshot)
+    private func recalculateConversion() {
+        converterState.recalculate(
+            currencyCodes: conversionCodes,
+            graph: conversionGraph,
+            displayBaseAmount: card.displayBaseAmount,
+            fractionDigits: card.fractionDigits
+        )
     }
 
-    private func synchronizeFromBase(_ baseAmount: Double, snapshot: CurrencySnapshot) {
-        let quoteAmount = baseAmount * unitRate(from: snapshot)
-
-        isSynchronizingConversion = true
-        baseAmountText = wholeAmountTextIfPossible(baseAmount)
-        quoteAmountText = formattedAmount(quoteAmount)
-        isSynchronizingConversion = false
-    }
-
-    private func synchronizeFromQuote(_ quoteAmount: Double, snapshot: CurrencySnapshot) {
-        let unitRate = unitRate(from: snapshot)
-        guard unitRate > 0 else {
-            return
-        }
-
-        let baseAmount = quoteAmount / unitRate
-
-        isSynchronizingConversion = true
-        quoteAmountText = formattedAmount(quoteAmount)
-        baseAmountText = formattedAmount(baseAmount)
-        isSynchronizingConversion = false
+    private func activateConversion(_ code: String) {
+        converterState.select(
+            code,
+            currencyCodes: conversionCodes,
+            graph: conversionGraph,
+            displayBaseAmount: card.displayBaseAmount,
+            fractionDigits: card.fractionDigits
+        )
     }
 
     private func toggleExpanded() {
@@ -1807,52 +1640,8 @@ private struct CurrencyCardView: View {
 
     private func expandCard() {
         expandedCardID = card.id
-        resetConversionFields()
-        focusedField = .base
-    }
-
-    private func parseAmount(_ text: String) -> Double? {
-        guard let amount = AmountInputParsing.parseDecimal(text) else {
-            return nil
-        }
-
-        return NSDecimalNumber(decimal: amount).doubleValue
-    }
-
-    private func setText(_ value: String, for field: ConversionField) {
-        switch field {
-        case .base:
-            baseAmountText = value
-        case .quote:
-            quoteAmountText = value
-        }
-    }
-
-    private func setCounterpartText(_ value: String, for editedField: ConversionField) {
-        isSynchronizingConversion = true
-        switch editedField {
-        case .base:
-            quoteAmountText = value
-        case .quote:
-            baseAmountText = value
-        }
-        isSynchronizingConversion = false
-    }
-
-    private func formattedAmount(_ value: Double) -> String {
-        CurrencyDisplayFormatting.plainNumber(value, fractionDigits: card.fractionDigits)
-    }
-
-    private func wholeAmountTextIfPossible(_ value: Double) -> String {
-        if value.rounded() == value {
-            return String(Int(value))
-        }
-
-        return formattedAmount(value)
-    }
-
-    private func unitRate(from snapshot: CurrencySnapshot) -> Double {
-        snapshot.rate / Double(max(card.pair.baseAmount, 1))
+        converterState = PanelConverterState()
+        recalculateConversion()
     }
 
     private func copyText(_ text: String) {
@@ -1863,8 +1652,8 @@ private struct CurrencyCardView: View {
 
     private static let fullDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = AppDisplayLocale.current
+        formatter.dateStyle = .medium
         return formatter
     }()
 }
@@ -2044,7 +1833,7 @@ private struct TrendChartView: View {
 
     private static let axisFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.locale = AppDisplayLocale.current
         formatter.numberStyle = .decimal
         formatter.minimumFractionDigits = 2
         formatter.maximumFractionDigits = 4
@@ -2053,8 +1842,8 @@ private struct TrendChartView: View {
 
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = AppDisplayLocale.current
+        formatter.dateStyle = .short
         return formatter
     }()
 }
@@ -2173,6 +1962,12 @@ extension View {
     let settingsController = SettingsWindowController(
         preferences: preferences,
         credentialStore: credentialStore,
+        backupService: ConfigurationBackupService(
+            preferences: preferences,
+            credentialStore: credentialStore,
+            secretStore: LocalSecretStore(service: "com.thomas.currency-tracker.preview"),
+            backupDirectory: FileManager.default.temporaryDirectory.appendingPathComponent("CurrencyTrackerPreviewBackups")
+        ),
         launchController: LaunchAtLoginController(),
         viewModel: viewModel,
         service: service,

@@ -7,14 +7,14 @@
 
 import Foundation
 
-protocol ExchangeSnapshotFetching: Sendable {
+nonisolated protocol ExchangeSnapshotFetching: Sendable {
     func fetchSnapshots(
         for pairs: [CurrencyPair],
         configuration: EnhancedSourceConfiguration
     ) async -> ExchangeFetchResult
 }
 
-protocol ExchangeStateStoring: Sendable {
+nonisolated protocol ExchangeStateStoring: Sendable {
     func load() async -> CachedExchangeState?
     func save(_ state: CachedExchangeState) async
 }
@@ -87,8 +87,8 @@ final class ConversionCoordinator {
         guard let parsedAmount = MoneyParsing.parse(trimmedText) else {
             log(.warning, "金额解析失败，无法识别可换算金额")
             await promptPanel.showError(
-                title: "无法识别金额",
-                message: "请重新选择包含金额的文本，例如 1234 USD、€299、599.99 土耳其里拉 或 1,234.56。"
+                title: String(localized: "无法识别金额"),
+                message: String(localized: "请重新选择包含金额的文本，例如 1234 USD、€299、599.99 土耳其里拉 或 1,234.56。")
             )
             await persistOperationArtifacts(logs: operationLogs, snapshots: snapshotsToPersist)
             return
@@ -154,8 +154,8 @@ final class ConversionCoordinator {
         guard let resolvedRate else {
             log(.error, "换算失败：没有拿到可用汇率")
             await promptPanel.showError(
-                title: "当前无法换算",
-                message: "没有拿到可用汇率，请稍后再试。"
+                title: String(localized: "当前无法换算"),
+                message: String(localized: "没有拿到可用汇率，请稍后再试。")
             )
             await persistOperationArtifacts(logs: operationLogs, snapshots: snapshotsToPersist)
             return

@@ -26,6 +26,7 @@ struct Currency_TrackerApp: App {
     private let globalShortcutHandler: GlobalShortcutHandler
     private let initialLaunchCoordinator: InitialLaunchCoordinator
     private let statusItemController: StatusItemController
+    private let uiTestPanelWindowController: NSWindowController?
     private let isRunningUITests: Bool
     @State private var viewModel: ExchangePanelViewModel
 
@@ -34,10 +35,24 @@ struct Currency_TrackerApp: App {
         let userDefaults = Self.makeUserDefaults()
         let secretStore = Self.makeSecretStore()
         let preferences = PreferencesStore(userDefaults: userDefaults, secretStore: secretStore)
+        let showUITestPanel = isRunningUITests
+            && ProcessInfo.processInfo.environment["CURRENCY_TRACKER_UI_TEST_SHOW_PANEL"] == "1"
+        if showUITestPanel {
+            preferences.addPair(baseCode: "USD", quoteCode: "CNY")
+            preferences.setRateDisplayBaseAmount(100)
+        }
         let credentialStore = EnhancedSourceCredentialStore(secretStore: secretStore, userDefaults: userDefaults)
         let launchController = LaunchAtLoginController()
         let service = ExchangeRateService()
-        let store = ExchangeRateStore()
+        let testDataDirectory = ProcessInfo.processInfo.environment["CURRENCY_TRACKER_TEST_DATA_DIR"]
+            .map { URL(fileURLWithPath: $0, isDirectory: true) }
+        let store = ExchangeRateStore(directoryURL: testDataDirectory)
+        let backupService = ConfigurationBackupService(
+            preferences: preferences,
+            credentialStore: credentialStore,
+            secretStore: secretStore,
+            backupDirectory: testDataDirectory?.appendingPathComponent("Backups", isDirectory: true)
+        )
         let viewModel = ExchangePanelViewModel(
             preferences: preferences,
             credentialStore: credentialStore,
@@ -78,6 +93,7 @@ struct Currency_TrackerApp: App {
         let settingsWindowController = SettingsWindowController(
             preferences: preferences,
             credentialStore: credentialStore,
+            backupService: backupService,
             launchController: launchController,
             viewModel: viewModel,
             service: service,
@@ -87,7 +103,8 @@ struct Currency_TrackerApp: App {
         )
         let welcomeWindowController = WelcomeWindowController(
             userDefaults: userDefaults,
-            launchController: launchController
+            launchController: launchController,
+            openBackup: { settingsWindowController.show(section: .backup) }
         )
         panelWindowController.configurePinnedContent { controller in
             AnyView(
@@ -101,6 +118,31 @@ struct Currency_TrackerApp: App {
                     menuBarMaximumPanelHeight: nil
                 )
             )
+        }
+        if showUITestPanel {
+            let window = NSWindow(contentViewController: NSHostingController(rootView: ContentView(
+                viewModel: viewModel,
+                preferences: preferences,
+                settingsWindowController: settingsWindowController,
+                panelWindowController: panelWindowController,
+                autoBootstrap: false,
+                presentationMode: .pinned,
+                menuBarMaximumPanelHeight: nil
+            )))
+            window.identifier = NSUserInterfaceItemIdentifier("currency-tracker-ui-test-panel")
+            window.title = "Currency Tracker"
+            window.styleMask = [.titled, .closable, .resizable]
+            window.setContentSize(NSSize(width: 480, height: 640))
+            window.center()
+            let controller = NSWindowController(window: window)
+            uiTestPanelWindowController = controller
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 200_000_000)
+                NSApplication.shared.activate(ignoringOtherApps: true)
+                controller.showWindow(nil)
+            }
+        } else {
+            uiTestPanelWindowController = nil
         }
         let automaticUpdateCoordinator = AutomaticSoftwareUpdateCoordinator(
             preferences: preferences,
@@ -179,6 +221,7 @@ struct Currency_TrackerApp: App {
 
         return environment["XCTestConfigurationFilePath"] != nil
             || environment["CURRENCY_TRACKER_UI_TEST_SHOW_SETTINGS"] == "1"
+            || environment["CURRENCY_TRACKER_UI_TEST_SHOW_PANEL"] == "1"
             || arguments.contains("-CurrencyTrackerUITestShowSettings")
     }
 
@@ -653,6 +696,7 @@ private final class EphemeralSecretStore: SecretStoring {
 final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let preferences: PreferencesStore
     private let credentialStore: EnhancedSourceCredentialStore
+    private let backupService: ConfigurationBackupService
     private let launchController: LaunchAtLoginController
     private let viewModel: ExchangePanelViewModel
     private let service: ExchangeRateService
@@ -672,6 +716,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     init(
         preferences: PreferencesStore,
         credentialStore: EnhancedSourceCredentialStore,
+        backupService: ConfigurationBackupService,
         launchController: LaunchAtLoginController,
         viewModel: ExchangePanelViewModel,
         service: ExchangeRateService,
@@ -681,6 +726,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     ) {
         self.preferences = preferences
         self.credentialStore = credentialStore
+        self.backupService = backupService
         self.launchController = launchController
         self.viewModel = viewModel
         self.service = service
@@ -750,6 +796,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             launchController: launchController,
             viewModel: viewModel,
             apiConfigurationViewModel: apiConfigurationViewModel,
+            backupService: backupService,
             globalShortcutHandler: globalShortcutHandler,
             softwareUpdateWindowController: softwareUpdateWindowController,
             focusSection: focusSection
@@ -761,16 +808,19 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 final class WelcomeWindowController: NSObject, NSWindowDelegate {
     private let userDefaults: UserDefaults
     private let launchController: LaunchAtLoginController
+    private let openBackup: () -> Void
     private var windowController: NSWindowController?
     private var onComplete: (() -> Void)?
     private var didCompleteWelcome = false
 
     init(
         userDefaults: UserDefaults,
-        launchController: LaunchAtLoginController
+        launchController: LaunchAtLoginController,
+        openBackup: @escaping () -> Void
     ) {
         self.userDefaults = userDefaults
         self.launchController = launchController
+        self.openBackup = openBackup
         super.init()
     }
 
@@ -790,7 +840,7 @@ final class WelcomeWindowController: NSObject, NSWindowDelegate {
             window.isReleasedWhenClosed = false
             window.isOpaque = true
             window.backgroundColor = .windowBackgroundColor
-            window.setContentSize(NSSize(width: 620, height: 480))
+            window.setContentSize(NSSize(width: 680, height: 540))
             window.center()
             windowController = NSWindowController(window: window)
         } else if let window = windowController?.window {
@@ -816,6 +866,7 @@ final class WelcomeWindowController: NSObject, NSWindowDelegate {
         FirstRunWelcomeView(
             initialStep: currentStep,
             launchController: launchController,
+            openBackup: openBackup,
             persistStep: { [weak self] step in
                 self?.persistStep(step)
             },

@@ -16,6 +16,7 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
     case language
     case rates
     case profiles
+    case backup
     case alerts
     case refresh
     case dataSources
@@ -34,6 +35,8 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
             "汇率"
         case .profiles:
             "配置"
+        case .backup:
+            "备份与恢复"
         case .alerts:
             "提醒"
         case .refresh:
@@ -61,6 +64,8 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
             "展示列表与新增汇率"
         case .profiles:
             "保存和切换工作流"
+        case .backup:
+            "导出和导入完整配置"
         case .alerts:
             "价格阈值通知"
         case .refresh:
@@ -88,6 +93,8 @@ enum SettingsSection: String, CaseIterable, Hashable, Sendable {
             "list.bullet.rectangle"
         case .profiles:
             "square.stack.3d.up"
+        case .backup:
+            "externaldrive"
         case .alerts:
             "bell"
         case .refresh:
@@ -230,6 +237,7 @@ struct SettingsView: View {
     let launchController: LaunchAtLoginController
     let viewModel: ExchangePanelViewModel
     let apiConfigurationViewModel: APIConfigurationViewModel
+    let backupService: ConfigurationBackupService
     let globalShortcutHandler: GlobalShortcutHandler
     let softwareUpdateWindowController: SoftwareUpdateWindowController
     let focusSection: SettingsSection?
@@ -251,10 +259,11 @@ struct SettingsView: View {
     @State private var alertDirection: RateAlertDirection = .above
     @State private var alertThresholdText = ""
     @State private var diagnosticExportMessage: String?
+    @State private var backupMessage: String?
     @State private var languageSettingsMessage: String?
 
     private let detailTitlebarClearance: CGFloat = 36
-    private let detailContentPadding: CGFloat = 24
+    private let detailContentPadding: CGFloat = 28
     private let detailContentMaxWidth: CGFloat = 820
 
     private let supportedAppLanguages = [
@@ -302,7 +311,7 @@ struct SettingsView: View {
     private var detailPane: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 20) {
                     pageHeader
                     selectedPageContent
                 }
@@ -319,11 +328,11 @@ struct SettingsView: View {
     }
 
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 12) {
             appHeader
 
             ScrollView(.vertical, showsIndicators: true) {
-                VStack(spacing: 6) {
+                VStack(spacing: 3) {
                     ForEach(SettingsSection.allCases, id: \.self) { section in
                         sidebarButton(for: section)
                     }
@@ -332,15 +341,15 @@ struct SettingsView: View {
             .scrollIndicators(.visible)
         }
         .padding(.horizontal, 14)
-        .padding(.top, detailTitlebarClearance + 14)
-        .padding(.bottom, 18)
-        .frame(width: 252)
+        .padding(.top, detailTitlebarClearance + 10)
+        .padding(.bottom, 12)
+        .frame(width: 246)
         .frame(maxHeight: .infinity, alignment: .topLeading)
         .background(sidebarBackground)
     }
 
     private var appHeader: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center, spacing: 10) {
             Image(systemName: "banknote.fill")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(Color.accentColor)
@@ -358,19 +367,12 @@ struct SettingsView: View {
                     )
                 )
 
-            VStack(alignment: .leading, spacing: 5) {
-                Text("Currency Tracker")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .lineLimit(1)
-                Text("管理汇率展示、刷新行为和系统级文本换算入口")
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            Text("Currency Tracker")
+                .font(.system(size: 17, weight: .bold, design: .rounded))
+                .lineLimit(1)
         }
         .padding(.horizontal, 2)
-        .padding(.bottom, 6)
+        .padding(.bottom, 2)
     }
 
     private var pageHeader: some View {
@@ -395,10 +397,13 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(selectedSection.title)
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
                 Text(selectedSection.subtitle)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Spacer(minLength: 0)
@@ -423,6 +428,8 @@ struct SettingsView: View {
             converterCurrenciesSection
         case .profiles:
             profilesSection
+        case .backup:
+            backupSection
         case .alerts:
             rateAlertsSection
         case .refresh:
@@ -445,7 +452,7 @@ struct SettingsView: View {
             selectedSection = section
         } label: {
             let isSelected = selectedSection == section
-            HStack(spacing: 10) {
+            HStack(spacing: 11) {
                 Image(systemName: section.symbolName)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
@@ -464,21 +471,17 @@ struct SettingsView: View {
                         )
                     )
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(section.title)
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
-                    Text(section.subtitle)
-                        .font(.system(size: 10, weight: .medium, design: .rounded))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                Text(section.title)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Spacer(minLength: 0)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .frame(minHeight: 42)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(sidebarRowBackground(isSelected: isSelected))
             .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -497,7 +500,7 @@ struct SettingsView: View {
                         Text("当前语言")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                         Text(currentAppLanguageName)
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
 
@@ -511,13 +514,13 @@ struct SettingsView: View {
                 }
 
                 Text("Currency Tracker 使用 macOS 的“每个应用的语言”设置。修改后需要重启应用生效。")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 if let languageSettingsMessage {
                     Text(languageSettingsMessage)
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -534,11 +537,11 @@ struct SettingsView: View {
                     ForEach(supportedAppLanguages) { language in
                         HStack(spacing: 8) {
                             Text(language.nativeName)
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
                                 .lineLimit(1)
                             Spacer(minLength: 4)
                             Text(language.code)
-                                .font(.system(size: 10, weight: .medium, design: .rounded))
+                                .font(.system(size: 11, weight: .medium, design: .rounded))
                                 .foregroundStyle(.secondary)
                         }
                         .padding(.horizontal, 10)
@@ -550,7 +553,7 @@ struct SettingsView: View {
                 }
 
                 Text("在系统设置中为 Currency Tracker 添加语言覆盖，或调整首选语言顺序。")
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
             }
             .padding(12)
@@ -567,7 +570,7 @@ struct SettingsView: View {
                     Text("系统级换算统一输出到这里")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                     Text("菜单栏面板、Services、全局快捷键和剪贴板结果都会统一使用这个币种。")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                 }
 
@@ -601,7 +604,7 @@ struct SettingsView: View {
                     Text("显示菜单栏图标")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                     Text("关闭后应用会保留 Dock 图标，方便重新打开设置。")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
@@ -625,7 +628,7 @@ struct SettingsView: View {
                     Text("选择菜单栏中显示的信息密度")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                     Text("重点汇率来自面板中的第一张卡片。空间紧张时建议保持只显示图标。")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
@@ -661,7 +664,7 @@ struct SettingsView: View {
                     Text("统一控制汇率基数和小数位")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                     Text("菜单栏、汇率卡片、换算器和选中文本换算结果会使用同一套显示规则。")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
@@ -691,7 +694,7 @@ struct SettingsView: View {
                             }
                         ),
                         options: preferences.conversionFractionDigitOptions,
-                        label: { "\($0) 位" }
+                        label: { "\($0)" }
                     )
                 }
             }
@@ -721,7 +724,7 @@ struct SettingsView: View {
 
                 if preferences.settingsProfiles.isEmpty {
                     Text("还没有保存 Profile。保存后可以在不同货币对列表、基准货币和刷新策略之间快速切换。")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                         .padding(12)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -736,7 +739,7 @@ struct SettingsView: View {
                                     Text(profile.name)
                                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                                     Text(profileSummaryText(for: profile))
-                                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                                        .font(.system(size: 12, weight: .medium, design: .rounded))
                                         .foregroundStyle(.secondary)
                                 }
 
@@ -744,7 +747,7 @@ struct SettingsView: View {
 
                                 if preferences.activeProfileID == profile.id {
                                     Label("当前", systemImage: "checkmark.circle.fill")
-                                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                        .font(.system(size: 12, weight: .semibold, design: .rounded))
                                         .foregroundStyle(Color(red: 0.09, green: 0.53, blue: 0.32))
                                 }
 
@@ -776,6 +779,44 @@ struct SettingsView: View {
         }
     }
 
+    private var backupSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("备份与恢复")
+
+            VStack(alignment: .leading, spacing: 14) {
+                Text("备份包含货币对、换算页、显示与刷新设置、提醒、Profile、数据源及 API 密钥。汇率缓存、日志和 macOS 权限不会导出。")
+                    .font(.system(size: 13))
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Label("备份是明文 JSON；任何拿到文件的人都能读取 API 密钥。请妥善保管，不要上传到公开仓库。", systemImage: "exclamationmark.shield")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 10) {
+                    Button("导出配置…") { exportConfiguration() }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.regular)
+                        .accessibilityIdentifier("settings.backup.export")
+                    Button("导入配置…") { importConfiguration() }
+                        .buttonStyle(.bordered)
+                        .controlSize(.regular)
+                        .accessibilityIdentifier("settings.backup.import")
+                }
+
+                if let backupMessage {
+                    Text(backupMessage)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(sectionCardBackground)
+        }
+    }
+
     private var rateAlertsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             sectionTitle("汇率提醒")
@@ -783,47 +824,65 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 14) {
                 if preferences.selectedPairs.isEmpty {
                     Text("先添加货币对后才能创建提醒。")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                 } else {
-                    HStack(spacing: 10) {
-                        Picker("货币对", selection: Binding(
-                            get: { resolvedAlertPairID },
-                            set: { alertPairID = $0 }
-                        )) {
-                            ForEach(preferences.selectedPairs) { pair in
-                                Text(pair.compactLabel).tag(pair.id)
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(alignment: .bottom, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text("货币对")
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(.secondary)
+                                Picker("货币对", selection: Binding(
+                                    get: { resolvedAlertPairID },
+                                    set: { alertPairID = $0 }
+                                )) {
+                                    ForEach(preferences.selectedPairs) { pair in
+                                        Text(pair.compactLabel).tag(pair.id)
+                                    }
+                                }
+                                .labelsHidden()
+                                .frame(maxWidth: .infinity)
+                            }
+
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text("方向")
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(.secondary)
+                                Picker("方向", selection: $alertDirection) {
+                                    ForEach(RateAlertDirection.allCases) { direction in
+                                        Text(direction.title).tag(direction)
+                                    }
+                                }
+                                .labelsHidden()
+                                .frame(width: 150)
                             }
                         }
-                        .labelsHidden()
-                        .frame(width: 150)
 
-                        Picker("方向", selection: $alertDirection) {
-                            ForEach(RateAlertDirection.allCases) { direction in
-                                Text(direction.title).tag(direction)
+                        HStack(alignment: .bottom, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text("阈值")
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(.secondary)
+                                TextField("阈值", text: $alertThresholdText)
+                                    .textFieldStyle(.roundedBorder)
                             }
-                        }
-                        .labelsHidden()
-                        .frame(width: 100)
 
-                        TextField("阈值", text: $alertThresholdText)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 160)
-
-                        Button("添加提醒") {
-                            if let threshold = Double(alertThresholdText.replacingOccurrences(of: ",", with: ".")) {
-                                preferences.addRateAlert(pairID: resolvedAlertPairID, direction: alertDirection, threshold: threshold)
-                                alertThresholdText = ""
+                            Button("添加提醒") {
+                                if let threshold = Double(alertThresholdText.replacingOccurrences(of: ",", with: ".")) {
+                                    preferences.addRateAlert(pairID: resolvedAlertPairID, direction: alertDirection, threshold: threshold)
+                                    alertThresholdText = ""
+                                }
                             }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(Double(alertThresholdText.replacingOccurrences(of: ",", with: ".")) == nil)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(Double(alertThresholdText.replacingOccurrences(of: ",", with: ".")) == nil)
                     }
                 }
 
                 if preferences.rateAlerts.isEmpty {
                     Text("没有启用的汇率提醒。提醒触发后会请求系统通知权限，并在 12 小时内避免重复打扰。")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                 } else {
                     VStack(spacing: 10) {
@@ -853,7 +912,7 @@ struct SettingsView: View {
                         Text("点开菜单栏时自动刷新")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                         Text("关闭后，只有手动刷新和定时刷新会更新数据。")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
 
@@ -877,7 +936,7 @@ struct SettingsView: View {
                         Text("定时自动刷新")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                         Text("固定窗口后会自动暂停；解锁后恢复。")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
 
@@ -912,7 +971,7 @@ struct SettingsView: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 Text("选中文本后按下这里设置的全局快捷键，会直接触发与 Services 相同的“换算为基准货币”流程。")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
 
                 GlobalShortcutRecorderView(shortcut: preferences.textConversionShortcut) { shortcut in
@@ -921,7 +980,7 @@ struct SettingsView: View {
                 }
 
                 Text("如果某些应用不能直接读取选中文本，应用会自动回退到复制方式；首次使用时系统可能要求辅助功能权限。")
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -940,7 +999,7 @@ struct SettingsView: View {
 
             if preferences.selectedPairs.isEmpty {
                 Text("还没有添加汇率")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
                     .padding(18)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -956,7 +1015,7 @@ struct SettingsView: View {
                                 Text(pair.displayName)
                                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                                 Text(pairSubtitle(for: pair))
-                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .font(.system(size: 12, weight: .medium, design: .rounded))
                                     .foregroundStyle(.secondary)
                             }
 
@@ -971,7 +1030,7 @@ struct SettingsView: View {
                                 }
                             }
                             .buttonStyle(.borderless)
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
                         }
                         .padding(14)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -1026,7 +1085,7 @@ struct SettingsView: View {
                                 swapDraftCurrencies()
                             } label: {
                                 Image(systemName: "arrow.left.arrow.right")
-                                    .font(.system(size: 12, weight: .semibold))
+                                    .font(.system(size: 13, weight: .semibold))
                                     .frame(width: 30, height: 30)
                             }
                             .buttonStyle(.plain)
@@ -1059,7 +1118,7 @@ struct SettingsView: View {
 
                 if currentDraftAlreadySelected {
                     Text("这个汇率已经存在")
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -1090,7 +1149,7 @@ struct SettingsView: View {
                 .toggleStyle(.checkbox)
 
                 Text("勾选后换算页继续从已添加货币对中自动提取币种；取消勾选后可以单独维护换算页列表。")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -1110,12 +1169,12 @@ struct SettingsView: View {
     private var linkedConverterCurrencyList: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("当前联动币种")
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)
 
             if preferences.effectiveConverterCurrencyCodes.isEmpty {
                 Text("暂无联动币种")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
             } else {
                 currencyCodeWrap(preferences.effectiveConverterCurrencyCodes)
@@ -1130,12 +1189,12 @@ struct SettingsView: View {
     private var independentConverterCurrencyList: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("已添加换算币种")
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)
 
             if preferences.converterCurrencyCodes.isEmpty {
                 Text("还没有添加换算币种")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
                     .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -1155,7 +1214,7 @@ struct SettingsView: View {
     private var addConverterCurrencyControls: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("添加换算币种")
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)
 
             TextField("搜索币种代码、中文名或英文名", text: $converterCurrencySearch)
@@ -1189,7 +1248,7 @@ struct SettingsView: View {
 
                     if converterCurrencyAlreadySelected {
                         Text("这个币种已经存在")
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -1205,11 +1264,11 @@ struct SettingsView: View {
                 HStack(alignment: .top, spacing: 16) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("选择你正在使用的供应商，下方只显示已添加的数据源。")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
 
                         Text("留空则继续使用默认公共数据源；API key 只用于增强最新快照。")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
 
                         DisclosureGroup("详细说明", isExpanded: $isShowingAPIPrivacyDetails) {
@@ -1217,11 +1276,11 @@ struct SettingsView: View {
                                 Text("只有在你点击“保存”后，API 信息才会写入本地凭证文件（Application Support/CurrencyTracker）。")
                                 Text("外部数据源只能看到本次汇率请求本身及常规网络元数据；应用不会上传本地文件、剪贴板或其他设备内容，并且请求会强制走 HTTPS。")
                             }
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                             .padding(.top, 4)
                         }
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                     }
 
                     Spacer()
@@ -1261,7 +1320,7 @@ struct SettingsView: View {
                             Text("自定义 API 模板")
                                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                             Text("模板支持 {base}、{quote}、{key} 占位符，JSON path 用来读取返回值中的汇率。")
-                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
                                 .foregroundStyle(.secondary)
                         }
 
@@ -1278,7 +1337,7 @@ struct SettingsView: View {
 
                     if preferences.customAPIProviders.isEmpty {
                         Text("还没有自定义 API。内置来源无法覆盖某些币种时，可以添加兼容 JSON 的汇率接口。")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                             .padding(12)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -1369,7 +1428,7 @@ struct SettingsView: View {
                 Text(title)
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                 Text(detail)
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
             }
 
@@ -1393,7 +1452,7 @@ struct SettingsView: View {
 
             VStack(alignment: .leading, spacing: 14) {
                 Text("导出的诊断报告只包含版本、系统、偏好摘要、数据源状态和最近日志，不包含 API key。")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
 
                 HStack {
@@ -1406,7 +1465,7 @@ struct SettingsView: View {
 
                     if let diagnosticExportMessage {
                         Text(diagnosticExportMessage)
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -1429,14 +1488,14 @@ struct SettingsView: View {
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
 
                         Text(updateStatusText)
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
 
                         if let lastUpdateCheckDate {
                             Text(String(format: String(localized: "上次检查：%@"), ExchangeFormatter.time.string(from: lastUpdateCheckDate)))
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(.tertiary)
                         }
 
@@ -1467,7 +1526,7 @@ struct SettingsView: View {
                                 NSWorkspace.shared.open(releaseURL)
                             }
                             .buttonStyle(.link)
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
                         }
                     }
                 }
@@ -1479,7 +1538,7 @@ struct SettingsView: View {
                         Text("自动检查更新")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                         Text("启动时每天最多检查一次；发现新版本时会弹出更新窗口。")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
@@ -1496,7 +1555,7 @@ struct SettingsView: View {
                 }
 
                 Text("应用会从 GitHub Releases 下载更新，并在确认后安装和重启。")
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -1514,7 +1573,7 @@ struct SettingsView: View {
                     Text("允许后台活动")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                     Text("关闭后会暂停定时刷新、自动检查更新和全局快捷键监听。手动刷新仍可使用。")
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
@@ -1540,7 +1599,7 @@ struct SettingsView: View {
 
                     if let lastErrorMessage = launchController.lastErrorMessage {
                         Text(lastErrorMessage)
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -1563,7 +1622,7 @@ struct SettingsView: View {
                     launchController.openSystemSettings()
                 }
                 .buttonStyle(.link)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .font(.system(size: 13, weight: .medium, design: .rounded))
             }
         }
     }
@@ -1760,13 +1819,13 @@ struct SettingsView: View {
                 .frame(width: 3, height: 15)
 
             Text(title)
-                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .font(.system(size: 16, weight: .bold, design: .rounded))
         }
     }
 
     private func countBadge(_ count: Int) -> some View {
         Text("\(count)")
-            .font(.system(size: 11, weight: .semibold, design: .rounded))
+            .font(.system(size: 12, weight: .semibold, design: .rounded))
             .foregroundStyle(Color.accentColor)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
@@ -1789,7 +1848,7 @@ struct SettingsView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)
 
             Picker(title, selection: selection) {
@@ -1821,7 +1880,7 @@ struct SettingsView: View {
                 viewModel.presentationDidChange()
             } label: {
                 Image(systemName: "chevron.up")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 11, weight: .bold))
                     .frame(width: 22, height: 22)
             }
             .buttonStyle(.plain)
@@ -1833,7 +1892,7 @@ struct SettingsView: View {
                 viewModel.presentationDidChange()
             } label: {
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 11, weight: .bold))
                     .frame(width: 22, height: 22)
             }
             .buttonStyle(.plain)
@@ -1859,7 +1918,7 @@ struct SettingsView: View {
                 Text(code)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                 Text(CurrencyCatalog.name(for: code))
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
             }
 
@@ -1874,7 +1933,7 @@ struct SettingsView: View {
                 }
             }
             .buttonStyle(.borderless)
-            .font(.system(size: 12, weight: .semibold, design: .rounded))
+            .font(.system(size: 13, weight: .semibold, design: .rounded))
         }
         .padding(12)
         .background(
@@ -1889,7 +1948,7 @@ struct SettingsView: View {
                 viewModel.presentationDidChange()
             } label: {
                 Image(systemName: "chevron.up")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 11, weight: .bold))
                     .frame(width: 22, height: 22)
             }
             .buttonStyle(.plain)
@@ -1901,7 +1960,7 @@ struct SettingsView: View {
                 viewModel.presentationDidChange()
             } label: {
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 11, weight: .bold))
                     .frame(width: 22, height: 22)
             }
             .buttonStyle(.plain)
@@ -1920,7 +1979,7 @@ struct SettingsView: View {
                 HStack(spacing: 6) {
                     Text(CurrencyCatalog.flag(for: code))
                     Text(code)
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
                     Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 9)
@@ -1939,7 +1998,7 @@ struct SettingsView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)
 
             Picker(title, selection: selection) {
@@ -1958,9 +2017,9 @@ struct SettingsView: View {
     private var dropToBottomStrip: some View {
         HStack(spacing: 8) {
             Image(systemName: "arrow.down.to.line")
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold))
             Text("拖到这里放到末尾")
-                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .font(.system(size: 12, weight: .medium, design: .rounded))
         }
         .foregroundStyle(.secondary)
         .padding(.vertical, 10)
@@ -2115,6 +2174,62 @@ struct SettingsView: View {
         }
     }
 
+    private func exportConfiguration() {
+        let warning = NSAlert()
+        warning.messageText = String(localized: "导出的备份包含明文 API 密钥")
+        warning.informativeText = String(localized: "任何能读取此 JSON 文件的人都能使用其中的 API 密钥。请仅保存到可信位置。")
+        warning.alertStyle = .warning
+        warning.addButton(withTitle: String(localized: "继续导出"))
+        warning.addButton(withTitle: String(localized: "取消"))
+        guard warning.runModal() == .alertFirstButtonReturn else { return }
+
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.json]
+        panel.nameFieldStringValue = "CurrencyTracker-Backup-\(Self.diagnosticFileFormatter.string(from: .now)).json"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        do {
+            let backup = try backupService.makeBackup(appVersion: SoftwareUpdateChecker.currentVersion())
+            try backupService.export(backup, to: url)
+            backupMessage = String(format: String(localized: "配置已导出到 %@"), url.path)
+        } catch {
+            backupMessage = String(format: String(localized: "配置导出失败：%@"), error.localizedDescription)
+        }
+    }
+
+    private func importConfiguration() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        do {
+            let backup = try backupService.prepareImport(Data(contentsOf: url))
+            let alert = NSAlert()
+            alert.messageText = String(localized: "确认替换当前配置？")
+            alert.informativeText = String(
+                format: String(localized: "备份包含 %d 个货币对、%d 个 Profile、%d 个 API 来源。导入前会在本机保存现有配置的恢复副本。"),
+                backup.pairCount, backup.profileCount, backup.sourceCount
+            )
+            alert.addButton(withTitle: String(localized: "替换配置"))
+            alert.addButton(withTitle: String(localized: "取消"))
+            guard alert.runModal() == .alertFirstButtonReturn else { return }
+
+            let recoveryURL = try backupService.importBackup(
+                backup,
+                appVersion: SoftwareUpdateChecker.currentVersion()
+            )
+            apiConfigurationViewModel.reloadFromStore()
+            globalShortcutHandler.refreshRegistration()
+            viewModel.presentationDidChange()
+            viewModel.refreshPolicyDidChange()
+            Task { await viewModel.selectedPairsDidChange() }
+            backupMessage = String(format: String(localized: "配置已恢复；原配置备份在 %@"), recoveryURL.path)
+        } catch {
+            backupMessage = String(format: String(localized: "配置导入失败：%@"), error.localizedDescription)
+        }
+    }
+
     private func exportDiagnostics() {
         let report = diagnosticsReportText()
         let baseURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
@@ -2234,7 +2349,7 @@ struct SettingsView: View {
                 .foregroundStyle(.secondary)
 
             Text("没有匹配的币种")
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -2298,6 +2413,7 @@ struct SettingsView: View {
 struct FirstRunWelcomeView: View {
     let initialStep: WelcomeStep
     let launchController: LaunchAtLoginController
+    let openBackup: () -> Void
     let persistStep: (WelcomeStep) -> Void
     let complete: () -> Void
 
@@ -2308,11 +2424,13 @@ struct FirstRunWelcomeView: View {
     init(
         initialStep: WelcomeStep,
         launchController: LaunchAtLoginController,
+        openBackup: @escaping () -> Void,
         persistStep: @escaping (WelcomeStep) -> Void,
         complete: @escaping () -> Void
     ) {
         self.initialStep = initialStep
         self.launchController = launchController
+        self.openBackup = openBackup
         self.persistStep = persistStep
         self.complete = complete
         _selectedStep = State(initialValue: initialStep)
@@ -2333,7 +2451,7 @@ struct FirstRunWelcomeView: View {
             bottomBar
         }
         .padding(24)
-        .frame(width: 620, height: 480, alignment: .leading)
+        .frame(width: 680, height: 540, alignment: .leading)
         .background(
             SettingsInsetGlassBackground(cornerRadius: 0, material: .regularMaterial)
         )
@@ -2388,7 +2506,7 @@ struct FirstRunWelcomeView: View {
                 title: "辅助功能",
                 detail: "Currency Tracker 用辅助功能权限在你按下全局快捷键时读取当前选中的文本，并在部分应用中使用复制动作作为回退。",
                 unavailableDetail: "不开启时，系统级选中文本换算会不可用，或者只能先手动复制文字再回到应用内换算。",
-                statusText: accessibilityTrusted ? "已开启" : "未开启",
+                statusText: accessibilityTrusted ? String(localized: "已开启") : String(localized: "未开启"),
                 isReady: accessibilityTrusted,
                 actionTitle: "打开辅助功能设置",
                 action: openAccessibilitySettings
@@ -2420,6 +2538,10 @@ struct FirstRunWelcomeView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("接下来只会引导你处理系统权限。")
                 .font(.system(size: 17, weight: .bold, design: .rounded))
+
+            Button("已有备份？导入配置…") { openBackup() }
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("welcome.import-backup")
 
             Text("这些权限不是查看汇率所必需的，但会影响全局快捷键、汇率提醒通知、开机后自动运行等系统级功能。你可以逐项开启，也可以跳过；完成或跳过后，欢迎窗口之后启动和应用内更新后都不会自动弹出。")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -2534,6 +2656,7 @@ struct FirstRunWelcomeView: View {
                 Text(detail)
                     .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }

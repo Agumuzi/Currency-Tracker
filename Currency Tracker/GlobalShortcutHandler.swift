@@ -279,8 +279,8 @@ final class GlobalShortcutHandler {
         guard let selectedText, selectedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false else {
             logHandler(.warning, "全局快捷键触发失败：未检测到可读取的选中文本")
             await popupPresenter.showError(
-                title: "未检测到选中文本",
-                message: "请先选中金额或数字，再按下文本换算快捷键。"
+                title: String(localized: "未检测到选中文本"),
+                message: String(localized: "请先选中金额或数字，再按下文本换算快捷键。")
             )
             return
         }

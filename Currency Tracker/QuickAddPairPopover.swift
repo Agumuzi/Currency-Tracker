@@ -158,7 +158,7 @@ struct QuickAddPairPopover: View {
         }
 
         if preferences.contains(currentPair) {
-            feedbackMessage = "这个货币对已经在展示列表里。"
+            feedbackMessage = String(localized: "这个货币对已经在展示列表里。")
             return
         }
 
@@ -268,7 +268,7 @@ struct QuickAddConverterCurrencyPopover: View {
         }
 
         if preferences.converterCurrencyCodes.contains(selectedCurrency.code) {
-            feedbackMessage = "这个币种已经在换算页里。"
+            feedbackMessage = String(localized: "这个币种已经在换算页里。")
             return
         }
 

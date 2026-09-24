@@ -318,3 +318,114 @@
 "关闭后应用会保留 Dock 图标，方便重新打开设置。" = "Quando desativado, o app mantém o ícone do Dock visível para reabrir os ajustes.";
 "允许后台活动" = "Permitir atividade em segundo plano";
 "关闭后会暂停定时刷新、自动检查更新和全局快捷键监听。手动刷新仍可使用。" = "Quando desativado, atualizações agendadas, verificações automáticas e atalhos globais são pausados. A atualização manual continua disponível.";
+
+/* 1.8: converter, backup, onboarding and missing UI labels */
+"%d 个换算币种" = "%d moedas do conversor";
+"%d 个汇率 · %@ · 基准 %@ · %@ · %d 基数 · %d 位" = "%d taxas · %@ · base %@ · %@ · %d base · %d dígitos";
+"Settings..." = "Configurações...";
+"上一步" = "Etapa anterior";
+"不支持此备份版本" = "Esta versão de backup não é compatível";
+"任何能读取此 JSON 文件的人都能使用其中的 API 密钥。请仅保存到可信位置。" = "Qualquer pessoa que possa ler este arquivo JSON pode usar a chave API contida nele. Salve apenas em locais confiáveis.";
+"例如 USD / 美元 / Turkish Lira / 土耳其里拉" = "por exemplo, USD / dólar americano / TRY / lira turca";
+"加入换算" = "Adicionar conversão";
+"勾选后换算页继续从已添加货币对中自动提取币种；取消勾选后可以单独维护换算页列表。" = "Se marcada, a página de conversão continuará a extrair automaticamente moedas dos pares de moedas adicionados; se desmarcada, a lista de páginas de conversão poderá ser mantida separadamente.";
+"原始货币" = "Moeda original";
+"取消" = "Cancelar";
+"备份与恢复" = "Backup e recuperação";
+"备份内容无效" = "O conteúdo do backup é inválido";
+"备份包含 %d 个货币对、%d 个 Profile、%d 个 API 来源。导入前会在本机保存现有配置的恢复副本。" = "O backup contém %d pares de moedas, %d perfis, %d fontes de API. Uma cópia restaurada da configuração existente será salva localmente antes da importação.";
+"备份包含货币对、换算页、显示与刷新设置、提醒、Profile、数据源及 API 密钥。汇率缓存、日志和 macOS 权限不会导出。" = "Os backups incluem pares de moedas, páginas de conversão, configurações de exibição e atualização, alertas, perfis, fontes de dados e chaves de API. Cache de taxa de câmbio, registros e permissões do macOS não são exportados.";
+"备份文件过大" = "O arquivo de backup é muito grande";
+"备份是明文 JSON；任何拿到文件的人都能读取 API 密钥。请妥善保管，不要上传到公开仓库。" = "O backup é JSON em texto não criptografado; qualquer pessoa que colocar as mãos no arquivo pode ler a chave da API. Por favor, guarde-o adequadamente e não o carregue em um repositório público.";
+"如果系统要求重新打开软件，重启后会自动回到这一页。" = "Se o sistema exigir que você reabra o software, você retornará automaticamente a esta página após reiniciar.";
+"导入配置…" = "Importar configuração…";
+"导出的备份包含明文 API 密钥" = "O backup exportado contém uma chave de API em texto não criptografado";
+"导出配置…" = "Exportar configuração…";
+"已开启" = "Ativado";
+"已拒绝" = "Rejeitado";
+"已有备份？导入配置…" = "Já tem um backup? Importar configuração…";
+"已添加换算币种" = "Moedas de conversão adicionadas";
+"当前联动币种" = "Moeda vinculada atual";
+"快速添加换算币种" = "Adicione moedas de conversão rapidamente";
+"换算币种" = "Moedas do conversor";
+"换算结果" = "Resultados de conversão";
+"换算联动" = "Vinculação de conversão";
+"换算页币种" = "Moeda da página de conversão";
+"接下来只会引导你处理系统权限。" = "O texto a seguir irá guiá-lo apenas para lidar com as permissões do sistema.";
+"搜索代码、中文名或英文名" = "Código de pesquisa, nome chinês ou nome inglês";
+"无法保存备份文件" = "Não foi possível salvar o arquivo de backup";
+"暂无联动币种" = "Atualmente não há moeda vinculada";
+"替换配置" = "Substituir configuração";
+"未开启" = "Não ativado";
+"本地凭证存储当前不可用，请稍后重试" = "O armazenamento de credenciais local não está disponível no momento. Tente novamente mais tarde.";
+"汇率与换算页设置…" = "Taxa de câmbio e configurações da página de conversão…";
+"添加换算币种" = "Adicionar moeda de conversão";
+"点击右上角 + 添加换算币种，或在设置里维护换算页列表。" = "Clique em + no canto superior direito para adicionar uma moeda de conversão ou manter a lista de páginas de conversão nas configurações.";
+"状态未知" = "Status desconhecido";
+"确认替换当前配置？" = "Confirma para substituir a configuração atual?";
+"第 %d 步，共 %d 步" = "Etapa %d de %d";
+"统一控制汇率基数和小数位" = "Controle unificado da base cambial e casas decimais";
+"继续" = "Continuar";
+"继续导出" = "Continuar exportando";
+"缺少 %@ 的汇率路径" = "Caminho da taxa de câmbio ausente para %@";
+"菜单栏、汇率卡片、换算器和选中文本换算结果会使用同一套显示规则。" = "A barra de menu, a tabela de taxas de câmbio, o conversor e os resultados da conversão de texto selecionado usarão o mesmo conjunto de regras de exibição.";
+"请先填写 URL 模板和 JSON path" = "Preencha o modelo de URL e o caminho JSON primeiro";
+"货币显示" = "Exibição de moeda";
+"跳过" = "Pular";
+"输入原始货币代码或名称" = "Insira o código ou nome da moeda original";
+"输入金额" = "Insira o valor";
+"还没有可换算的货币" = "Ainda não há moeda para converter";
+"还没有添加换算币种" = "Nenhuma moeda de conversão foi adicionada ainda";
+"这个币种已经存在" = "Esta moeda já existe";
+"这些权限不是查看汇率所必需的，但会影响全局快捷键、汇率提醒通知、开机后自动运行等系统级功能。你可以逐项开启，也可以跳过；完成或跳过后，欢迎窗口之后启动和应用内更新后都不会自动弹出。" = "Essas permissões não são necessárias para visualizar as taxas de câmbio, mas afetarão funções no nível do sistema, como teclas de atalho globais, notificações de lembretes de taxas de câmbio e operação automática após a inicialização. Você pode abrir os itens um por um ou ignorá-los; após concluir ou pular, a janela de boas-vindas não aparecerá automaticamente após a inicialização e as atualizações no aplicativo.";
+"配置导入失败：%@" = "Falha na importação da configuração: %@";
+"配置导出失败：%@" = "Falha na exportação da configuração: %@";
+"配置已导出到 %@" = "Configuração exportada para %@";
+"配置已恢复；原配置备份在 %@" = "Configuração restaurada; backup da configuração original em %@";
+"金额存在歧义" = "Há ambigüidade no valor";
+"金额格式无效" = "Formato de valor inválido";
+"需要在系统设置中批准" = "Requer aprovação nas configurações do sistema";
+"导出和导入完整配置" = "Exportar e importar todas as configurações";
+
+/* 1.8: converter, backup, onboarding and missing UI labels */
+"当前无法换算" = "Atualmente não pode ser convertido";
+"无法识别金额" = "Valor não reconhecido";
+"未检测到选中文本" = "Nenhum texto selecionado detectado";
+"没有拿到可用汇率，请稍后再试。" = "Não foi obtida a taxa de câmbio disponível. Tente novamente mais tarde.";
+"请先选中金额或数字，再按下文本换算快捷键。" = "Selecione o valor ou número primeiro e, em seguida, pressione a tecla de atalho de conversão de texto.";
+"请重新选择包含金额的文本，例如 1234 USD、€299、599.99 土耳其里拉 或 1,234.56。" = "Selecione novamente o texto que contém um valor, como 1.234 USD, € 299, 599,99 liras turcas ou 1.234,56.";
+"这个币种已经在换算页里。" = "Esta moeda já está na página de conversão.";
+"这个货币对已经在展示列表里。" = "Este par de moedas já está na lista de exibição.";
+
+/* 1.8: converter, backup, onboarding and missing UI labels */
+"Currency Tracker 用辅助功能权限在你按下全局快捷键时读取当前选中的文本，并在部分应用中使用复制动作作为回退。" = "O Currency Tracker usa permissões de acessibilidade para ler o texto atualmente selecionado quando você pressiona uma tecla de atalho global e usa a ação de cópia como alternativa em alguns aplicativos.";
+"下一步" = "Próxima etapa";
+"不开启时，提醒仍可保存在应用内，但触发后不会弹出系统通知。" = "Quando não ativado, o lembrete ainda pode ser salvo no aplicativo, mas a notificação do sistema não aparecerá após ser acionada.";
+"不开启时，每次重启电脑后需要手动打开应用，后台刷新和快捷键监听也会等应用启动后才工作。" = "Quando não habilitado, o aplicativo precisa ser aberto manualmente sempre que o computador for reiniciado. A atualização em segundo plano e o monitoramento de teclas de atalho também aguardarão o início do aplicativo antes de funcionar.";
+"不开启时，系统级选中文本换算会不可用，或者只能先手动复制文字再回到应用内换算。" = "Quando não ativado, a conversão de texto selecionado no nível do sistema não estará disponível ou você só poderá copiar manualmente o texto e depois retornar à conversão no aplicativo.";
+"先了解接下来要开启哪些能力" = "Primeiro entenda quais habilidades devem ser habilitadas em seguida";
+"完成" = "Concluído";
+"开启通知权限" = "Ative as permissões de notificação";
+"打开登录项设置" = "Abra as configurações do item de login";
+"打开辅助功能设置" = "Abrir configurações de acessibilidade";
+"用于全局快捷键读取选中文本。" = "é usado para teclas de atalho globais para ler o texto selecionado.";
+"用于汇率提醒触发时弹出系统通知。" = "Usado para exibir uma notificação do sistema quando o lembrete da taxa de câmbio é acionado.";
+"用于重启电脑后自动恢复菜单栏和后台能力。" = "Usado para restaurar automaticamente a barra de menus e os recursos de segundo plano após reiniciar o computador.";
+"登录项权限用于开机后自动启动 Currency Tracker，让菜单栏汇率、后台刷新和全局快捷键监听持续可用。" = "A permissão do item de login é usada para iniciar automaticamente o Rastreador de Moeda após a inicialização, para que a taxa de câmbio da barra de menu, a atualização em segundo plano e o monitoramento global das teclas de atalho estejam continuamente disponíveis.";
+"让全局快捷键可以读取选中文本" = "Permitir que teclas de atalho globais leiam o texto selecionado";
+"让应用在重启电脑后自动恢复" = "Deixe o aplicativo reiniciar automaticamente após reiniciar o computador";
+"让汇率提醒可以通过系统通知出现" = "Permitir que alertas de taxa de câmbio apareçam por meio de notificações do sistema";
+"通知权限用于在汇率提醒达到阈值时弹出系统通知，让你不必一直打开应用查看。" = "A permissão de notificação é usada para exibir uma notificação do sistema quando o lembrete da taxa de câmbio atinge o limite, para que você não precise ficar abrindo o aplicativo para visualizá-lo.";
+
+/* 1.8 settings labels and permission titles */
+"显示基数" = "Valor base";
+"小数位" = "Casas decimais";
+"跟随汇率列表" = "Seguir a lista de taxas";
+"辅助功能权限" = "Permissão de Acessibilidade";
+"通知权限" = "Permissão para notificações";
+"登录项权限" = "Permissão para itens de início de sessão";
+
+/* 1.8 user-facing error messages */
+"未识别该币种，请输入标准代码或常见名称。" = "Moeda não reconhecida. Digite um código padrão ou um nome comum.";
+"系统暂时无法确认开机启动状态。" = "Não foi possível verificar agora o início de sessão automático.";
+"无法读取选中文本" = "Não foi possível ler o texto selecionado";
