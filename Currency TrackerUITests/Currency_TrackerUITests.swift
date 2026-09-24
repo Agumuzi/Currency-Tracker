@@ -131,9 +131,14 @@ final class Currency_TrackerUITests: XCTestCase {
 
         let toggle = app.buttons["panel.toggleConverter"]
         XCTAssertTrue(toggle.waitForExistence(timeout: 8))
+        XCTAssertTrue(toggle.isEnabled)
         toggle.click()
+        let openedScreenshot = XCTAttachment(screenshot: app.screenshot())
+        openedScreenshot.name = "converter-after-toggle"
+        openedScreenshot.lifetime = .keepAlways
+        add(openedScreenshot)
         let usd = app.staticTexts["converter.result.USD"]
-        XCTAssertTrue(usd.waitForExistence(timeout: 5))
+        XCTAssertTrue(usd.waitForExistence(timeout: 5), app.debugDescription)
         let defaultScreenshot = XCTAttachment(screenshot: app.screenshot())
         defaultScreenshot.name = "converter-default-base"
         defaultScreenshot.lifetime = .keepAlways
