@@ -94,9 +94,9 @@ Currency Tracker 默认可使用公开备用数据源。对个人使用来说，
 
 ## 当前版本
 
-版本 `1.8` 包含：
+版本 `1.8.1` 包含：
 
-- 点击任意币种即可切换换算基准，结果与默认空白的金额输入框分开显示。
+- 货币列表和展开的货币对换算器会在输入框内显示示例金额，直接键入即可替换；点击任意币种仍会切换换算基准。
 - 通过带预览和恢复副本的版本化 JSON 文件导出、导入配置档案、数据源及 API 密钥。
 - 改进全部 11 种语言的界面文案、币种名称及数字和日期格式。
 - 在独立的 GitHub macOS 运行器上增加界面与备份测试。
@@ -120,7 +120,7 @@ brew upgrade --cask currency-tracker
 
 ### 直接下载
 
-从最新 GitHub Release 下载 [`Currency-Tracker-1.8.zip`](https://github.com/Agumuzi/Currency-Tracker/releases/download/v1.8/Currency-Tracker-1.8.zip)，解压后将 `Currency Tracker.app` 移动到“应用程序”文件夹。
+从最新 GitHub Release 下载 [`Currency-Tracker-1.8.1.zip`](https://github.com/Agumuzi/Currency-Tracker/releases/download/v1.8.1/Currency-Tracker-1.8.1.zip)，解压后将 `Currency Tracker.app` 移动到“应用程序”文件夹。
 
 ### 首次启动批准
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.1 - 2026-09-24
+
+- Shows the example amount inside the editable field in both the currency list and expanded pair converter, so typing replaces the example immediately.
+
 ## 1.8 - 2026-09-24
 
 - Makes the selected currency the converter base and separates editable amounts from calculated results.

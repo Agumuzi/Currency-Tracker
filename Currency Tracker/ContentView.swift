@@ -948,32 +948,31 @@ private struct PanelCurrencyConverterView: View {
             Spacer(minLength: 10)
 
             VStack(alignment: .trailing, spacing: 5) {
-                Text(state.displayTexts[code] ?? "—")
-                    .font(.system(size: 21, weight: .semibold, design: .rounded))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-                    .accessibilityIdentifier("converter.result.\(code)")
-
                 if state.activeCode == code {
-                    TextField("输入金额", text: binding)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                    TextField("输入金额", text: binding, prompt: Text(verbatim: state.displayTexts[code] ?? ""))
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 21, weight: .semibold, design: .rounded))
                         .multilineTextAlignment(.trailing)
                         .focused($focusedCode, equals: code)
                         .accessibilityIdentifier("converter.input.\(code)")
-                        .frame(width: 142)
                     if state.hasInvalidInput {
                         Text("金额格式无效")
                             .font(.system(size: 10))
                             .foregroundStyle(.red)
                     }
+                } else {
+                    Text(state.displayTexts[code] ?? "—")
+                        .font(.system(size: 21, weight: .semibold, design: .rounded))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                        .accessibilityIdentifier("converter.result.\(code)")
                 }
             }
             .frame(minWidth: 116, maxWidth: 190, alignment: .trailing)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, minHeight: state.activeCode == code ? 96 : 58, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: state.activeCode == code ? 72 : 58, alignment: .leading)
         .background(rowBackground(isActive: isRowActive(code)))
         .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .onTapGesture {
@@ -1200,6 +1199,7 @@ private struct CurrencyCardView: View {
                             }
                             .buttonStyle(.plain)
                             .help(isExpanded ? "收起详情" : "展开详情")
+                            .accessibilityIdentifier("card.toggleDetails.\(card.pair.baseCode).\(card.pair.quoteCode)")
                         }
                     }
                     .layoutPriority(1)
@@ -1495,16 +1495,11 @@ private struct CurrencyCardView: View {
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)
 
-            Text(converterState.displayTexts[code] ?? "—")
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .accessibilityIdentifier("card.converter.result.\(code)")
-
             if converterState.activeCode == code {
-                TextField("输入金额", text: converterBinding)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                TextField("输入金额", text: converterBinding, prompt: Text(verbatim: converterState.displayTexts[code] ?? ""))
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .multilineTextAlignment(alignment == .leading ? .leading : .trailing)
                     .focused($focusedCode, equals: code)
                     .accessibilityIdentifier("card.converter.input.\(code)")
                 if converterState.hasInvalidInput {
@@ -1512,6 +1507,12 @@ private struct CurrencyCardView: View {
                         .font(.system(size: 9))
                         .foregroundStyle(.red)
                 }
+            } else {
+                Text(converterState.displayTexts[code] ?? "—")
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .accessibilityIdentifier("card.converter.result.\(code)")
             }
         }
         .padding(.horizontal, 12)
@@ -1562,6 +1563,7 @@ private struct CurrencyCardView: View {
                 }
                 .buttonStyle(.plain)
                 .help(mode.title)
+                .accessibilityIdentifier("card.mode.\(mode.rawValue).\(card.pair.baseCode).\(card.pair.quoteCode)")
             }
         }
         .padding(3)
