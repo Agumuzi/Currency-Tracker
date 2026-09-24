@@ -825,6 +825,7 @@ private struct PanelCurrencyConverterView: View {
 
     @State private var state = PanelConverterState()
     @FocusState private var focusedCode: String?
+    @FocusState private var focusedCurrencySelector: String?
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -874,6 +875,12 @@ private struct PanelCurrencyConverterView: View {
         .onChange(of: focusedCode) { _, code in
             if let code { activate(code) }
         }
+        .onChange(of: focusedCurrencySelector) { _, code in
+            if let code {
+                activate(code)
+                focusedCode = code
+            }
+        }
     }
 
     private var emptyState: some View {
@@ -920,15 +927,23 @@ private struct PanelCurrencyConverterView: View {
                     )
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(code)
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
-                    .lineLimit(1)
-                Text(CurrencyCatalog.name(for: code))
-                    .font(.system(size: 10, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+            Button {
+                activate(code)
+                focusedCode = code
+            } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(code)
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                    Text(CurrencyCatalog.name(for: code))
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
+            .buttonStyle(.plain)
+            .focused($focusedCurrencySelector, equals: code)
+            .accessibilityIdentifier("converter.select.\(code)")
 
             Spacer(minLength: 10)
 

@@ -139,25 +139,29 @@ final class Currency_TrackerUITests: XCTestCase {
         add(openedScreenshot)
         let usd = app.staticTexts["converter.result.USD"]
         XCTAssertTrue(usd.waitForExistence(timeout: 5), app.debugDescription)
+        let exampleResult = usd.label
+        XCTAssertFalse(exampleResult.isEmpty)
         let defaultScreenshot = XCTAttachment(screenshot: app.screenshot())
         defaultScreenshot.name = "converter-default-base"
         defaultScreenshot.lifetime = .keepAlways
         add(defaultScreenshot)
 
-        let yuanRow = app.staticTexts["CNY"]
+        let yuanRow = app.buttons["converter.select.CNY"]
         XCTAssertTrue(yuanRow.waitForExistence(timeout: 5))
         yuanRow.click()
         let yuanInput = app.textFields["converter.input.CNY"]
         XCTAssertTrue(yuanInput.waitForExistence(timeout: 5))
-        let exampleResult = usd.label
         yuanInput.click()
         yuanInput.typeText("35")
-        XCTAssertEqual(yuanInput.value as? String, "35")
-        XCTAssertNotEqual(usd.label, exampleResult)
         let editedScreenshot = XCTAttachment(screenshot: app.screenshot())
         editedScreenshot.name = "converter-yuan-input"
         editedScreenshot.lifetime = .keepAlways
         add(editedScreenshot)
+        XCTAssertEqual(yuanInput.value as? String, "35")
+        let convertedUSD = app.staticTexts["converter.result.USD"]
+        XCTAssertTrue(convertedUSD.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertNotEqual(convertedUSD.label, exampleResult)
+        XCTAssertEqual(app.staticTexts["converter.result.CNY"].label, "35")
     }
 
 }
