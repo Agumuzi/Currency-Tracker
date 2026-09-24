@@ -10,8 +10,12 @@ permissions:
 
 jobs:
   test:
-    name: Test tagged commit
-    runs-on: macos-latest
+    name: Test tagged commit (${{ matrix.runner }})
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-latest, xcode-27]
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout tag
         uses: actions/checkout@v6
@@ -31,7 +35,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: tagged-ui-tests
+          name: tagged-ui-tests-${{ matrix.runner }}
           path: .build/UI-Tests.xcresult
 
   package:
