@@ -137,10 +137,11 @@ final class Currency_TrackerUITests: XCTestCase {
         openedScreenshot.name = "converter-after-toggle"
         openedScreenshot.lifetime = .keepAlways
         add(openedScreenshot)
-        let usd = app.staticTexts["converter.result.USD"]
-        XCTAssertTrue(usd.waitForExistence(timeout: 5), app.debugDescription)
-        let exampleResult = usd.value as? String ?? ""
-        XCTAssertFalse(exampleResult.isEmpty)
+        let usdInput = app.textFields["converter.input.USD"]
+        XCTAssertTrue(usdInput.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(app.staticTexts["converter.result.USD"].exists)
+        let initialCNYResult = app.staticTexts["converter.result.CNY"].value as? String
+        XCTAssertNotNil(initialCNYResult)
         let defaultScreenshot = XCTAttachment(screenshot: app.screenshot())
         defaultScreenshot.name = "converter-default-base"
         defaultScreenshot.lifetime = .keepAlways
@@ -151,6 +152,9 @@ final class Currency_TrackerUITests: XCTestCase {
         yuanRow.click()
         let yuanInput = app.textFields["converter.input.CNY"]
         XCTAssertTrue(yuanInput.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["converter.result.CNY"].exists)
+        let exampleResult = app.staticTexts["converter.result.USD"].value as? String
+        XCTAssertNotNil(exampleResult)
         yuanInput.click()
         yuanInput.typeText("35")
         let editedScreenshot = XCTAttachment(screenshot: app.screenshot())
@@ -161,7 +165,56 @@ final class Currency_TrackerUITests: XCTestCase {
         let convertedUSD = app.staticTexts["converter.result.USD"]
         XCTAssertTrue(convertedUSD.waitForExistence(timeout: 5), app.debugDescription)
         XCTAssertNotEqual(convertedUSD.value as? String, exampleResult)
-        XCTAssertEqual(app.staticTexts["converter.result.CNY"].value as? String, "35")
+        XCTAssertFalse(app.staticTexts["converter.result.CNY"].exists)
+    }
+
+    @MainActor
+    func testExpandedPairUsesSingleEditableAmount() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-AppleLanguages", "(en)"]
+        app.launchEnvironment["CURRENCY_TRACKER_DEFAULTS_SUITE"] = "CurrencyTrackerUITests.\(UUID().uuidString)"
+        app.launchEnvironment["CURRENCY_TRACKER_RESET_DEFAULTS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_UI_TEST_SHOW_PANEL"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_USE_IN_MEMORY_SECRETS"] = "1"
+        app.launchEnvironment["CURRENCY_TRACKER_TEST_DATA_DIR"] = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CurrencyTrackerUITests-\(UUID().uuidString)").path
+        app.launch()
+
+        let details = app.buttons["card.toggleDetails.USD.CNY"]
+        XCTAssertTrue(details.waitForExistence(timeout: 8), app.debugDescription)
+        details.click()
+        let converter = app.buttons["card.mode.converter.USD.CNY"]
+        XCTAssertTrue(converter.waitForExistence(timeout: 5))
+        converter.click()
+
+        let usdInput = app.textFields["card.converter.input.USD"]
+        XCTAssertTrue(usdInput.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(app.staticTexts["card.converter.result.USD"].exists)
+        let yuanResult = app.staticTexts["card.converter.result.CNY"]
+        XCTAssertTrue(yuanResult.waitForExistence(timeout: 5))
+        let initialYuanResult = yuanResult.value as? String
+        let defaultScreenshot = XCTAttachment(screenshot: app.screenshot())
+        defaultScreenshot.name = "card-converter-default-amount"
+        defaultScreenshot.lifetime = .keepAlways
+        add(defaultScreenshot)
+
+        usdInput.click()
+        usdInput.typeText("50")
+        XCTAssertEqual(usdInput.value as? String, "50")
+        XCTAssertNotEqual(yuanResult.value as? String, initialYuanResult)
+
+        yuanResult.click()
+        let yuanInput = app.textFields["card.converter.input.CNY"]
+        XCTAssertTrue(yuanInput.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["card.converter.result.CNY"].exists)
+        yuanInput.click()
+        yuanInput.typeText("35")
+        XCTAssertEqual(yuanInput.value as? String, "35")
+        XCTAssertTrue(app.staticTexts["card.converter.result.USD"].exists)
+        let editedScreenshot = XCTAttachment(screenshot: app.screenshot())
+        editedScreenshot.name = "card-converter-yuan-input"
+        editedScreenshot.lifetime = .keepAlways
+        add(editedScreenshot)
     }
 
 }
