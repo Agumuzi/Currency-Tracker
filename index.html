@@ -510,36 +510,6 @@
       width: min(650px, 62vw);
     }
 
-    /* The original App Icon is the hero's brand mark; UI screenshots remain supporting imagery. */
-    .hero-brandmark {
-      position: relative;
-      display: grid;
-      flex: 0 0 min(310px, 30vw);
-      place-items: center;
-      width: min(310px, 30vw);
-      padding: 14px;
-      isolation: isolate;
-    }
-
-    .hero-brandmark::before {
-      position: absolute;
-      z-index: -1;
-      inset: -12%;
-      border-radius: 36%;
-      background: radial-gradient(circle, color-mix(in srgb, var(--blue) 18%, transparent), transparent 72%);
-      content: "";
-      pointer-events: none;
-    }
-
-    .hero-brandmark img {
-      display: block;
-      width: 100%;
-      height: auto;
-      aspect-ratio: 1;
-      object-fit: contain;
-      filter: drop-shadow(0 28px 30px rgba(20, 34, 51, 0.24));
-    }
-
     .eyebrow {
       display: inline-flex;
       align-items: center;
@@ -1124,13 +1094,6 @@
         padding: 62px 0 420px;
       }
 
-      .hero-brandmark {
-        order: -1;
-        flex: none;
-        width: clamp(130px, 20vw, 180px);
-        padding: 0;
-      }
-
       .hero-copy {
         flex: none;
         width: min(100%, 720px);
@@ -1237,10 +1200,6 @@
       .hero-inner {
         gap: 20px;
         padding: 40px 0 430px;
-      }
-
-      .hero-brandmark {
-        width: min(124px, 35vw);
       }
 
       .hero-copy {
@@ -1396,9 +1355,6 @@
             <li>11 app languages</li>
             <li>Local-first preferences</li>
           </ul>
-        </div>
-        <div class="hero-brandmark" aria-hidden="true">
-          <img src="assets/app-icon.png" width="256" height="256" alt="" fetchpriority="high">
         </div>
       </div>
     </section>
