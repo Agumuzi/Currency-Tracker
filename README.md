@@ -153,6 +153,11 @@ Currency Tracker is local-first. Preferences, selected pairs, refresh behavior, 
 
 External exchange-rate providers only receive the exchange-rate requests needed for the data sources you enable.
 
+## Community & Security
+
+- [Contributing](CONTRIBUTING.md) — bug reports, localization, and pull requests.
+- [Security policy](SECURITY.md) — privately report potential vulnerabilities; never post API keys in public issues.
+
 ## License
 
 Currency Tracker is released under the [MIT License](LICENSE).
