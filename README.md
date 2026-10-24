@@ -107,15 +107,15 @@ Version `1.8.1` includes:
 ### Homebrew
 
 ```bash
-brew tap agumuzi/currency-tracker
-brew install --cask currency-tracker
+brew tap agumuzi/currency-tracker https://github.com/Agumuzi/Currency-Tracker.git
+brew install --cask agumuzi/currency-tracker/currency-tracker
 ```
 
-Homebrew installs the same GitHub Release ZIP and verifies it with the cask SHA256 checksum. To update later:
+Homebrew installs the same GitHub Release ZIP and verifies it with the cask SHA256 checksum. **If you used the former standalone tap**, follow the [Homebrew migration guide](docs/HOMEBREW.md#migrate-an-existing-installation) before that repository is removed. To update later:
 
 ```bash
 brew update
-brew upgrade --cask currency-tracker
+brew upgrade --cask agumuzi/currency-tracker/currency-tracker
 ```
 
 ### Direct Download

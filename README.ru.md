@@ -107,15 +107,15 @@ Currency Tracker — приложение для macOS в строке меню,
 ### Homebrew
 
 ```bash
-brew tap agumuzi/currency-tracker
-brew install --cask currency-tracker
+brew tap agumuzi/currency-tracker https://github.com/Agumuzi/Currency-Tracker.git
+brew install --cask agumuzi/currency-tracker/currency-tracker
 ```
 
-Homebrew устанавливает тот же ZIP из GitHub Release и проверяет его по SHA256 из cask. Для последующего обновления:
+Homebrew устанавливает тот же ZIP из GitHub Release и проверяет его по SHA256 из cask. **Если вы подключали прежний отдельный tap**, сначала выполните действия из [руководства по переносу Homebrew](docs/HOMEBREW.md#migrate-an-existing-installation), прежде чем старый репозиторий будет удалён. Для последующего обновления:
 
 ```bash
 brew update
-brew upgrade --cask currency-tracker
+brew upgrade --cask agumuzi/currency-tracker/currency-tracker
 ```
 
 ### Прямая загрузка

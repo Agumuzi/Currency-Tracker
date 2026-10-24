@@ -20,6 +20,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Validate Homebrew files
+        run: |
+          ruby -c Casks/currency-tracker.rb
+          python3 -m py_compile scripts/update-homebrew-cask.py
+
       - name: Check localizations
         run: python3 scripts/check-localizations.py
 

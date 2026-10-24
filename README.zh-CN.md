@@ -107,15 +107,15 @@ Currency Tracker 默认可使用公开备用数据源。对个人使用来说，
 ### Homebrew
 
 ```bash
-brew tap agumuzi/currency-tracker
-brew install --cask currency-tracker
+brew tap agumuzi/currency-tracker https://github.com/Agumuzi/Currency-Tracker.git
+brew install --cask agumuzi/currency-tracker/currency-tracker
 ```
 
-Homebrew 会安装同一个 GitHub Release ZIP，并使用 cask 里的 SHA256 校验值进行验证。之后更新可以运行：
+Homebrew 会安装同一个 GitHub Release ZIP，并使用 cask 里的 SHA256 校验值进行验证。**如果之前使用独立的 Homebrew 仓库**，请先按 [Homebrew 迁移指南](docs/HOMEBREW.md#migrate-an-existing-installation) 更改旧 tap 的仓库地址，再删除旧仓库。之后更新可以运行：
 
 ```bash
 brew update
-brew upgrade --cask currency-tracker
+brew upgrade --cask agumuzi/currency-tracker/currency-tracker
 ```
 
 ### 直接下载

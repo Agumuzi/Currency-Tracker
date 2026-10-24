@@ -119,3 +119,45 @@ jobs:
         with:
           name: Currency-Tracker
           path: build/release/*
+
+      - name: Sync Homebrew Cask with published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          LATEST_TAG="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq '.tagName')"
+          if [[ "$LATEST_TAG" != "$TAG" ]]; then
+            echo "Skipping Cask update: $TAG is not the latest release ($LATEST_TAG)."
+            exit 0
+          fi
+
+          RELEASE_SHA="$(awk '{print $1}' "build/release/Currency-Tracker-$VERSION.zip.sha256")"
+          ACTUAL_SHA="$(shasum -a 256 "build/release/Currency-Tracker-$VERSION.zip" | awk '{print $1}')"
+          test "$RELEASE_SHA" = "$ACTUAL_SHA"
+
+          WORKTREE="$(mktemp -d)"
+          cleanup() {
+            cd "$GITHUB_WORKSPACE" || true
+            git worktree remove --force "$WORKTREE" >/dev/null 2>&1 || true
+            rmdir "$WORKTREE" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          git fetch origin main
+          git worktree add --detach "$WORKTREE" origin/main
+          cd "$WORKTREE"
+
+          python3 scripts/update-homebrew-cask.py "$VERSION" "$RELEASE_SHA"
+          ruby -c Casks/currency-tracker.rb
+
+          if git diff --quiet -- Casks/currency-tracker.rb; then
+            echo "Cask is already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/currency-tracker.rb
+          git commit -m "chore(homebrew): update Cask to $VERSION [skip ci]"
+          git push origin HEAD:main
