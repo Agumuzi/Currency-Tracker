@@ -1,6 +1,10 @@
-# Currency Tracker
+<p align="center">
+  <img src="Currency%20Tracker/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" width="144" height="144" alt="Currency Tracker 应用图标">
+</p>
 
-<p>
+<h1 align="center">Currency Tracker</h1>
+
+<p align="center">
   <a href="README.md">English</a>
   ·
   <strong>简体中文</strong>
@@ -10,7 +14,7 @@
 
 Currency Tracker 是一款 macOS 菜单栏汇率工具，支持实时汇率查看、快速换算，以及对其他应用中选中文本进行系统级货币换算。它适合经常关注少量货币对、并希望所有操作都尽量停留在菜单栏附近的用户。
 
-<p>
+<p align="center">
   <a href="https://github.com/Agumuzi/Currency-Tracker/releases/latest"><strong>下载最新版本</strong></a>
   ·
   <a href="https://agumuzi.github.io/Currency-Tracker/">产品页面</a>
@@ -18,7 +22,7 @@ Currency Tracker 是一款 macOS 菜单栏汇率工具，支持实时汇率查�
   <a href="https://github.com/Agumuzi/Currency-Tracker/releases">发布记录</a>
 </p>
 
-<p>
+<p align="center">
   <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="420" alt="Currency Tracker 菜单栏面板，显示选中的货币对、趋势图和紧凑汇率卡片。">
 </p>
 

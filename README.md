@@ -1,6 +1,10 @@
-# Currency Tracker
+<p align="center">
+  <img src="Currency%20Tracker/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" width="144" height="144" alt="Currency Tracker app icon">
+</p>
 
-<p>
+<h1 align="center">Currency Tracker</h1>
+
+<p align="center">
   <strong>English</strong>
   ·
   <a href="README.zh-CN.md">简体中文</a>
@@ -10,7 +14,7 @@
 
 Currency Tracker is a macOS menu bar app for exchange rates, quick conversion, and system-wide selected-text currency conversion. It is built for people who check a small set of rates repeatedly and want the workflow to stay close to the menu bar.
 
-<p>
+<p align="center">
   <a href="https://github.com/Agumuzi/Currency-Tracker/releases/latest"><strong>Download latest release</strong></a>
   ·
   <a href="https://agumuzi.github.io/Currency-Tracker/">Product page</a>
@@ -18,7 +22,7 @@ Currency Tracker is a macOS menu bar app for exchange rates, quick conversion, a
   <a href="https://github.com/Agumuzi/Currency-Tracker/releases">Release notes</a>
 </p>
 
-<p>
+<p align="center">
   <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="420" alt="Currency Tracker menu bar panel with a selected currency pair, trend chart, and compact rate cards.">
 </p>
 

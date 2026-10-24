@@ -1,6 +1,10 @@
-# Currency Tracker
+<p align="center">
+  <img src="Currency%20Tracker/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" width="144" height="144" alt="Значок приложения Currency Tracker">
+</p>
 
-<p>
+<h1 align="center">Currency Tracker</h1>
+
+<p align="center">
   <a href="README.md">English</a>
   ·
   <a href="README.zh-CN.md">简体中文</a>
@@ -10,7 +14,7 @@
 
 Currency Tracker — приложение для macOS в строке меню, которое показывает курсы валют, помогает быстро конвертировать суммы и умеет конвертировать выделенный текст из других приложений на уровне системных служб. Оно рассчитано на пользователей, которые регулярно следят за небольшим набором валютных пар и хотят держать этот рабочий процесс рядом со строкой меню.
 
-<p>
+<p align="center">
   <a href="https://github.com/Agumuzi/Currency-Tracker/releases/latest"><strong>Скачать последнюю версию</strong></a>
   ·
   <a href="https://agumuzi.github.io/Currency-Tracker/">Страница продукта</a>
@@ -18,7 +22,7 @@ Currency Tracker — приложение для macOS в строке меню,
   <a href="https://github.com/Agumuzi/Currency-Tracker/releases">Заметки о выпусках</a>
 </p>
 
-<p>
+<p align="center">
   <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="420" alt="Панель Currency Tracker в строке меню с выбранной валютной парой, графиком и компактными карточками курсов.">
 </p>
 
