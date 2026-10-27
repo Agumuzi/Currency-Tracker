@@ -20,6 +20,8 @@ Currency Tracker is a macOS menu bar app for exchange rates, quick conversion, a
   <a href="https://agumuzi.github.io/Currency-Tracker/">Product page</a>
   ·
   <a href="https://github.com/Agumuzi/Currency-Tracker/releases">Release notes</a>
+  ·
+  <a href="https://ko-fi.com/agumuzi">☕ Support development</a>
 </p>
 
 <p align="center">
