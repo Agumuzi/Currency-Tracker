@@ -1,0 +1,41 @@
+name: "💡 Feature request"
+description: "Suggest a workflow improvement for Currency Tracker"
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search for existing requests and omit private data or API credentials.
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Problem or use case
+      description: "What are you trying to accomplish?"
+    validations:
+      required: true
+  - type: textarea
+    id: desired
+    attributes:
+      label: Desired behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Related area
+      options:
+        - Menu bar and rate cards
+        - History and conversion
+        - Providers and alerts
+        - Settings and profiles
+        - Localization and accessibility
+        - Installation and updates
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: approach
+    attributes:
+      label: Suggested approach or references (optional)
+    validations:
+      required: false
