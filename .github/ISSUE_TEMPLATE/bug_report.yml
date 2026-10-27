@@ -1,0 +1,90 @@
+name: "🐛 Bug report"
+description: "Report a reproducible Currency Tracker issue"
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search existing issues first. **Never post API keys, credential exports, private account data or unredacted logs.** Report vulnerabilities through SECURITY.md rather than public Issues.
+  - type: input
+    id: version
+    attributes:
+      label: Currency Tracker version
+      placeholder: "e.g. 1.8.1"
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "e.g. macOS 27.2"
+    validations:
+      required: true
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Mac architecture
+      options:
+        - Apple Silicon
+        - Intel
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: locale
+    attributes:
+      label: App language
+      placeholder: "e.g. English, Русский, 简体中文"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Menu bar and rate cards
+        - Currency conversion and history
+        - Providers and network requests
+        - Alerts and notifications
+        - Settings and localization
+        - Import, export and backup
+        - Updates, permissions and installation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Select...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: provider
+    attributes:
+      label: Data provider (if relevant)
+      description: "Provider name only; never include your key."
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Screenshots and context (optional)
+      description: "Redact sensitive data before uploading."
+    validations:
+      required: false
