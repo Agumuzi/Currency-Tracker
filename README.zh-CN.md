@@ -20,6 +20,8 @@ Currency Tracker 是一款 macOS 菜单栏汇率工具，支持实时汇率查�
   <a href="https://agumuzi.github.io/Currency-Tracker/">产品页面</a>
   ·
   <a href="https://github.com/Agumuzi/Currency-Tracker/releases">发布记录</a>
+  ·
+  <a href="https://ko-fi.com/agumuzi">☕ 支持开发</a>
 </p>
 
 <p align="center">
