@@ -20,6 +20,8 @@ Currency Tracker — приложение для macOS в строке меню,
   <a href="https://agumuzi.github.io/Currency-Tracker/">Страница продукта</a>
   ·
   <a href="https://github.com/Agumuzi/Currency-Tracker/releases">Заметки о выпусках</a>
+  ·
+  <a href="https://ko-fi.com/agumuzi">☕ Поддержать разработку</a>
 </p>
 
 <p align="center">
