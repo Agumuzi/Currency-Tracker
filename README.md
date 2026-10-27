@@ -159,6 +159,7 @@ External exchange-rate providers only receive the exchange-rate requests needed 
 
 - [Contributing](CONTRIBUTING.md) — bug reports, localization, and pull requests.
 - [Security policy](SECURITY.md) — privately report potential vulnerabilities; never post API keys in public issues.
+- [Code of Conduct](CODE_OF_CONDUCT.md) — community expectations and moderation policy.
 
 ## License
 
