@@ -1310,6 +1310,193 @@
         width: min(180px, 100%);
       }
     }
+
+    /* Product screenshots: preserve native proportions and blend transparent macOS captures into their surroundings. */
+    .hero-settings,
+    .hero-panel {
+      height: auto;
+      max-width: none;
+      object-fit: contain;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .hero-settings {
+      top: clamp(74px, 9vh, 126px);
+      right: clamp(26px, 4.5vw, 90px);
+      bottom: auto;
+      width: clamp(490px, 49vw, 740px);
+      opacity: .9;
+      filter: drop-shadow(0 24px 36px rgba(24, 43, 61, .14));
+      animation: screenshotEnter 900ms ease both;
+    }
+
+    .hero-panel {
+      right: clamp(340px, 30vw, 470px);
+      bottom: clamp(115px, 15vh, 170px);
+      left: auto;
+      width: clamp(225px, 19vw, 280px);
+      filter: drop-shadow(0 24px 36px rgba(19, 28, 40, .22));
+    }
+
+    .hero-media::before {
+      background: radial-gradient(ellipse at 74% 38%, color-mix(in srgb, var(--blue) 6%, var(--panel-soft)), transparent 66%);
+    }
+
+    .hero::after {
+      background: linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 91%, transparent) 30%, transparent 65%),
+        linear-gradient(0deg, var(--bg) 0%, transparent 17%);
+    }
+
+    @keyframes screenshotEnter {
+      from { opacity: 0; transform: translateY(24px) scale(.985); }
+      to { opacity: .9; transform: translateY(0) scale(1); }
+    }
+
+    .showcase-media {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: end;
+      gap: clamp(12px, 2vw, 26px);
+      padding: clamp(22px, 2.6vw, 42px);
+      border: 1px solid rgba(255, 255, 255, .095);
+      border-radius: 24px;
+      background:
+        radial-gradient(ellipse at 48% 38%, rgba(104, 147, 197, .16), transparent 67%),
+        linear-gradient(145deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .012));
+    }
+
+    .showcase-media img {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-width: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      object-fit: contain;
+      filter: drop-shadow(0 18px 29px rgba(0, 0, 0, .35));
+    }
+
+    .showcase-media img:first-child {
+      transform: none;
+    }
+
+    .surface-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .surface.large {
+      display: grid;
+      place-items: center;
+      width: min(100%, 960px);
+      min-height: 0;
+      margin: 0 auto;
+      padding: clamp(16px, 2.5vw, 30px);
+      overflow: visible;
+      background: linear-gradient(150deg, var(--panel), color-mix(in srgb, var(--panel-soft) 78%, var(--panel)));
+    }
+
+    .surface.large img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+      border-radius: 0;
+      filter: drop-shadow(0 13px 20px rgba(26, 41, 56, .13));
+    }
+
+    .surface-copy {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .mini-shot {
+      grid-template-columns: minmax(0, 1fr);
+      align-content: start;
+      align-items: start;
+      gap: 14px;
+      min-width: 0;
+      padding: clamp(15px, 1.5vw, 22px);
+      background: linear-gradient(155deg, var(--panel), color-mix(in srgb, var(--panel-soft) 68%, var(--panel)));
+    }
+
+    .mini-shot img {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-width: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 14px rgba(27, 46, 62, .12));
+    }
+
+    .mini-shot h3 { font-size: 18px; }
+    .mini-shot p { line-height: 1.65; }
+
+    @media (max-width: 1040px) {
+      .hero::after {
+        background: linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 92%, transparent) 37%, transparent 75%),
+          linear-gradient(0deg, var(--bg) 0%, transparent 20%);
+      }
+      .hero-inner { padding-bottom: 510px; }
+      .hero-settings {
+        top: auto;
+        right: 3vw;
+        bottom: 115px;
+        width: min(690px, 76vw);
+      }
+      .hero-panel {
+        right: auto;
+        left: 4vw;
+        bottom: 108px;
+        width: min(240px, 27vw);
+      }
+      .surface-copy { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mini-shot:last-child { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 720px) {
+      /* Show one clear product image rather than crop an oversized settings window. */
+      .hero-inner { padding-bottom: 475px; }
+      .hero-settings { display: none; }
+      .hero-panel {
+        left: 50%;
+        right: auto;
+        bottom: 84px;
+        width: min(195px, 50vw);
+        transform: translateX(-50%);
+        animation: none;
+      }
+      .showcase-media {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 23px;
+        padding: 22px;
+      }
+      .showcase-media img {
+        width: min(100%, 275px);
+        margin-inline: auto;
+      }
+      .surface.large { padding: 13px; }
+      .surface-copy { grid-template-columns: minmax(0, 1fr); }
+      .mini-shot:last-child { grid-column: auto; }
+      .mini-shot { padding: 16px; }
+      .mini-shot img { width: 100%; }
+    }
+
   </style>
 </head>
 <body>
