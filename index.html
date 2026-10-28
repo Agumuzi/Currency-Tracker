@@ -919,6 +919,38 @@
       text-decoration: underline;
     }
 
+    /* Provider titles link directly to the same official sites as the README. */
+    .source-card h3 a {
+      color: inherit;
+      font-weight: inherit;
+      text-decoration: none;
+    }
+
+    .source-card h3 a::after {
+      display: inline-block;
+      margin-inline-start: .34em;
+      color: var(--blue);
+      font-size: .68em;
+      font-weight: 760;
+      content: "↗";
+      transition: transform 160ms ease;
+    }
+
+    .source-card h3 a:hover {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .source-card h3 a:hover::after {
+      transform: translate(2px, -2px);
+    }
+
+    .source-card h3 a:focus-visible {
+      border-radius: 2px;
+      outline: 2px solid var(--blue);
+      outline-offset: 4px;
+    }
+
     .privacy-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1498,7 +1530,7 @@
               <span>Recommended</span>
               <span class="pill">Free tier</span>
             </div>
-            <h3>Twelve Data</h3>
+            <h3 data-i18n-ignore><a href="https://twelvedata.com/" target="_blank" rel="noopener noreferrer">Twelve Data</a></h3>
             <p>Twelve Data offers 800 free API credits per day, which is about 100 full multi-pair refreshes in Currency Tracker.</p>
             <p><a href="https://twelvedata.com/">Open Twelve Data</a></p>
           </article>
@@ -1507,7 +1539,7 @@
               <span>Recommended</span>
               <span class="pill">Free tier</span>
             </div>
-            <h3>Open Exchange Rates</h3>
+            <h3 data-i18n-ignore><a href="https://openexchangerates.org/" target="_blank" rel="noopener noreferrer">Open Exchange Rates</a></h3>
             <p>Open Exchange Rates offers 1,000 free requests per month, making it a practical secondary source for personal workflows.</p>
             <p><a href="https://openexchangerates.org/">Open Exchange Rates</a></p>
           </article>
@@ -2987,7 +3019,7 @@ brew install --cask agumuzi/currency-tracker/currency-tracker</code></pre>
       }
 
       document.querySelectorAll(copySelector).forEach((element) => {
-        if (element.closest("[data-language-switcher]")) {
+        if (element.closest("[data-language-switcher]") || element.closest("[data-i18n-ignore]")) {
           return;
         }
 
