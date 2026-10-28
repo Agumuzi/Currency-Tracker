@@ -159,9 +159,13 @@ Currency Tracker 以本地优先为原则。偏好设置、选中的货币对、
 
 外部汇率服务商只会收到你启用的数据源所需的汇率请求。
 
-## 许可证
+## 许可证与品牌素材
 
-Currency Tracker 基于 [MIT License](LICENSE) 发布。
+本仓库当前的原创源代码采用 [PolyForm Noncommercial 1.0.0](LICENSE)：允许符合条件的个人使用、学习、修改和非商业再分发，**商业使用需要另行取得授权**。这是源码公开（source-available）项目，不属于 OSI 定义的开源许可。
+
+原创的 **Currency Tracker 软件图标、Agumuzi 品牌标识、宣传图片及截图**不随源代码授权供其他项目复用，详见[品牌与视觉资产声明](ASSETS-LICENSE.md)。第三方素材遵循其各自许可。
+
+**历史许可：**先前采用 MIT 发布的版本，其已有授权不因本次调整被撤销，原协议存档见[旧版 MIT 许可证](docs/LEGACY_MIT_LICENSE.md)。商业或品牌授权请联系本仓库维护者。
 
 ## 链接
 
