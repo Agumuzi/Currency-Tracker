@@ -25,7 +25,7 @@ Currency Tracker is a macOS menu bar app for exchange rates, quick conversion, a
 </p>
 
 <p align="center">
-  <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="420" alt="Currency Tracker menu bar panel with a selected currency pair, trend chart, and compact rate cards.">
+  <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="350" alt="Currency Tracker menu bar panel with a selected currency pair, trend chart, and compact rate cards.">
 </p>
 
 ## What It Does
@@ -43,21 +43,25 @@ Currency Tracker is a macOS menu bar app for exchange rates, quick conversion, a
 
 ## Screenshots
 
+Select a screenshot to view it at full resolution.
+
 ### Menu Bar Workflow
 
-| Rate list | History chart | Inline conversion |
-| --- | --- | --- |
-| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png" alt="Currency Tracker menu bar panel showing multiple exchange-rate cards."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" alt="Expanded rate card with a one-month history chart."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png" alt="Expanded rate card with two-way currency conversion."> |
+<table>
+  <tr><th align="center" width="33%">Rate list</th><th align="center" width="33%">History chart</th><th align="center" width="33%">Inline conversion</th></tr>
+  <tr><td align="center" valign="top"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png" alt="Currency Tracker menu bar panel showing multiple exchange-rate cards." width="250"></a></td><td align="center" valign="top"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" alt="Expanded rate card with a one-month history chart." width="250"></a></td><td align="center" valign="top"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png" alt="Expanded rate card with two-way currency conversion." width="250"></a></td></tr>
+</table>
 
 ### Welcome And Settings
 
-| First-run permissions | General settings | Rates |
-| --- | --- | --- |
-| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png" alt="Standalone first-run welcome window explaining permission setup."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png" alt="General settings screen with the refreshed sidebar and menu bar controls."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png" alt="Settings screen for managing shown exchange-rate pairs."> |
-
-| Data sources | Permissions | Updates |
-| --- | --- | --- |
-| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png" alt="Settings screen for API provider credentials and custom API templates."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png" alt="Settings screen showing system permission status."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png" alt="Settings screen for checking updates and enabling automatic checks."> |
+<table>
+  <tr><th align="center" width="50%">First-run permissions</th><th align="center" width="50%">General settings</th></tr>
+  <tr><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png" alt="Standalone first-run welcome window explaining permission setup." width="410"></a></td><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png" alt="General settings screen with the refreshed sidebar and menu bar controls." width="460"></a></td></tr>
+  <tr><th align="center" width="50%">Rates</th><th align="center" width="50%">Data sources</th></tr>
+  <tr><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png" alt="Settings screen for managing shown exchange-rate pairs." width="460"></a></td><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png" alt="Settings screen for API provider credentials and custom API templates." width="460"></a></td></tr>
+  <tr><th align="center" width="50%">Permissions</th><th align="center" width="50%">Updates</th></tr>
+  <tr><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png" alt="Settings screen showing system permission status." width="460"></a></td><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png" alt="Settings screen for checking updates and enabling automatic checks." width="460"></a></td></tr>
+</table>
 
 ## Main Features
 

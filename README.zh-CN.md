@@ -25,7 +25,7 @@ Currency Tracker 是一款 macOS 菜单栏汇率工具，支持实时汇率查�
 </p>
 
 <p align="center">
-  <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="420" alt="Currency Tracker 菜单栏面板，显示选中的货币对、趋势图和紧凑汇率卡片。">
+  <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="350" alt="Currency Tracker 菜单栏面板，显示选中的货币对、趋势图和紧凑汇率卡片。">
 </p>
 
 ## 功能概览
@@ -43,21 +43,25 @@ Currency Tracker 是一款 macOS 菜单栏汇率工具，支持实时汇率查�
 
 ## 截图
 
+点击截图可查看完整分辨率。
+
 ### 菜单栏工作流
 
-| 汇率列表 | 历史图表 | 内联换算 |
-| --- | --- | --- |
-| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png" alt="Currency Tracker 菜单栏面板，显示多个汇率卡片。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" alt="展开后的汇率卡片，显示一个月历史走势图。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png" alt="展开后的汇率卡片，显示双向货币换算。"> |
+<table>
+  <tr><th align="center" width="33%">汇率列表</th><th align="center" width="33%">历史图表</th><th align="center" width="33%">内联换算</th></tr>
+  <tr><td align="center" valign="top"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png" alt="Currency Tracker 菜单栏面板，显示多个汇率卡片。" width="250"></a></td><td align="center" valign="top"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" alt="展开后的汇率卡片，显示一个月历史走势图。" width="250"></a></td><td align="center" valign="top"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png" alt="展开后的汇率卡片，显示双向货币换算。" width="250"></a></td></tr>
+</table>
 
 ### 欢迎与设置
 
-| 首次权限引导 | 通用设置 | 汇率 |
-| --- | --- | --- |
-| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png" alt="独立首次欢迎窗口，说明系统权限设置流程。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png" alt="新版通用设置界面，包含侧边栏和菜单栏显示控制。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png" alt="用于管理显示货币对的设置页面。"> |
-
-| 数据源 | 权限 | 更新 |
-| --- | --- | --- |
-| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png" alt="用于配置 API 服务商凭据和自定义 API 模板的设置页面。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png" alt="显示系统权限状态的设置页面。"> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png" alt="用于检查更新和启用自动检查的设置页面。"> |
+<table>
+  <tr><th align="center" width="50%">首次权限引导</th><th align="center" width="50%">通用设置</th></tr>
+  <tr><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png" alt="独立首次欢迎窗口，说明系统权限设置流程。" width="410"></a></td><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png" alt="新版通用设置界面，包含侧边栏和菜单栏显示控制。" width="460"></a></td></tr>
+  <tr><th align="center" width="50%">汇率</th><th align="center" width="50%">数据源</th></tr>
+  <tr><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png" alt="用于管理显示货币对的设置页面。" width="460"></a></td><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png" alt="用于配置 API 服务商凭据和自定义 API 模板的设置页面。" width="460"></a></td></tr>
+  <tr><th align="center" width="50%">权限</th><th align="center" width="50%">更新</th></tr>
+  <tr><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png" alt="显示系统权限状态的设置页面。" width="460"></a></td><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png" alt="用于检查更新和启用自动检查的设置页面。" width="460"></a></td></tr>
+</table>
 
 ## 主要功能
 

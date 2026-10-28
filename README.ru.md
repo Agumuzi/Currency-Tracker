@@ -25,7 +25,7 @@ Currency Tracker — приложение для macOS в строке меню,
 </p>
 
 <p align="center">
-  <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="420" alt="Панель Currency Tracker в строке меню с выбранной валютной парой, графиком и компактными карточками курсов.">
+  <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" width="350" alt="Панель Currency Tracker в строке меню с выбранной валютной парой, графиком и компактными карточками курсов.">
 </p>
 
 ## Что умеет приложение
@@ -43,21 +43,25 @@ Currency Tracker — приложение для macOS в строке меню,
 
 ## Скриншоты
 
+Нажмите на скриншот, чтобы открыть его в полном разрешении.
+
 ### Работа из строки меню
 
-| Список курсов | График истории | Конвертация в карточке |
-| --- | --- | --- |
-| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png" alt="Панель Currency Tracker в строке меню с несколькими карточками курсов."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" alt="Раскрытая карточка курса с графиком за один месяц."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png" alt="Раскрытая карточка курса с двусторонней конвертацией валют."> |
+<table>
+  <tr><th align="center" width="33%">Список курсов</th><th align="center" width="33%">График истории</th><th align="center" width="33%">Конвертация в карточке</th></tr>
+  <tr><td align="center" valign="top"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel.png" alt="Панель Currency Tracker в строке меню с несколькими карточками курсов." width="250"></a></td><td align="center" valign="top"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-history.png" alt="Раскрытая карточка курса с графиком за один месяц." width="250"></a></td><td align="center" valign="top"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/menu-panel-conversion.png" alt="Раскрытая карточка курса с двусторонней конвертацией валют." width="250"></a></td></tr>
+</table>
 
 ### Приветствие и настройки
 
-| Первичные разрешения | Общие настройки | Курсы |
-| --- | --- | --- |
-| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png" alt="Отдельное окно первого запуска с объяснением системных разрешений."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png" alt="Общие настройки с обновленной боковой панелью и управлением строкой меню."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png" alt="Экран настроек для управления отображаемыми валютными парами."> |
-
-| Источники данных | Разрешения | Обновления |
-| --- | --- | --- |
-| <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png" alt="Экран настроек для API-ключей поставщиков и пользовательских API-шаблонов."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png" alt="Экран настроек со статусом системных разрешений."> | <img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png" alt="Экран настроек для проверки обновлений и включения автоматической проверки."> |
+<table>
+  <tr><th align="center" width="50%">Первичные разрешения</th><th align="center" width="50%">Общие настройки</th></tr>
+  <tr><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/welcome-permissions.png" alt="Отдельное окно первого запуска с объяснением системных разрешений." width="410"></a></td><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-window.png" alt="Общие настройки с обновленной боковой панелью и управлением строкой меню." width="460"></a></td></tr>
+  <tr><th align="center" width="50%">Курсы</th><th align="center" width="50%">Источники данных</th></tr>
+  <tr><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-rates.png" alt="Экран настроек для управления отображаемыми валютными парами." width="460"></a></td><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/data-sources-window.png" alt="Экран настроек для API-ключей поставщиков и пользовательских API-шаблонов." width="460"></a></td></tr>
+  <tr><th align="center" width="50%">Разрешения</th><th align="center" width="50%">Обновления</th></tr>
+  <tr><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-permissions.png" alt="Экран настроек со статусом системных разрешений." width="460"></a></td><td align="center" valign="middle"><a href="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png"><img src="https://agumuzi.github.io/Currency-Tracker/assets/screenshots/settings-updates.png" alt="Экран настроек для проверки обновлений и включения автоматической проверки." width="460"></a></td></tr>
+</table>
 
 ## Основные возможности
 
