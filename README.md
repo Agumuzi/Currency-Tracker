@@ -165,9 +165,13 @@ External exchange-rate providers only receive the exchange-rate requests needed 
 - [Security policy](SECURITY.md) — privately report potential vulnerabilities; never post API keys in public issues.
 - [Code of Conduct](CODE_OF_CONDUCT.md) — community expectations and moderation policy.
 
-## License
+## License & Brand Assets
 
-Currency Tracker is released under the [MIT License](LICENSE).
+The current original source code is available under the [PolyForm Noncommercial License 1.0.0](LICENSE), permitting qualifying personal, educational and other noncommercial use, modification and redistribution. **Commercial use requires separate permission.** This is source-available software, not OSI-approved open source.
+
+Original **Currency Tracker app icons, Agumuzi branding, promotional artwork and screenshots** are **not licensed for reuse** under the software license; see [Brand & Visual Assets](ASSETS-LICENSE.md). Third-party content remains under its own terms.
+
+**Historical licensing:** Versions previously distributed under MIT retain those grants; the previous license text is archived at [Legacy MIT License](docs/LEGACY_MIT_LICENSE.md). Contact the maintainer via this repository for commercial or brand-asset permissions.
 
 ## Links
 
