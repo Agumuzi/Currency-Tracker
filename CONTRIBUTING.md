@@ -21,4 +21,6 @@ Please preserve the project's existing release/versioning and Homebrew distribut
 
 ## License
 
-The repository's original code is available under the [MIT License](LICENSE); any third-party dependencies or assets remain subject to their own terms.
+Current original source code is made available under [PolyForm Noncommercial 1.0.0](LICENSE). Original application icons, logos, and screenshots are separately reserved under the [Brand & Visual Assets notice](ASSETS-LICENSE.md); third-party assets remain subject to their own terms. Previously MIT-licensed releases retain the permissions granted under the [archived license](docs/LEGACY_MIT_LICENSE.md).
+
+Only submit contributions you have the right to license under the repository's current terms. A pull request does not automatically transfer copyright or grant the maintainer separate commercial relicensing rights; those require permission from the relevant rights holders.
