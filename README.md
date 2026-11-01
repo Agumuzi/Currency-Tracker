@@ -167,11 +167,11 @@ External exchange-rate providers only receive the exchange-rate requests needed 
 
 ## License & Brand Assets
 
-The current original source code is available under the [PolyForm Noncommercial License 1.0.0](LICENSE), permitting qualifying personal, educational and other noncommercial use, modification and redistribution. **Commercial use requires separate permission.** This is source-available software, not OSI-approved open source.
+The original project-maintained source code is licensed under the [MIT License](LICENSE). Use, modification, redistribution and commercial use are permitted provided that the copyright and license notices are retained. The software is provided without warranty.
 
-Original **Currency Tracker app icons, Agumuzi branding, promotional artwork and screenshots** are **not licensed for reuse** under the software license; see [Brand & Visual Assets](ASSETS-LICENSE.md). Third-party content remains under its own terms.
+Original **Currency Tracker app icons, Agumuzi branding, promotional artwork and screenshots** are excluded from the software code license; see [Brand & Visual Assets](ASSETS-LICENSE.md). Third-party content remains under its own terms.
 
-**Historical licensing:** Versions previously distributed under MIT retain those grants; the previous license text is archived at [Legacy MIT License](docs/LEGACY_MIT_LICENSE.md). Contact the maintainer via this repository for commercial or brand-asset permissions.
+**License history:** Earlier releases may retain rights under their original terms. The previous MIT text is preserved at [Legacy MIT License](docs/LEGACY_MIT_LICENSE.md). Contact the maintainer for reuse of reserved brand assets.
 
 ## Links
 

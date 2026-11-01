@@ -8,7 +8,7 @@ To the extent that the maintainer owns the relevant rights, the original **Agumu
 
 These include original brand and application artwork wherever it appears in this repository (including copies, alternate formats, embedded artwork, and website assets). Their presence in a public repository, website, README, release, or distributable application does **not** grant a standalone license to copy, modify, extract, rebrand, redistribute, or incorporate them into another product or project.
 
-You may view the published materials and use original artwork as included in unmodified, authorized official distributions of this project. Reuse outside that context—including in otherwise noncommercial forks—requires prior written permission, except as permitted by applicable law or an existing valid license.
+You may view the published materials and use original artwork as included in unmodified, authorized official distributions of this project. Reuse outside that context—including in forks of MIT-licensed code—requires prior written permission, except as permitted by applicable law or an existing valid license.
 
 The software license does not grant rights to use the names **Agumuzi**, **FinTrack**, **Currency Tracker**, or **CR-Hopper**, or their associated logos and icons, as branding for derivative products, nor to imply affiliation or endorsement.
 
@@ -20,6 +20,6 @@ Historic releases or copies previously made available under different licenses m
 
 ## Permissions
 
-For requests to reuse original visual assets or obtain separate commercial code permission, contact the maintainer through the relevant GitHub repository.
+For requests to reuse original visual assets or questions about licensing, contact the maintainer through the relevant GitHub repository. The project-maintained source code is licensed separately under MIT.
 
 This notice does not restrict uses permitted by applicable law, or the minimal viewing and forking permissions required by GitHub's Terms of Service.
